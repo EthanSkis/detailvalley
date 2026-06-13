@@ -4,16 +4,17 @@ Marketing + booking site for **Detail Valley**, a mobile car detailing business
 serving Valley County, Idaho (McCall · Cascade · Donnelly).
 
 It's a single-page, conversion-focused static site with a built-in multi-step
-booking flow (package → add-ons → details → confirm). No build step, no
-dependencies — just HTML, CSS, and a little vanilla JavaScript.
+booking flow (package → add-ons → pick a slot → details → confirm) that saves
+real bookings to a Supabase database. No build step — just HTML, CSS, and a
+little vanilla JavaScript (plus the Supabase client from a CDN).
 
 ## The site
 
 `index.html` is the production site. Open it in any browser to preview it, or
 host it on any static host.
 
-> `index.html` and `logo.png` must live in the **same folder** — the page
-> references the logo by relative path (`logo.png`).
+> `index.html`, `logo.svg`, and `logo.png` must live in the **same folder** —
+> the page references them by relative path.
 
 ### Deploy on GitHub Pages
 1. Repo **Settings → Pages**
@@ -54,7 +55,33 @@ A few things in `index.html` are still placeholders:
 - **Email** — `ethan@detailvalley.com` (make sure that inbox actually exists / forwards to you).
 - **Social links** — Facebook and TikTok point to `#`; Instagram points to
   `detailvalleyid`. Turn the others on once those accounts exist and have a post or two.
-- **Booking form** — currently a front-end demo: confirming shows a success
-  screen but **does not send anything**. Wire it to Formspree, Netlify Forms,
-  or a Google Form to actually receive bookings.
+- **Booking form** — live: it writes real bookings to Supabase (see below).
+  Nothing more required, though you may want to add email/SMS alerts on new bookings.
 - **Prices & package details** — confirm against your real time-per-car before launch.
+
+## Bookings (Supabase)
+
+The booking flow is backed by a Supabase project (**valleydetail1**). Confirmed
+bookings are written to a `public.bookings` table, and the calendar only offers
+slots that aren't already taken.
+
+**See your bookings:** Supabase dashboard → your project → **Table editor →
+`bookings`**. Each row has the package, add-ons, customer name + phone, the
+chosen slot, and total. Set a booking's `status` to `cancelled` to free that
+slot back up, or `confirmed` / `completed` to track it.
+
+**How availability works:**
+- Slots are generated in code from your hours, in Mountain Time, for the next
+  ~3 weeks. Edit `DAY_SLOTS` / `DAYS_AHEAD` near the top of the `<script>` in
+  `index.html` to change the times, the number of slots per day, or how far
+  ahead people can book.
+- Currently **2 slots/day** (a morning and an afternoon), Mon–Sat; Sunday closed.
+- A unique database index makes double-booking the same slot impossible.
+
+**Security:** the key in `index.html` is the Supabase *publishable* key — it's
+meant to be public. Row-level security lets visitors only *create* a booking and
+*see which slots are taken*; nobody can read other customers' names or phone
+numbers through the public API. Only you, via the dashboard, can read them.
+
+**Optional next step:** get notified on new bookings — a Supabase Database
+Webhook or a small Edge Function can email or text you whenever a row is inserted.

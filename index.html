@@ -199,6 +199,19 @@
   .done h3{margin-bottom:8px}
   .done p{color:var(--slate);font-size:.95rem;margin-bottom:6px}
 
+  /* ---------- BOOKING SLOTS ---------- */
+  .slot-status{color:var(--slate);font-size:.95rem;padding:6px 0 12px}
+  .slot-status a{color:var(--blue);font-weight:600}
+  .slot-day{margin-bottom:16px}
+  .slot-date{font-family:'Sora',sans-serif;font-weight:600;font-size:.78rem;color:var(--slate);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px}
+  .slot-times{display:flex;flex-wrap:wrap;gap:8px}
+  .slot-btn{font-family:'Sora',sans-serif;font-weight:600;font-size:.95rem;color:var(--navy);background:var(--white);border:1.5px solid var(--line);border-radius:8px;padding:10px 16px;cursor:pointer;transition:border .12s,background .12s}
+  .slot-btn:hover{border-color:var(--blue)}
+  .slot-btn.sel{border-color:var(--blue);background:var(--mist)}
+  .slot-chosen{font-family:'Sora',sans-serif;font-weight:600;color:var(--blue);margin:-6px 0 16px}
+  .form-err{color:#c0392b;font-size:.9rem;margin:2px 0 12px}
+  .hp{position:absolute;left:-9999px;width:1px;height:1px;opacity:0}
+
   /* ---------- DESKTOP / WIDER SCREENS ---------- */
   @media (min-width:820px){
     /* Hero: centered and larger so it fills the screen and lines up with the
@@ -353,7 +366,80 @@
   <div class="modal" id="modalInner"></div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
+/* ---------- Supabase ---------- */
+const SUPABASE_URL = 'https://utybbdrthxgsijplowup.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_48352eB1w0mLVwvLm3gXUg_BpGKN67o';
+const sb = window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY) : null;
+
+/* ---------- Availability config ---------- */
+const SLOT_TZ    = 'America/Boise';   // Mountain Time (McCall / Valley County)
+const DAYS_AHEAD = 21;                // how far out customers can book
+const BIZ_PHONE  = '(208) 315-1420';
+// Bookable start times per weekday (0=Sun … 6=Sat). Omit a day to close it.
+// Two slots/day, within the posted hours (Mon–Fri 8–6, Sat 9–4).
+const DAY_SLOTS = {
+  1:[['09:00','Morning'],['13:30','Afternoon']],
+  2:[['09:00','Morning'],['13:30','Afternoon']],
+  3:[['09:00','Morning'],['13:30','Afternoon']],
+  4:[['09:00','Morning'],['13:30','Afternoon']],
+  5:[['09:00','Morning'],['13:30','Afternoon']],
+  6:[['09:30','Morning'],['13:00','Afternoon']]
+};
+const DOW = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+
+/* Minutes SLOT_TZ is offset from UTC at a given instant (handles DST). */
+function tzOffsetMinutes(date){
+  const dtf = new Intl.DateTimeFormat('en-US',{timeZone:SLOT_TZ,hourCycle:'h23',
+    year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',second:'2-digit'});
+  const p = {}; for(const part of dtf.formatToParts(date)) p[part.type]=part.value;
+  const asUTC = Date.UTC(+p.year,+p.month-1,+p.day,+p.hour,+p.minute,+p.second);
+  return (asUTC - date.getTime())/60000;
+}
+/* A Mountain-Time wall clock (y,m,d,hh,mm) -> the real UTC instant. */
+function mtToInstant(y,m,d,hh,mm){
+  const guess = Date.UTC(y,m-1,d,hh,mm,0);
+  return new Date(guess - tzOffsetMinutes(new Date(guess))*60000);
+}
+/* The calendar date (in MT) of a given instant. */
+function mtDateParts(date){
+  const dtf = new Intl.DateTimeFormat('en-US',{timeZone:SLOT_TZ,
+    year:'numeric',month:'2-digit',day:'2-digit',weekday:'short'});
+  const p = {}; for(const part of dtf.formatToParts(date)) p[part.type]=part.value;
+  return {y:+p.year,m:+p.month,d:+p.day,dow:DOW.indexOf(p.weekday)};
+}
+function fmtDay(i){ return i.toLocaleDateString('en-US',{timeZone:SLOT_TZ,weekday:'short',month:'short',day:'numeric'}); }
+function fmtTime(i){ return i.toLocaleTimeString('en-US',{timeZone:SLOT_TZ,hour:'numeric',minute:'2-digit'}); }
+
+/* Every open start time from tomorrow through DAYS_AHEAD days out. */
+function candidateSlots(){
+  const out = [], now = new Date();
+  for(let i=1;i<=DAYS_AHEAD;i++){
+    const {y,m,d,dow} = mtDateParts(new Date(now.getTime()+i*86400000));
+    const times = DAY_SLOTS[dow];
+    if(!times) continue;
+    for(const [hhmm,label] of times){
+      const [hh,mm] = hhmm.split(':').map(Number);
+      const instant = mtToInstant(y,m,d,hh,mm);
+      if(instant.getTime() <= now.getTime()) continue;
+      out.push({key:instant.getTime(), iso:instant.toISOString(), instant, label});
+    }
+  }
+  return out;
+}
+/* Open slots minus already-booked ones (booked times come from Supabase, no PII). */
+async function availableSlots(){
+  const all = candidateSlots();
+  if(!sb) return all;
+  const from = new Date().toISOString();
+  const to   = new Date(Date.now()+(DAYS_AHEAD+2)*86400000).toISOString();
+  const { data, error } = await sb.rpc('taken_slots',{p_from:from,p_to:to});
+  if(error) throw error;
+  const taken = new Set((data||[]).map(r=>new Date(r.slot_start).getTime()));
+  return all.filter(s=>!taken.has(s.key));
+}
+
 const PACKAGES = [
   {id:'express', name:'Express', price:60, meta:'Wash, vacuum, windows · ~1 hr'},
   {id:'full',    name:'Full Detail', price:150, meta:'Deep clean, clay, wax · ~3 hrs'},
@@ -365,15 +451,17 @@ const ADDONS = [
   {id:'engine', name:'Engine bay clean', price:30},
 ];
 
-let state = {step:1, pkg:null, addons:[], name:'', phone:'', date:''};
+let state = {step:1, pkg:null, addons:[], slot:null, name:'', phone:'', hp:false};
+let slotCache = null;
+let submitting = false;
 const modal = document.getElementById('modal');
 const inner = document.getElementById('modalInner');
 
-function openBooking(){ state={step:1,pkg:null,addons:[],name:'',phone:'',date:''}; modal.classList.add('open'); render(); }
+function openBooking(){ state={step:1,pkg:null,addons:[],slot:null,name:'',phone:'',hp:false}; slotCache=null; submitting=false; modal.classList.add('open'); render(); }
 function closeBooking(){ modal.classList.remove('open'); }
 modal.addEventListener('click', e=>{ if(e.target===modal) closeBooking(); });
 
-function pickPkg(id){ state.pkg=id; state.step=2; render(); }
+function pickPkg(id){ state.pkg=id; go(2); }
 function toggleAddon(id){
   const i=state.addons.indexOf(id);
   if(i>-1) state.addons.splice(i,1); else state.addons.push(id);
@@ -384,13 +472,14 @@ function total(){
   state.addons.forEach(a=> t += ADDONS.find(x=>x.id===a).price);
   return t;
 }
-function go(step){ state.step=step; render(); }
+function go(step){ state.step=step; render(); if(step===3) loadSlots(); }
+function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+const topBar = n => `<div class="modal-top"><span class="step-label">Step ${n} of 5</span>`+
+  `<button class="close" onclick="closeBooking()" aria-label="Close">×</button></div>`;
 
 function render(){
   if(state.step===1){
-    inner.innerHTML = `
-      <div class="modal-top"><span class="step-label">Step 1 of 4</span>
-      <button class="close" onclick="closeBooking()" aria-label="Close">×</button></div>
+    inner.innerHTML = topBar(1) + `
       <h3>What does your car need?</h3>
       ${PACKAGES.map(p=>`
         <button class="opt ${state.pkg===p.id?'sel':''}" onclick="pickPkg('${p.id}')">
@@ -400,9 +489,7 @@ function render(){
     `;
   }
   else if(state.step===2){
-    inner.innerHTML = `
-      <div class="modal-top"><span class="step-label">Step 2 of 4</span>
-      <button class="close" onclick="closeBooking()" aria-label="Close">×</button></div>
+    inner.innerHTML = topBar(2) + `
       <h3>Add anything extra?</h3>
       ${ADDONS.map(a=>`
         <label class="addon ${state.addons.includes(a.id)?'sel':''}">
@@ -415,50 +502,125 @@ function render(){
     `;
   }
   else if(state.step===3){
-    inner.innerHTML = `
-      <div class="modal-top"><span class="step-label">Step 3 of 4</span>
-      <button class="close" onclick="closeBooking()" aria-label="Close">×</button></div>
-      <h3>Your details</h3>
-      <div class="field"><label>Name</label><input id="f-name" value="${state.name}" placeholder="Jordan Smith"></div>
-      <div class="field"><label>Phone</label><input id="f-phone" type="tel" value="${state.phone}" placeholder="(555) 000-0000"></div>
-      <div class="field"><label>Preferred date</label><input id="f-date" type="date" value="${state.date}"></div>
-      <button class="btn" onclick="saveDetails()">Review booking</button>
+    inner.innerHTML = topBar(3) + `
+      <h3>Pick a time</h3>
+      <div id="slotArea"><p class="slot-status">Loading available times…</p></div>
       <button class="back" onclick="go(2)">← Back</button>
     `;
   }
   else if(state.step===4){
-    const p = PACKAGES.find(x=>x.id===state.pkg);
-    inner.innerHTML = `
-      <div class="modal-top"><span class="step-label">Step 4 of 4</span>
-      <button class="close" onclick="closeBooking()" aria-label="Close">×</button></div>
-      <h3>Confirm your booking</h3>
-      <div class="summary">
-        <div class="summary-row"><span>${p.name}</span><span>$${p.price}</span></div>
-        ${state.addons.map(a=>{const x=ADDONS.find(z=>z.id===a);return `<div class="summary-row"><span class="muted">+ ${x.name}</span><span class="muted">$${x.price}</span></div>`}).join('')}
-        <div class="summary-row"><span class="muted">${state.name||'—'} · ${state.phone||'—'}</span><span class="muted">${state.date||'date TBC'}</span></div>
-        <div class="summary-row total"><span>Total</span><span>$${total()}</span></div>
-      </div>
-      <button class="btn" onclick="go(5)">Confirm booking</button>
+    inner.innerHTML = topBar(4) + `
+      <h3>Your details</h3>
+      <p class="slot-chosen">${state.slot ? fmtDay(state.slot.instant)+' · '+fmtTime(state.slot.instant) : ''}</p>
+      <div class="field"><label>Name</label><input id="f-name" value="${esc(state.name)}" placeholder="Jordan Smith"></div>
+      <div class="field"><label>Phone</label><input id="f-phone" type="tel" value="${esc(state.phone)}" placeholder="(555) 000-0000"></div>
+      <input type="text" id="f-company" class="hp" tabindex="-1" autocomplete="off" aria-hidden="true">
+      <p id="detailErr" class="form-err" hidden></p>
+      <button class="btn" onclick="saveDetails()">Review booking</button>
       <button class="back" onclick="go(3)">← Back</button>
     `;
   }
   else if(state.step===5){
+    const p = PACKAGES.find(x=>x.id===state.pkg);
+    inner.innerHTML = topBar(5) + `
+      <h3>Confirm your booking</h3>
+      <div class="summary">
+        <div class="summary-row"><span>${p.name}</span><span>$${p.price}</span></div>
+        ${state.addons.map(a=>{const x=ADDONS.find(z=>z.id===a);return `<div class="summary-row"><span class="muted">+ ${x.name}</span><span class="muted">$${x.price}</span></div>`}).join('')}
+        <div class="summary-row"><span class="muted">${fmtDay(state.slot.instant)} · ${fmtTime(state.slot.instant)}</span><span class="muted">${esc(state.name)}</span></div>
+        <div class="summary-row total"><span>Total</span><span>$${total()}</span></div>
+      </div>
+      <p id="confirmErr" class="form-err" hidden></p>
+      <button class="btn" id="confirmBtn" onclick="submitBooking()">Confirm booking</button>
+      <button class="back" onclick="go(4)">← Back</button>
+    `;
+  }
+  else if(state.step===6){
     inner.innerHTML = `
       <div class="done">
         <div class="tick"></div>
         <h3>You're booked in.</h3>
-        <p>We'll text ${state.phone||'you'} to confirm your slot.</p>
-        <p>Nothing to pay until the work is done.</p>
+        <p>${fmtDay(state.slot.instant)} at ${fmtTime(state.slot.instant)}.</p>
+        <p>We'll text ${esc(state.phone)||'you'} to confirm. Nothing to pay until the work's done.</p>
         <button class="btn" onclick="closeBooking()" style="margin-top:20px">Done</button>
       </div>
     `;
   }
 }
+
+async function loadSlots(){
+  const area = () => document.getElementById('slotArea');
+  let slots;
+  try { slots = await availableSlots(); }
+  catch(e){
+    if(area()) area().innerHTML = `<p class="slot-status">Couldn't load available times. Call or text <a href="tel:+12083151420">${BIZ_PHONE}</a> to book.</p>`;
+    return;
+  }
+  if(state.step!==3) return;
+  slotCache = slots;
+  if(!slots.length){
+    area().innerHTML = `<p class="slot-status">No open slots in the next ${DAYS_AHEAD} days. Call or text <a href="tel:+12083151420">${BIZ_PHONE}</a> and we'll fit you in.</p>`;
+    return;
+  }
+  const groups = [];
+  slots.forEach(s=>{
+    const label = fmtDay(s.instant);
+    let g = groups[groups.length-1];
+    if(!g || g.label!==label){ g={label, items:[]}; groups.push(g); }
+    g.items.push(s);
+  });
+  area().innerHTML = groups.map(g=>`
+    <div class="slot-day">
+      <div class="slot-date">${g.label}</div>
+      <div class="slot-times">
+        ${g.items.map(s=>`<button class="slot-btn ${state.slot&&state.slot.key===s.key?'sel':''}" onclick="pickSlot(${s.key})">${fmtTime(s.instant)}</button>`).join('')}
+      </div>
+    </div>`).join('');
+}
+function pickSlot(key){
+  state.slot = (slotCache||[]).find(s=>s.key===key) || null;
+  if(state.slot) go(4);
+}
+
+function showErr(el,msg){ if(el){ el.textContent=msg; el.hidden=false; } }
 function saveDetails(){
-  state.name = document.getElementById('f-name').value;
-  state.phone = document.getElementById('f-phone').value;
-  state.date = document.getElementById('f-date').value;
-  go(4);
+  state.name = document.getElementById('f-name').value.trim();
+  state.phone = document.getElementById('f-phone').value.trim();
+  state.hp = !!(document.getElementById('f-company') && document.getElementById('f-company').value);
+  const err = document.getElementById('detailErr');
+  if(!state.name) return showErr(err,'Please enter your name.');
+  if(state.phone.replace(/\D/g,'').length < 7) return showErr(err,'Please enter a valid phone number.');
+  go(5);
+}
+
+async function submitBooking(){
+  if(submitting) return;
+  const btn = document.getElementById('confirmBtn');
+  const err = document.getElementById('confirmErr');
+  if(!state.slot){ go(3); return; }
+  if(state.hp){ go(6); return; }                       // honeypot: bot, skip silently
+  if(!sb) return showErr(err, `Booking is offline right now — call or text ${BIZ_PHONE}.`);
+  submitting = true; if(btn){ btn.disabled=true; btn.textContent='Booking…'; }
+  const { error } = await sb.from('bookings').insert({
+    slot_start: state.slot.iso,
+    package: PACKAGES.find(p=>p.id===state.pkg).name,
+    addons: state.addons.map(a=>ADDONS.find(x=>x.id===a).name),
+    customer_name: state.name,
+    customer_phone: state.phone,
+    total_usd: total(),
+    status: 'pending'
+  });
+  submitting = false; if(btn){ btn.disabled=false; btn.textContent='Confirm booking'; }
+  if(error){
+    if(error.code==='23505'){
+      showErr(err,'Sorry — that time was just booked. Choose another.');
+      setTimeout(()=>go(3), 1300);
+    } else {
+      showErr(err, `Couldn't complete the booking. Call or text ${BIZ_PHONE}.`);
+    }
+    return;
+  }
+  go(6);
 }
 </script>
 </body>

@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="256" height="256" role="img" aria-label="Detail Valley logo">
+  <title>Detail Valley</title>
+  <defs>
+    <clipPath id="badge"><circle cx="128" cy="128" r="111"/></clipPath>
+  </defs>
+
+  <!-- badge background -->
+  <circle cx="128" cy="128" r="121" fill="#eef3f7"/>
+
+  <g clip-path="url(#badge)">
+    <!-- mountain range -->
+    <path d="M8,168 L44,120 L70,150 L110,58 L140,108 L168,80 L196,130 L212,150 L248,168 L248,252 L8,252 Z" fill="#0f2c44"/>
+    <!-- snow caps (negative space) -->
+    <path d="M110,58 L129,99 L122,93 L115,101 L108,92 L101,101 L94,94 L88,97 Z" fill="#eef3f7"/>
+    <path d="M168,80 L182,112 L176,107 L171,114 L165,106 L159,113 L154,108 Z" fill="#eef3f7"/>
+    <!-- water droplet -->
+    <path d="M124,108 C150,150 158,162 158,184 C158,206 90,206 90,184 C90,162 98,150 124,108 Z"
+          fill="#b8632c" stroke="#0f2c44" stroke-width="7" stroke-linejoin="round"/>
+    <!-- droplet shine -->
+    <path d="M104,176 C99,186 101,197 110,201" fill="none" stroke="#dd9163" stroke-width="5" stroke-linecap="round"/>
+    <!-- sparkle -->
+    <path d="M196,50 L201,67 L218,72 L201,77 L196,94 L191,77 L174,72 L191,67 Z" fill="#b8632c"/>
+  </g>
+
+  <!-- ring -->
+  <circle cx="128" cy="128" r="116" fill="none" stroke="#0f2c44" stroke-width="9"/>
+</svg>

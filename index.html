@@ -196,6 +196,41 @@
   .done .tick::after{content:"";position:absolute;left:22px;top:17px;width:16px;height:28px;border-right:4px solid var(--white);border-bottom:4px solid var(--white);transform:rotate(45deg)}
   .done h3{margin-bottom:8px}
   .done p{color:var(--slate);font-size:.95rem;margin-bottom:6px}
+
+  /* ---------- DESKTOP / WIDER SCREENS ---------- */
+  @media (min-width:820px){
+    /* Hero: centered and larger so it fills the screen and lines up with the
+       centered section headings below, instead of being pinned far left. */
+    header{padding:112px 24px 96px;text-align:center}
+    .hero-inner{max-width:780px;margin:0 auto}
+    .brand-lockup{justify-content:center;margin-bottom:34px}
+    h1{font-size:3.5rem}
+    header p.lead{font-size:1.2rem;max-width:540px;margin-left:auto;margin-right:auto}
+
+    /* One consistent, wider content width across the page */
+    .strip-inner,.wrap,.foot-inner,.foot-bottom{max-width:1060px}
+    .spec{padding:26px 16px}
+
+    /* Sections breathe more on big screens */
+    section{padding:90px 0}
+    .section-title{font-size:2.4rem}
+    .section-sub{font-size:1.06rem;margin-bottom:46px}
+
+    /* Packages sit side-by-side instead of stacking down a thin column */
+    .pkgs{display:grid;grid-template-columns:repeat(3,1fr);gap:22px;align-items:stretch}
+    .pkg{margin-bottom:0}
+    .pkg.featured{transform:translateY(-10px)}
+
+    .final{padding:92px 24px}
+    .final h2{font-size:2.2rem}
+
+    /* Center the footer too, mirroring the centered hero at the top */
+    footer{padding:64px 24px 36px}
+    .foot-inner{grid-template-columns:1fr;text-align:center;gap:30px;max-width:520px}
+    .foot-inner img{margin-left:auto;margin-right:auto}
+    .hours-row{margin-left:auto;margin-right:auto}
+    .socials{justify-content:center}
+  }
 </style>
 </head>
 <body>
@@ -229,6 +264,7 @@
     <h2 class="section-title">Choose your package</h2>
     <p class="section-sub">Clear, flat pricing. No surprises on the day.</p>
 
+    <div class="pkgs">
     <div class="pkg">
       <div class="pkg-head"><span class="pkg-name">Express</span><span class="pkg-price">$60</span></div>
       <ul>
@@ -257,6 +293,7 @@
         <li>Sealant for lasting protection</li>
         <li>Leather cleaned &amp; conditioned</li>
       </ul>
+    </div>
     </div>
   </div>
 </section>

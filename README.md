@@ -42,6 +42,7 @@ command and no publish directory beyond the root are needed.
 |------|---------|
 | `index.html` | The live Detail Valley site (final, professional design). |
 | `logo.png` | Brand logo — used in the hero and footer, and as the social profile picture. |
+| `logo.svg` | Scalable vector version of the logo, for crisp rendering at any size (web, retina, print/decals). |
 | `alternate-designs/ridgeline-mountain.html` | Earlier "alpine garage" concept (rugged, mountain-themed, under the working name *Ridgeline Detail*). Kept for reference; not used live. |
 
 ## Before going fully live

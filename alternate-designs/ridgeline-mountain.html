@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ridgeline Detail — Mobile Car Detailing, McCall ID</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Archivo:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --pine:#11241d;        /* deep forest base */
+    --pine-2:#1a3329;      /* lifted panel */
+    --bone:#f0ece3;        /* warm off-white */
+    --bone-dim:#cbc7bd;
+    --amber:#e8843b;       /* hazard amber accent */
+    --amber-2:#cf6f2b;
+    --slate:#7e8a86;       /* muted gray-green */
+    --line:#2c463b;
+    --line-bone:#d8d3c7;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    font-family:'Archivo',system-ui,sans-serif;
+    color:var(--pine);
+    background:var(--bone);
+    line-height:1.55;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:760px;margin:0 auto;padding:0 24px}
+  h1,h2,h3,.display{font-family:'Oswald',sans-serif;text-transform:uppercase}
+
+  /* ---------- HERO ---------- */
+  header{
+    position:relative;
+    background:var(--pine);
+    color:var(--bone);
+    padding:72px 24px 60px;
+    overflow:hidden;
+  }
+  /* topographic contour signature */
+  .topo{
+    position:absolute;inset:0;
+    background-image:
+      repeating-radial-gradient(circle at 78% 18%,
+        transparent 0 26px,
+        rgba(232,132,59,.07) 26px 27px,
+        transparent 27px 54px);
+    pointer-events:none;
+  }
+  .topo2{
+    position:absolute;inset:0;
+    background-image:
+      repeating-radial-gradient(circle at 12% 88%,
+        transparent 0 34px,
+        rgba(240,236,227,.05) 34px 35px,
+        transparent 35px 70px);
+    pointer-events:none;
+  }
+  .hero-inner{position:relative;z-index:2;max-width:760px;margin:0 auto}
+  .badge{
+    display:inline-flex;align-items:center;gap:8px;
+    border:1px solid var(--line);
+    border-left:3px solid var(--amber);
+    padding:7px 14px;
+    font-family:'Oswald',sans-serif;
+    text-transform:uppercase;letter-spacing:.18em;
+    font-size:.7rem;font-weight:600;color:var(--bone-dim);
+    margin-bottom:26px;
+  }
+  .badge .dot{width:7px;height:7px;background:var(--amber);border-radius:50%}
+  h1{
+    font-size:3.1rem;line-height:.98;font-weight:700;
+    letter-spacing:.005em;margin-bottom:20px;
+  }
+  h1 .amber{color:var(--amber)}
+  header p.lead{
+    font-family:'Archivo',sans-serif;text-transform:none;
+    color:var(--bone-dim);font-size:1.12rem;
+    max-width:460px;margin-bottom:32px;
+  }
+  .btn{
+    display:inline-block;
+    background:var(--amber);color:var(--pine);
+    border:none;font-family:'Oswald',sans-serif;
+    text-transform:uppercase;letter-spacing:.06em;
+    font-size:1.02rem;font-weight:600;
+    padding:15px 36px;border-radius:2px;
+    cursor:pointer;text-decoration:none;
+    transition:transform .12s ease,background .12s ease;
+  }
+  .btn:hover{background:var(--amber-2);transform:translateY(-2px)}
+  .btn:focus-visible{outline:3px solid var(--bone);outline-offset:3px}
+  .reassure{font-size:.82rem;color:var(--slate);margin-top:15px;letter-spacing:.02em}
+
+  /* ---------- SPEC STRIP ---------- */
+  .strip{
+    background:var(--pine-2);
+    border-top:1px solid var(--line);
+    border-bottom:1px solid var(--line);
+    color:var(--bone);
+  }
+  .strip-inner{
+    max-width:760px;margin:0 auto;padding:0 24px;
+    display:grid;grid-template-columns:repeat(3,1fr);
+  }
+  .spec{
+    padding:18px 8px;text-align:center;
+    border-left:1px solid var(--line);
+  }
+  .spec:first-child{border-left:none}
+  .spec .k{font-family:'Oswald',sans-serif;text-transform:uppercase;
+    font-size:.72rem;letter-spacing:.14em;color:var(--amber);font-weight:600}
+  .spec .v{font-size:.82rem;color:var(--bone-dim);margin-top:2px}
+
+  /* ---------- PACKAGES ---------- */
+  section{padding:60px 0}
+  .kicker{
+    font-family:'Oswald',sans-serif;text-transform:uppercase;
+    letter-spacing:.2em;font-size:.74rem;color:var(--amber-2);
+    font-weight:600;text-align:center;margin-bottom:10px;
+  }
+  .section-title{text-align:center;font-size:2rem;font-weight:700;letter-spacing:.01em;margin-bottom:8px}
+  .section-sub{text-align:center;color:var(--slate);margin-bottom:38px;font-size:.96rem}
+
+  .pkg{
+    border:1px solid var(--line-bone);
+    background:#fff;
+    padding:0;margin-bottom:16px;
+    border-radius:3px;overflow:hidden;
+  }
+  .pkg.featured{border:1.5px solid var(--pine)}
+  .pkg-bar{
+    display:flex;justify-content:space-between;align-items:center;
+    padding:16px 22px;border-bottom:1px solid var(--line-bone);
+  }
+  .pkg.featured .pkg-bar{background:var(--pine);border-bottom:none}
+  .pkg.featured .pkg-name{color:var(--bone)}
+  .pkg.featured .pkg-price{color:var(--amber)}
+  .pkg.featured .flag{
+    display:inline-block;font-family:'Oswald',sans-serif;
+    font-size:.62rem;letter-spacing:.14em;text-transform:uppercase;
+    color:var(--pine);background:var(--amber);
+    padding:3px 8px;border-radius:2px;margin-left:10px;vertical-align:middle;
+  }
+  .pkg-name{font-family:'Oswald',sans-serif;text-transform:uppercase;
+    font-size:1.25rem;font-weight:600;letter-spacing:.02em}
+  .pkg-price{font-family:'Oswald',sans-serif;font-size:1.5rem;font-weight:700;color:var(--pine)}
+  .pkg ul{list-style:none;padding:18px 22px}
+  .pkg li{padding:6px 0 6px 28px;position:relative;font-size:.95rem}
+  .pkg li::before{
+    content:"";position:absolute;left:2px;top:10px;
+    width:12px;height:7px;border-left:2px solid var(--amber);
+    border-bottom:2px solid var(--amber);transform:rotate(-45deg);
+  }
+
+  /* ---------- FINAL CTA ---------- */
+  .final{position:relative;background:var(--pine);color:var(--bone);text-align:center;padding:64px 24px;overflow:hidden}
+  .final h2{font-size:1.9rem;font-weight:700;margin-bottom:12px;letter-spacing:.01em}
+  .final p{color:var(--bone-dim);margin-bottom:28px}
+
+  footer{text-align:center;padding:30px 24px;font-size:.82rem;color:var(--slate);background:var(--pine-2);color:var(--bone-dim);letter-spacing:.03em}
+  footer .name{font-family:'Oswald',sans-serif;text-transform:uppercase;letter-spacing:.16em;color:var(--bone);display:block;margin-bottom:4px}
+
+  /* ---------- MODAL ---------- */
+  .modal-bg{display:none;position:fixed;inset:0;background:rgba(10,18,14,.78);align-items:flex-end;justify-content:center;z-index:50}
+  .modal-bg.open{display:flex}
+  .modal{background:var(--bone);width:100%;max-width:480px;border-radius:14px 14px 0 0;padding:26px 24px 34px;max-height:92vh;overflow-y:auto;animation:rise .22s ease}
+  @keyframes rise{from{transform:translateY(40px);opacity:.4}to{transform:translateY(0);opacity:1}}
+  @media(min-width:520px){.modal-bg{align-items:center}.modal{border-radius:6px}}
+  .modal-top{display:flex;justify-content:space-between;align-items:center}
+  .step-label{font-family:'Oswald',sans-serif;text-transform:uppercase;font-size:.72rem;letter-spacing:.16em;color:var(--amber-2);font-weight:600}
+  .close{background:none;border:none;font-size:1.7rem;line-height:1;cursor:pointer;color:var(--slate)}
+  .modal h3{font-size:1.4rem;font-weight:600;margin:8px 0 18px;letter-spacing:.02em}
+
+  .opt{display:block;width:100%;text-align:left;background:#fff;border:1.5px solid var(--line-bone);border-radius:4px;padding:14px 16px;margin-bottom:10px;cursor:pointer;font-family:'Archivo',sans-serif;font-size:1rem;transition:border .12s,background .12s}
+  .opt:hover{border-color:var(--amber)}
+  .opt.sel{border-color:var(--amber);background:#fbf1e8}
+  .opt .o-name{font-family:'Oswald',sans-serif;text-transform:uppercase;letter-spacing:.02em;font-weight:600}
+  .opt .o-meta{font-size:.85rem;color:var(--slate);display:block;margin-top:2px}
+
+  .addon{display:flex;align-items:center;gap:12px;background:#fff;border:1.5px solid var(--line-bone);border-radius:4px;padding:12px 14px;margin-bottom:9px;cursor:pointer}
+  .addon.sel{border-color:var(--amber);background:#fbf1e8}
+  .addon input{width:20px;height:20px;accent-color:var(--amber)}
+  .addon .a-name{font-weight:600;font-size:.95rem}
+  .addon .a-price{margin-left:auto;font-family:'Oswald',sans-serif;font-weight:700;color:var(--amber-2)}
+
+  .field{margin-bottom:14px}
+  .field label{display:block;font-family:'Oswald',sans-serif;text-transform:uppercase;letter-spacing:.06em;font-size:.74rem;font-weight:600;margin-bottom:5px;color:var(--pine)}
+  .field input{width:100%;padding:13px 14px;border:1.5px solid var(--line-bone);border-radius:4px;font-size:1rem;background:#fff;font-family:inherit}
+  .field input:focus{outline:none;border-color:var(--amber)}
+
+  .summary{background:#fff;border:1px solid var(--line-bone);border-radius:4px;padding:16px;margin-bottom:18px}
+  .summary-row{display:flex;justify-content:space-between;padding:5px 0;font-size:.95rem}
+  .summary-row.total{border-top:1px solid var(--line-bone);margin-top:8px;padding-top:12px;font-family:'Oswald',sans-serif;font-weight:700;font-size:1.15rem}
+  .summary-row .muted{color:var(--slate)}
+
+  .modal .btn{width:100%;text-align:center;margin-top:6px;border-radius:4px}
+  .back{background:none;border:none;color:var(--slate);font-size:.9rem;cursor:pointer;margin-top:14px;display:block;width:100%;text-align:center}
+
+  .done{text-align:center;padding:14px 0}
+  .done .tick{width:64px;height:64px;border-radius:50%;background:var(--amber);margin:0 auto 18px;position:relative}
+  .done .tick::after{content:"";position:absolute;left:23px;top:18px;width:16px;height:28px;border-right:4px solid var(--pine);border-bottom:4px solid var(--pine);transform:rotate(45deg)}
+  .done h3{margin-bottom:8px}
+  .done p{color:var(--slate);font-size:.95rem;margin-bottom:6px}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="topo"></div>
+  <div class="topo2"></div>
+  <div class="hero-inner">
+    <span class="badge"><span class="dot"></span>Valley County · Mobile</span>
+    <h1>Mountain roads<br>are hard on<br>your <span class="amber">ride.</span></h1>
+    <p class="lead">We bring the full detailing rig to your driveway and send your truck back cleaner than the day you bought it.</p>
+    <button class="btn" onclick="openBooking()">Book a detail</button>
+    <p class="reassure">No deposit to book. Pay when the work's done.</p>
+  </div>
+</header>
+
+<div class="strip">
+  <div class="strip-inner">
+    <div class="spec"><div class="k">Mobile</div><div class="v">We come to you</div></div>
+    <div class="spec"><div class="k">This week</div><div class="v">Same-week slots</div></div>
+    <div class="spec"><div class="k">Backed</div><div class="v">100% guaranteed</div></div>
+  </div>
+</div>
+
+<section>
+  <div class="wrap">
+    <p class="kicker">Service Menu</p>
+    <h2 class="section-title">Pick your package</h2>
+    <p class="section-sub">Flat rates. Built for mountain-town vehicles.</p>
+
+    <div class="pkg">
+      <div class="pkg-bar"><span class="pkg-name">Express</span><span class="pkg-price">$60</span></div>
+      <ul>
+        <li>Exterior hand wash &amp; dry</li>
+        <li>Wheels &amp; tires cleaned</li>
+        <li>Interior vacuum</li>
+        <li>Windows in &amp; out</li>
+      </ul>
+    </div>
+
+    <div class="pkg featured">
+      <div class="pkg-bar"><span class="pkg-name">Full Detail<span class="flag">Most booked</span></span><span class="pkg-price">$150</span></div>
+      <ul>
+        <li>Everything in Express</li>
+        <li>Deep interior clean &amp; wipe-down</li>
+        <li>Clay bar &amp; wax finish</li>
+        <li>Door jambs &amp; trim dressed</li>
+      </ul>
+    </div>
+
+    <div class="pkg">
+      <div class="pkg-bar"><span class="pkg-name">Showroom</span><span class="pkg-price">$275</span></div>
+      <ul>
+        <li>Everything in Full Detail</li>
+        <li>Single-stage paint correction</li>
+        <li>Sealant for lasting protection</li>
+        <li>Leather feed &amp; condition</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<div class="final">
+  <div class="topo"></div>
+  <div class="hero-inner" style="position:relative;z-index:2">
+    <h2>Clean truck. Zero hassle.</h2>
+    <p>Booking takes under a minute.</p>
+    <button class="btn" onclick="openBooking()">Book a detail</button>
+  </div>
+</div>
+
+<footer>
+  <span class="name">Ridgeline Detail</span>
+  Call or text (555) 000-0000 · McCall, ID
+</footer>
+
+<div class="modal-bg" id="modal" role="dialog" aria-modal="true" aria-label="Booking">
+  <div class="modal" id="modalInner"></div>
+</div>
+
+<script>
+const PACKAGES = [
+  {id:'express', name:'Express', price:60, meta:'Wash, vacuum, windows · ~1 hr'},
+  {id:'full',    name:'Full Detail', price:150, meta:'Deep clean, clay, wax · ~3 hrs'},
+  {id:'show',    name:'Showroom', price:275, meta:'Paint correction, sealant · ~5 hrs'},
+];
+const ADDONS = [
+  {id:'pet', name:'Pet hair removal', price:35},
+  {id:'seats', name:'Seat shampoo', price:45},
+  {id:'engine', name:'Engine bay clean', price:30},
+];
+
+let state = {step:1, pkg:null, addons:[], name:'', phone:'', date:''};
+const modal = document.getElementById('modal');
+const inner = document.getElementById('modalInner');
+
+function openBooking(){ state={step:1,pkg:null,addons:[],name:'',phone:'',date:''}; modal.classList.add('open'); render(); }
+function closeBooking(){ modal.classList.remove('open'); }
+modal.addEventListener('click', e=>{ if(e.target===modal) closeBooking(); });
+
+function pickPkg(id){ state.pkg=id; state.step=2; render(); }
+function toggleAddon(id){
+  const i=state.addons.indexOf(id);
+  if(i>-1) state.addons.splice(i,1); else state.addons.push(id);
+  render();
+}
+function total(){
+  let t = PACKAGES.find(p=>p.id===state.pkg)?.price || 0;
+  state.addons.forEach(a=> t += ADDONS.find(x=>x.id===a).price);
+  return t;
+}
+function go(step){ state.step=step; render(); }
+
+function render(){
+  if(state.step===1){
+    inner.innerHTML = `
+      <div class="modal-top"><span class="step-label">Step 1 of 4</span>
+      <button class="close" onclick="closeBooking()" aria-label="Close">×</button></div>
+      <h3>What does your ride need?</h3>
+      ${PACKAGES.map(p=>`
+        <button class="opt ${state.pkg===p.id?'sel':''}" onclick="pickPkg('${p.id}')">
+          <span class="o-name">${p.name} — $${p.price}</span>
+          <span class="o-meta">${p.meta}</span>
+        </button>`).join('')}
+    `;
+  }
+  else if(state.step===2){
+    inner.innerHTML = `
+      <div class="modal-top"><span class="step-label">Step 2 of 4</span>
+      <button class="close" onclick="closeBooking()" aria-label="Close">×</button></div>
+      <h3>Add anything extra?</h3>
+      ${ADDONS.map(a=>`
+        <label class="addon ${state.addons.includes(a.id)?'sel':''}">
+          <input type="checkbox" ${state.addons.includes(a.id)?'checked':''} onchange="toggleAddon('${a.id}')">
+          <span class="a-name">${a.name}</span>
+          <span class="a-price">+$${a.price}</span>
+        </label>`).join('')}
+      <button class="btn" onclick="go(3)">Continue · $${total()}</button>
+      <button class="back" onclick="go(1)">← Back</button>
+    `;
+  }
+  else if(state.step===3){
+    inner.innerHTML = `
+      <div class="modal-top"><span class="step-label">Step 3 of 4</span>
+      <button class="close" onclick="closeBooking()" aria-label="Close">×</button></div>
+      <h3>Your details</h3>
+      <div class="field"><label>Name</label><input id="f-name" value="${state.name}" placeholder="Jordan Smith"></div>
+      <div class="field"><label>Phone</label><input id="f-phone" type="tel" value="${state.phone}" placeholder="(555) 000-0000"></div>
+      <div class="field"><label>Preferred date</label><input id="f-date" type="date" value="${state.date}"></div>
+      <button class="btn" onclick="saveDetails()">Review booking</button>
+      <button class="back" onclick="go(2)">← Back</button>
+    `;
+  }
+  else if(state.step===4){
+    const p = PACKAGES.find(x=>x.id===state.pkg);
+    inner.innerHTML = `
+      <div class="modal-top"><span class="step-label">Step 4 of 4</span>
+      <button class="close" onclick="closeBooking()" aria-label="Close">×</button></div>
+      <h3>Confirm your booking</h3>
+      <div class="summary">
+        <div class="summary-row"><span>${p.name}</span><span>$${p.price}</span></div>
+        ${state.addons.map(a=>{const x=ADDONS.find(z=>z.id===a);return `<div class="summary-row"><span class="muted">+ ${x.name}</span><span class="muted">$${x.price}</span></div>`}).join('')}
+        <div class="summary-row"><span class="muted">${state.name||'—'} · ${state.phone||'—'}</span><span class="muted">${state.date||'date TBC'}</span></div>
+        <div class="summary-row total"><span>Total</span><span>$${total()}</span></div>
+      </div>
+      <button class="btn" onclick="go(5)">Confirm booking</button>
+      <button class="back" onclick="go(3)">← Back</button>
+    `;
+  }
+  else if(state.step===5){
+    inner.innerHTML = `
+      <div class="done">
+        <div class="tick"></div>
+        <h3>You're booked in.</h3>
+        <p>We'll text ${state.phone||'you'} to lock in your slot.</p>
+        <p>Nothing to pay until the work's done.</p>
+        <button class="btn" onclick="closeBooking()" style="margin-top:20px">Done</button>
+      </div>
+    `;
+  }
+}
+function saveDetails(){
+  state.name = document.getElementById('f-name').value;
+  state.phone = document.getElementById('f-phone').value;
+  state.date = document.getElementById('f-date').value;
+  go(4);
+}
+</script>
+</body>
+</html>

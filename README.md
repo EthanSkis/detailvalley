@@ -50,7 +50,7 @@ command and no publish directory beyond the root are needed.
 
 A few things in `index.html` are still placeholders:
 
-- **Phone number** — currently `(555) 000-0000` (booking form + footer).
+- **Phone number** — set to `(208) 315-1420` in the footer. (The booking form's phone field keeps `(555) 000-0000` as an example for customers to fill in.)
 - **Email** — `ethan@detailvalley.com` (make sure that inbox actually exists / forwards to you).
 - **Social links** — Facebook and TikTok point to `#`; Instagram points to
   `detailvalleyid`. Turn the others on once those accounts exist and have a post or two.

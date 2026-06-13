@@ -51,7 +51,7 @@ command and no publish directory beyond the root are needed.
 A few things in `index.html` are still placeholders:
 
 - **Phone number** — currently `(555) 000-0000` (booking form + footer).
-- **Email** — `hello@detailvalley.com`; set up that inbox or swap in a real address.
+- **Email** — `ethan@detailvalley.com` (make sure that inbox actually exists / forwards to you).
 - **Social links** — Facebook and TikTok point to `#`; Instagram points to
   `detailvalleyid`. Turn the others on once those accounts exist and have a post or two.
 - **Booking form** — currently a front-end demo: confirming shows a success

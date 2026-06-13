@@ -41,7 +41,9 @@ command and no publish directory beyond the root are needed.
 | File | Purpose |
 |------|---------|
 | `index.html` | The live Detail Valley site (final, professional design). |
-| `logo.png` | Brand logo — used in the hero and footer, and as the social profile picture. |
+| `CNAME` | Custom domain for GitHub Pages (`detailvalley.com`). |
+| `logo.svg` | The logo, as vector — used on the site (hero, footer, favicon). Scales crisply at any size. |
+| `logo.png` | Raster version of the logo — social profile picture / raster fallback. |
 | `alternate-designs/ridgeline-mountain.html` | Earlier "alpine garage" concept (rugged, mountain-themed, under the working name *Ridgeline Detail*). Kept for reference; not used live. |
 
 ## Before going fully live

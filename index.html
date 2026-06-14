@@ -190,6 +190,12 @@
   .addon input{width:26px;height:26px;accent-color:var(--blue);flex:none}
   .addon .a-name{font-weight:600;font-size:1.05rem}
   .addon .a-price{margin-left:auto;font-family:'Sora',sans-serif;font-weight:700;font-size:1.05rem;color:var(--blue)}
+  /* Add-ons a chosen package already bundles: shown as included, not purchasable */
+  .addon.included{cursor:default;border-color:var(--blue);background:var(--mist)}
+  .addon.included .a-name{color:var(--ink)}
+  .addon .addon-check{width:26px;height:26px;flex:none;border-radius:7px;background:var(--blue);position:relative}
+  .addon .addon-check::after{content:"";position:absolute;left:9px;top:5px;width:6px;height:11px;border:solid #fff;border-width:0 3px 3px 0;transform:rotate(45deg)}
+  .addon .a-incl{margin-left:auto;font-family:'Sora',sans-serif;font-weight:700;font-size:.8rem;letter-spacing:.02em;color:var(--blue);white-space:nowrap}
 
   .field{margin-bottom:16px}
   .field label{display:block;font-family:'Sora',sans-serif;font-weight:600;font-size:.95rem;margin-bottom:8px;color:var(--ink)}
@@ -517,7 +523,7 @@ async function availableSlots(){
 const PACKAGES = [
   {id:'express',   name:'Express', price:60, meta:'Wash, vacuum, windows · ~1 hr'},
   {id:'full',      name:'Full Detail', price:150, meta:'Deep clean, clay, wax · ~3 hrs'},
-  {id:'signature', name:'Signature', price:210, meta:'Everything — seats, engine bay, double wax · ~4½ hrs'},
+  {id:'signature', name:'Signature', price:210, meta:'Everything — seats, engine bay, double wax · ~4½ hrs', includes:['seats','engine']},
 ];
 const ADDONS = [
   {id:'pet', name:'Pet hair removal', price:35},
@@ -569,7 +575,13 @@ function pickUtil(v){
     note.hidden = (v==='yes' || !v);
   }
 }
+// True when the chosen package already bundles this add-on (so it can't be bought again).
+function pkgIncludes(id){
+  const p = PACKAGES.find(x=>x.id===state.pkg);
+  return !!(p && p.includes && p.includes.includes(id));
+}
 function toggleAddon(id){
+  if(pkgIncludes(id)) return;            // already part of the chosen package — not a paid extra
   const i=state.addons.indexOf(id);
   if(i>-1) state.addons.splice(i,1); else state.addons.push(id);
   render();
@@ -577,7 +589,7 @@ function toggleAddon(id){
 function total(){
   let t = PACKAGES.find(p=>p.id===state.pkg)?.price || 0;
   t += SIZES.find(s=>s.id===state.size)?.price || 0;
-  state.addons.forEach(a=> t += ADDONS.find(x=>x.id===a).price);
+  state.addons.forEach(a=>{ if(!pkgIncludes(a)) t += ADDONS.find(x=>x.id===a).price; });
   return t;
 }
 function go(step){ state.step=step; render(); if(step===3) loadSlots(); }
@@ -603,6 +615,8 @@ function render(){
     `;
   }
   else if(state.step===2){
+    state.addons = state.addons.filter(id=>!pkgIncludes(id));   // drop anything the chosen package already covers
+    const pkgNm = PACKAGES.find(x=>x.id===state.pkg)?.name || 'this package';
     inner.innerHTML = topBar(2) + `
       <h3>What are you driving?</h3>
       <p class="field-intro">Bigger or muddier rigs take more time, so pick the closest match.</p>
@@ -613,12 +627,17 @@ function render(){
         </button>`).join('')}
       <h3>Want to add anything?</h3>
       <p class="field-intro">Optional — tap to add, or just keep going.</p>
-      ${ADDONS.map(a=>`
-        <label class="addon ${state.addons.includes(a.id)?'sel':''}">
-          <input type="checkbox" ${state.addons.includes(a.id)?'checked':''} onchange="toggleAddon('${a.id}')">
-          <span class="a-name">${a.name}</span>
-          <span class="a-price">+$${a.price}</span>
-        </label>`).join('')}
+      ${ADDONS.map(a=> pkgIncludes(a.id)
+        ? `<div class="addon included" aria-disabled="true">
+            <span class="addon-check" aria-hidden="true"></span>
+            <span class="a-name">${a.name}</span>
+            <span class="a-incl">Comes with ${pkgNm}</span>
+          </div>`
+        : `<label class="addon ${state.addons.includes(a.id)?'sel':''}">
+            <input type="checkbox" ${state.addons.includes(a.id)?'checked':''} onchange="toggleAddon('${a.id}')">
+            <span class="a-name">${a.name}</span>
+            <span class="a-price">+$${a.price}</span>
+          </label>`).join('')}
       <button class="btn" onclick="go(3)">Continue · $${total()}</button>
       <button class="back" onclick="go(1)">← Back</button>
     `;

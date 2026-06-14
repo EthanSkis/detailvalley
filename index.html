@@ -298,7 +298,7 @@
     .section-sub{font-size:1.06rem;margin-bottom:46px}
 
     /* Packages sit side-by-side instead of stacking down a thin column */
-    .pkgs{display:grid;grid-template-columns:repeat(3,1fr);gap:22px;align-items:stretch}
+    .pkgs{display:grid;grid-template-columns:repeat(2,1fr);gap:22px;align-items:stretch;max-width:720px;margin:0 auto}
     .pkg{margin-bottom:0}
     .pkg.featured{transform:translateY(-10px)}
 
@@ -373,18 +373,6 @@
       <button class="pkg-btn" onclick="openBooking('full')">Book Full Detail — $150</button>
     </div>
 
-    <div class="pkg">
-      <div class="pkg-head"><span class="pkg-name">Showroom</span><span class="pkg-price">$275</span></div>
-      <ul>
-        <li>Everything in Full Detail</li>
-        <li>One-step paint correction for a deep shine</li>
-        <li>Sealant or ceramic spray for lasting protection</li>
-        <li>Leather cleaned &amp; conditioned</li>
-        <li>Interior shampoo &amp; extraction (seats + carpets)</li>
-        <li>Wheels sealed &amp; undercarriage salt-flush</li>
-      </ul>
-      <button class="pkg-btn" onclick="openBooking('show')">Book Showroom — $275</button>
-    </div>
     </div>
   </div>
 </section>
@@ -515,14 +503,11 @@ async function availableSlots(){
 const PACKAGES = [
   {id:'express', name:'Express', price:60, meta:'Wash, vacuum, windows · ~1 hr'},
   {id:'full',    name:'Full Detail', price:150, meta:'Deep clean, clay, wax · ~3 hrs'},
-  {id:'show',    name:'Showroom', price:275, meta:'Paint correction, sealant · ~5 hrs'},
 ];
 const ADDONS = [
   {id:'pet', name:'Pet hair removal', price:35},
   {id:'seats', name:'Seat shampoo', price:45},
   {id:'engine', name:'Engine bay clean', price:30},
-  {id:'headlight', name:'Headlight restoration', price:40},
-  {id:'ceramic', name:'Ceramic coating upgrade', price:120},
   {id:'winter', name:'Winter salt / undercarriage flush', price:25},
 ];
 // Vehicle size surcharge — bigger / dirtier rigs take more time. 'standard' is the default (no charge).

@@ -210,6 +210,8 @@
   .slot-btn.sel{border-color:var(--blue);background:var(--mist)}
   .slot-chosen{font-family:'Sora',sans-serif;font-weight:600;color:var(--blue);margin:-6px 0 16px}
   .form-err{color:#c0392b;font-size:.9rem;margin:2px 0 12px}
+  .field select{width:100%;padding:13px 14px;border:1.5px solid var(--line);border-radius:8px;font-size:1rem;background:var(--white);font-family:inherit;color:var(--ink);appearance:none;-webkit-appearance:none}
+  .field select:focus{outline:none;border-color:var(--blue)}
   .hp{position:absolute;left:-9999px;width:1px;height:1px;opacity:0}
 
   /* ---------- DESKTOP / WIDER SCREENS ---------- */
@@ -451,13 +453,14 @@ const ADDONS = [
   {id:'engine', name:'Engine bay clean', price:30},
 ];
 
-let state = {step:1, pkg:null, addons:[], slot:null, name:'', phone:'', hp:false};
+let state = {step:1, pkg:null, addons:[], slot:null, name:'', phone:'', address:'', town:'', hp:false};
 let slotCache = null;
 let submitting = false;
 const modal = document.getElementById('modal');
 const inner = document.getElementById('modalInner');
+const TOWNS = ['McCall','Cascade','Donnelly','Other'];
 
-function openBooking(){ state={step:1,pkg:null,addons:[],slot:null,name:'',phone:'',hp:false}; slotCache=null; submitting=false; modal.classList.add('open'); render(); }
+function openBooking(){ state={step:1,pkg:null,addons:[],slot:null,name:'',phone:'',address:'',town:'',hp:false}; slotCache=null; submitting=false; modal.classList.add('open'); render(); }
 function closeBooking(){ modal.classList.remove('open'); }
 modal.addEventListener('click', e=>{ if(e.target===modal) closeBooking(); });
 
@@ -514,6 +517,11 @@ function render(){
       <p class="slot-chosen">${state.slot ? fmtDay(state.slot.instant)+' · '+fmtTime(state.slot.instant) : ''}</p>
       <div class="field"><label>Name</label><input id="f-name" value="${esc(state.name)}" placeholder="Jordan Smith"></div>
       <div class="field"><label>Phone</label><input id="f-phone" type="tel" value="${esc(state.phone)}" placeholder="(555) 000-0000"></div>
+      <div class="field"><label>Service address</label><input id="f-address" value="${esc(state.address)}" placeholder="123 Main St"></div>
+      <div class="field"><label>Town</label><select id="f-town">
+        <option value="" ${state.town?'':'selected'} disabled>Select your town…</option>
+        ${TOWNS.map(t=>`<option value="${t}" ${state.town===t?'selected':''}>${t}</option>`).join('')}
+      </select></div>
       <input type="text" id="f-company" class="hp" tabindex="-1" autocomplete="off" aria-hidden="true">
       <p id="detailErr" class="form-err" hidden></p>
       <button class="btn" onclick="saveDetails()">Review booking</button>
@@ -528,6 +536,7 @@ function render(){
         <div class="summary-row"><span>${p.name}</span><span>$${p.price}</span></div>
         ${state.addons.map(a=>{const x=ADDONS.find(z=>z.id===a);return `<div class="summary-row"><span class="muted">+ ${x.name}</span><span class="muted">$${x.price}</span></div>`}).join('')}
         <div class="summary-row"><span class="muted">${fmtDay(state.slot.instant)} · ${fmtTime(state.slot.instant)}</span><span class="muted">${esc(state.name)}</span></div>
+        <div class="summary-row"><span class="muted">${esc(state.address)}, ${esc(state.town)}</span><span class="muted">${esc(state.phone)}</span></div>
         <div class="summary-row total"><span>Total</span><span>$${total()}</span></div>
       </div>
       <p id="confirmErr" class="form-err" hidden></p>
@@ -586,10 +595,14 @@ function showErr(el,msg){ if(el){ el.textContent=msg; el.hidden=false; } }
 function saveDetails(){
   state.name = document.getElementById('f-name').value.trim();
   state.phone = document.getElementById('f-phone').value.trim();
+  state.address = document.getElementById('f-address').value.trim();
+  state.town = document.getElementById('f-town').value;
   state.hp = !!(document.getElementById('f-company') && document.getElementById('f-company').value);
   const err = document.getElementById('detailErr');
   if(!state.name) return showErr(err,'Please enter your name.');
   if(state.phone.replace(/\D/g,'').length < 7) return showErr(err,'Please enter a valid phone number.');
+  if(state.address.length < 5) return showErr(err,'Please enter the address we should come to.');
+  if(!state.town) return showErr(err,'Please choose your town.');
   go(5);
 }
 
@@ -607,6 +620,8 @@ async function submitBooking(){
     addons: state.addons.map(a=>ADDONS.find(x=>x.id===a).name),
     customer_name: state.name,
     customer_phone: state.phone,
+    address: state.address,
+    town: state.town,
     total_usd: total(),
     status: 'pending'
   });

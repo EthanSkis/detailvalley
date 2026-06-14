@@ -67,7 +67,7 @@ slots that aren't already taken.
 
 **See your bookings:** Supabase dashboard → your project → **Table editor →
 `bookings`**. Each row has the package, add-ons, customer name + phone, the
-chosen slot, and total. Set a booking's `status` to `cancelled` to free that
+service address + town, the chosen slot, and total. Set a booking's `status` to `cancelled` to free that
 slot back up, or `confirmed` / `completed` to track it.
 
 **How availability works:**

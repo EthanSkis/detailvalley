@@ -298,7 +298,7 @@
     .section-sub{font-size:1.06rem;margin-bottom:46px}
 
     /* Packages sit side-by-side instead of stacking down a thin column */
-    .pkgs{display:grid;grid-template-columns:repeat(2,1fr);gap:22px;align-items:stretch;max-width:720px;margin:0 auto}
+    .pkgs{display:grid;grid-template-columns:repeat(3,1fr);gap:22px;align-items:stretch}
     .pkg{margin-bottom:0}
     .pkg.featured{transform:translateY(-10px)}
 
@@ -371,6 +371,20 @@
         <li>Streak-free glass &amp; plastics conditioned</li>
       </ul>
       <button class="pkg-btn" onclick="openBooking('full')">Book Full Detail — $150</button>
+    </div>
+
+    <div class="pkg">
+      <div class="pkg-head"><span class="pkg-name">Signature</span><span class="pkg-price">$210</span></div>
+      <ul>
+        <li>Everything in Full Detail</li>
+        <li>Seats &amp; carpets shampooed &amp; extracted</li>
+        <li>Engine bay cleaned &amp; dressed</li>
+        <li>Double coat of hand wax — deeper gloss, longer protection</li>
+        <li>Vents, buttons &amp; interior trim detailed</li>
+        <li>Tires &amp; exterior trim dressed</li>
+        <li>Finished with a fresh scent</li>
+      </ul>
+      <button class="pkg-btn" onclick="openBooking('signature')">Book Signature — $210</button>
     </div>
 
     </div>
@@ -501,8 +515,9 @@ async function availableSlots(){
 }
 
 const PACKAGES = [
-  {id:'express', name:'Express', price:60, meta:'Wash, vacuum, windows · ~1 hr'},
-  {id:'full',    name:'Full Detail', price:150, meta:'Deep clean, clay, wax · ~3 hrs'},
+  {id:'express',   name:'Express', price:60, meta:'Wash, vacuum, windows · ~1 hr'},
+  {id:'full',      name:'Full Detail', price:150, meta:'Deep clean, clay, wax · ~3 hrs'},
+  {id:'signature', name:'Signature', price:210, meta:'Everything — seats, engine bay, double wax · ~4½ hrs'},
 ];
 const ADDONS = [
   {id:'pet', name:'Pet hair removal', price:35},

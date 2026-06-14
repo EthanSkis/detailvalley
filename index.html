@@ -174,6 +174,9 @@
   .opt .o-name{font-family:'Sora',sans-serif;font-weight:700;font-size:1.12rem}
   .opt .o-meta{font-size:.92rem;color:var(--slate);display:block;margin-top:4px}
   .opt::after{content:"›";position:absolute;right:18px;top:50%;transform:translateY(-50%);font-family:'Sora',sans-serif;font-size:1.7rem;line-height:1;color:var(--blue)}
+  /* Size options just select (no navigation) — drop the chevron, show a tick when chosen */
+  .opt.size-opt::after{content:none}
+  .opt.size-opt.sel::after{content:"✓";font-size:1.25rem;color:var(--blue)}
 
   .addon{display:flex;align-items:center;gap:14px;background:var(--white);border:2px solid var(--line);border-radius:12px;padding:16px;margin-bottom:11px;cursor:pointer}
   .addon.sel{border-color:var(--blue);background:var(--mist)}
@@ -393,7 +396,7 @@
         <a href="mailto:ethan@detailvalley.com">ethan@detailvalley.com</a>
       </div>
       <div class="socials">
-        <a href="#" aria-label="Facebook" title="Facebook">
+        <a href="https://www.facebook.com/detailvalleyid" target="_blank" rel="noopener" aria-label="Facebook" title="Facebook">
           <svg viewBox="0 0 24 24"><path d="M22 12a10 10 0 1 0-11.6 9.9v-7H7.9V12h2.5V9.8c0-2.5 1.5-3.9 3.8-3.9 1.1 0 2.2.2 2.2.2v2.5h-1.3c-1.2 0-1.6.8-1.6 1.6V12h2.8l-.4 2.9h-2.4v7A10 10 0 0 0 22 12z"/></svg>
         </a>
         <a href="https://instagram.com/detailvalleyid" target="_blank" rel="noopener" aria-label="Instagram" title="Instagram">
@@ -509,8 +512,14 @@ const ADDONS = [
   {id:'ceramic', name:'Ceramic coating upgrade', price:120},
   {id:'winter', name:'Winter salt / undercarriage flush', price:25},
 ];
+// Vehicle size surcharge — bigger / dirtier rigs take more time. 'standard' is the default (no charge).
+const SIZES = [
+  {id:'standard', name:'Car / sedan / coupe', meta:'No extra charge', price:0},
+  {id:'midsize',  name:'SUV / crossover / crew-cab truck', meta:'+$20 · more space to cover', price:20},
+  {id:'oversize', name:'Oversized or extra-dirty', meta:'+$40 · 3-row, lifted, heavy mud', price:40},
+];
 
-function freshState(){ return {step:1, pkg:null, addons:[], slot:null, calDate:null, name:'', phone:'', address:'', town:'', hp:false}; }
+function freshState(){ return {step:1, pkg:null, size:'standard', addons:[], slot:null, calDate:null, name:'', phone:'', address:'', town:'', hp:false}; }
 let state = freshState();
 let slotCache = null;
 let submitting = false;
@@ -531,6 +540,7 @@ modal.addEventListener('click', e=>{ if(e.target===modal) closeBooking(); });
 document.addEventListener('keydown', e=>{ if(e.key==='Escape' && modal.classList.contains('open')) closeBooking(); });
 
 function pickPkg(id){ state.pkg=id; go(2); }
+function pickSize(id){ state.size=id; render(); }
 function toggleAddon(id){
   const i=state.addons.indexOf(id);
   if(i>-1) state.addons.splice(i,1); else state.addons.push(id);
@@ -538,6 +548,7 @@ function toggleAddon(id){
 }
 function total(){
   let t = PACKAGES.find(p=>p.id===state.pkg)?.price || 0;
+  t += SIZES.find(s=>s.id===state.size)?.price || 0;
   state.addons.forEach(a=> t += ADDONS.find(x=>x.id===a).price);
   return t;
 }
@@ -565,6 +576,13 @@ function render(){
   }
   else if(state.step===2){
     inner.innerHTML = topBar(2) + `
+      <h3>What are you driving?</h3>
+      <p class="field-intro">Bigger or muddier rigs take more time, so pick the closest match.</p>
+      ${SIZES.map(s=>`
+        <button class="opt size-opt ${state.size===s.id?'sel':''}" onclick="pickSize('${s.id}')">
+          <span class="o-name">${s.name}</span>
+          <span class="o-meta">${s.meta}</span>
+        </button>`).join('')}
       <h3>Want to add anything?</h3>
       <p class="field-intro">Optional — tap to add, or just keep going.</p>
       ${ADDONS.map(a=>`
@@ -607,10 +625,12 @@ function render(){
   }
   else if(state.step===5){
     const p = PACKAGES.find(x=>x.id===state.pkg);
+    const sz = SIZES.find(s=>s.id===state.size);
     inner.innerHTML = topBar(5) + `
       <h3>Does this look right?</h3>
       <div class="summary">
         <div class="summary-row"><span>${p.name}</span><span>$${p.price}</span></div>
+        ${sz && sz.price ? `<div class="summary-row"><span class="muted">+ ${sz.name}</span><span class="muted">$${sz.price}</span></div>` : ''}
         ${state.addons.map(a=>{const x=ADDONS.find(z=>z.id===a);return `<div class="summary-row"><span class="muted">+ ${x.name}</span><span class="muted">$${x.price}</span></div>`}).join('')}
         <div class="summary-row"><span class="muted">${fmtDay(state.slot.instant)} · ${fmtTime(state.slot.instant)}</span><span class="muted">${esc(state.name)}</span></div>
         <div class="summary-row"><span class="muted">${esc(state.address)}, ${esc(state.town)}</span><span class="muted">${esc(state.phone)}</span></div>
@@ -775,9 +795,10 @@ async function submitBooking(){
   if(state.hp){ go(6); return; }                       // honeypot: bot, skip silently
   if(!sb) return showErr(err, `Booking is offline right now — call or text ${BIZ_PHONE}.`);
   submitting = true; if(btn){ btn.disabled=true; btn.textContent='Booking…'; }
+  const sz = SIZES.find(s=>s.id===state.size);
   const { error } = await sb.from('bookings').insert({
     slot_start: state.slot.iso,
-    package: PACKAGES.find(p=>p.id===state.pkg).name,
+    package: PACKAGES.find(p=>p.id===state.pkg).name + (sz ? ` · ${sz.name}` : ''),
     addons: state.addons.map(a=>ADDONS.find(x=>x.id===a).name),
     customer_name: state.name,
     customer_phone: state.phone,

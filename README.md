@@ -56,8 +56,9 @@ A few things in `index.html` are still placeholders:
 
 - **Phone number** — set to `(208) 315-1420` in the footer. (The booking form's phone field keeps `(555) 000-0000` as an example for customers to fill in.)
 - **Email** — `ethan@detailvalley.com` (make sure that inbox actually exists / forwards to you).
-- **Social links** — Facebook and TikTok point to `#`; Instagram points to
-  `detailvalleyid`. Turn the others on once those accounts exist and have a post or two.
+- **Social links** — Instagram and TikTok point to `@detailvalleyid`; Facebook
+  points to the page profile (`facebook.com/profile.php?id=61590927205017`).
+  Make sure each account has a post or two before promoting it.
 - **Booking form** — live: it writes real bookings to Supabase (see below).
   Nothing more required, though you may want to add email/SMS alerts on new bookings.
 - **Prices & package details** — confirm against your real time-per-car before launch.

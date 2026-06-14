@@ -83,5 +83,11 @@ meant to be public. Row-level security lets visitors only *create* a booking and
 *see which slots are taken*; nobody can read other customers' names or phone
 numbers through the public API. Only you, via the dashboard, can read them.
 
-**Optional next step:** get notified on new bookings — a Supabase Database
-Webhook or a small Edge Function can email or text you whenever a row is inserted.
+**Email alerts:** every new booking emails the owner automatically. A Postgres
+trigger (`notify_booking` on `public.bookings`) sends the booking details to
+**Resend** via the `pg_net` extension the moment a row is inserted. The Resend
+API key is stored in **Supabase Vault** — never in this repo or the site code.
+Alerts go to `ethan@detailvalley.com`, sent from `bookings@detailvalley.com`
+(the verified `detailvalley.com` domain). To change either address, edit `v_to`
+or `v_from` in the `notify_booking()` function. Sending is best-effort and never
+blocks a booking.

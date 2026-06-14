@@ -87,7 +87,7 @@ numbers through the public API. Only you, via the dashboard, can read them.
 trigger (`notify_booking` on `public.bookings`) sends the booking details to
 **Resend** via the `pg_net` extension the moment a row is inserted. The Resend
 API key is stored in **Supabase Vault** — never in this repo or the site code.
-Alerts currently go to `ethangardner298@gmail.com`, sent from `onboarding@resend.dev`.
-To change the recipient, edit `v_to` in the `notify_booking()` function; to send
-*from* `bookings@detailvalley.com`, verify the domain in Resend. Sending is
-best-effort and never blocks a booking.
+Alerts go to `ethan@detailvalley.com`, sent from `bookings@detailvalley.com`
+(the verified `detailvalley.com` domain). To change either address, edit `v_to`
+or `v_from` in the `notify_booking()` function. Sending is best-effort and never
+blocks a booking.

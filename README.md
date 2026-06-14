@@ -4,9 +4,12 @@ Marketing + booking site for **Detail Valley**, a mobile car detailing business
 serving Valley County, Idaho (McCall · Cascade · Donnelly).
 
 It's a single-page, conversion-focused static site with a built-in multi-step
-booking flow (package → add-ons → pick a slot → details → confirm) that saves
-real bookings to a Supabase database. No build step — just HTML, CSS, and a
-little vanilla JavaScript (plus the Supabase client from a CDN).
+booking flow (package → add-ons → pick a day & time on a calendar → details →
+confirm) that saves real bookings to a Supabase database. The flow is built
+mobile-first with large tap targets, a step progress bar, an auto-formatting
+phone field, and a real month-grid calendar so it's easy to use one-handed on a
+phone. No build step — just HTML, CSS, and a little vanilla JavaScript (plus the
+Supabase client from a CDN).
 
 ## The site
 
@@ -75,6 +78,9 @@ slot back up, or `confirmed` / `completed` to track it.
   ~3 weeks. Edit `DAY_SLOTS` / `DAYS_AHEAD` near the top of the `<script>` in
   `index.html` to change the times, the number of slots per day, or how far
   ahead people can book.
+- Customers see a month-grid **calendar**: days with openings are highlighted
+  (with a dot), fully-booked or out-of-range days are greyed out, and tapping a
+  day reveals that day's available times.
 - Currently **2 slots/day** (a morning and an afternoon), Mon–Sat; Sunday closed.
 - A unique database index makes double-booking the same slot impossible.
 

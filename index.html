@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Detail Valley — Mobile Car Detailing, Valley County</title>
 <link rel="icon" type="image/svg+xml" href="logo.svg">
 <link rel="alternate icon" href="logo.png">
@@ -165,33 +165,38 @@
   @media(min-width:520px){.modal-bg{align-items:center}.modal{border-radius:10px}}
   .modal-top{display:flex;justify-content:space-between;align-items:center}
   .step-label{font-family:'Sora',sans-serif;font-weight:600;font-size:.74rem;letter-spacing:.1em;text-transform:uppercase;color:var(--copper-2)}
-  .close{background:none;border:none;font-size:1.7rem;line-height:1;cursor:pointer;color:var(--slate)}
-  .modal h3{font-family:'Sora',sans-serif;font-size:1.35rem;font-weight:600;margin:8px 0 18px}
+  .close{background:none;border:none;font-size:1.9rem;line-height:1;cursor:pointer;color:var(--slate);width:44px;height:44px;display:flex;align-items:center;justify-content:center;margin:-8px -8px 0 0;border-radius:8px}
+  .close:hover{background:var(--mist);color:var(--navy)}
+  .modal h3{font-family:'Sora',sans-serif;font-size:1.45rem;font-weight:700;margin:14px 0 18px}
+  .field-intro{color:var(--slate);font-size:.96rem;margin:-12px 0 18px}
 
-  .opt{display:block;width:100%;text-align:left;background:var(--white);border:1.5px solid var(--line);border-radius:9px;padding:14px 16px;margin-bottom:10px;cursor:pointer;font-family:'Inter',sans-serif;font-size:1rem;transition:border .12s,background .12s}
+  .opt{display:block;width:100%;text-align:left;background:var(--white);border:2px solid var(--line);border-radius:12px;padding:18px 46px 18px 18px;margin-bottom:12px;cursor:pointer;font-family:'Inter',sans-serif;font-size:1.05rem;position:relative;transition:border .12s,background .12s}
   .opt:hover{border-color:var(--blue)}
   .opt.sel{border-color:var(--blue);background:var(--mist)}
-  .opt .o-name{font-family:'Sora',sans-serif;font-weight:600}
-  .opt .o-meta{font-size:.86rem;color:var(--slate);display:block;margin-top:2px}
+  .opt .o-name{font-family:'Sora',sans-serif;font-weight:700;font-size:1.12rem}
+  .opt .o-meta{font-size:.92rem;color:var(--slate);display:block;margin-top:4px}
+  .opt::after{content:"›";position:absolute;right:18px;top:50%;transform:translateY(-50%);font-family:'Sora',sans-serif;font-size:1.7rem;line-height:1;color:var(--blue)}
 
-  .addon{display:flex;align-items:center;gap:12px;background:var(--white);border:1.5px solid var(--line);border-radius:9px;padding:12px 14px;margin-bottom:9px;cursor:pointer}
+  .addon{display:flex;align-items:center;gap:14px;background:var(--white);border:2px solid var(--line);border-radius:12px;padding:16px;margin-bottom:11px;cursor:pointer}
   .addon.sel{border-color:var(--blue);background:var(--mist)}
-  .addon input{width:20px;height:20px;accent-color:var(--blue)}
-  .addon .a-name{font-weight:600;font-size:.95rem}
-  .addon .a-price{margin-left:auto;font-family:'Sora',sans-serif;font-weight:700;color:var(--blue)}
+  .addon input{width:26px;height:26px;accent-color:var(--blue);flex:none}
+  .addon .a-name{font-weight:600;font-size:1.05rem}
+  .addon .a-price{margin-left:auto;font-family:'Sora',sans-serif;font-weight:700;font-size:1.05rem;color:var(--blue)}
 
-  .field{margin-bottom:14px}
-  .field label{display:block;font-family:'Sora',sans-serif;font-weight:600;font-size:.8rem;margin-bottom:6px;color:var(--ink)}
-  .field input{width:100%;padding:13px 14px;border:1.5px solid var(--line);border-radius:8px;font-size:1rem;background:var(--white);font-family:inherit}
-  .field input:focus{outline:none;border-color:var(--blue)}
+  .field{margin-bottom:16px}
+  .field label{display:block;font-family:'Sora',sans-serif;font-weight:600;font-size:.95rem;margin-bottom:8px;color:var(--ink)}
+  .field input{width:100%;padding:15px 16px;border:2px solid var(--line);border-radius:10px;font-size:1.05rem;background:var(--white);font-family:inherit}
+  .field input:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 3px rgba(43,108,176,.15)}
+  .field .hint{font-size:.85rem;color:var(--slate);margin-top:6px}
 
   .summary{background:var(--mist);border:1px solid var(--line);border-radius:9px;padding:16px;margin-bottom:18px}
   .summary-row{display:flex;justify-content:space-between;padding:5px 0;font-size:.95rem}
   .summary-row.total{border-top:1px solid var(--line);margin-top:8px;padding-top:12px;font-family:'Sora',sans-serif;font-weight:700;font-size:1.12rem}
   .summary-row .muted{color:var(--slate)}
 
-  .modal .btn{width:100%;text-align:center;margin-top:6px}
-  .back{background:none;border:none;color:var(--slate);font-size:.9rem;cursor:pointer;margin-top:14px;display:block;width:100%;text-align:center}
+  .modal .btn{width:100%;text-align:center;margin-top:10px;font-size:1.12rem;padding:17px 24px}
+  .back{background:none;border:none;color:var(--slate);font-size:1rem;font-weight:600;cursor:pointer;margin-top:12px;display:block;width:100%;text-align:center;padding:12px}
+  .back:hover{color:var(--navy)}
 
   .done{text-align:center;padding:14px 0}
   .done .tick{width:62px;height:62px;border-radius:50%;background:var(--blue);margin:0 auto 18px;position:relative}
@@ -200,19 +205,64 @@
   .done p{color:var(--slate);font-size:.95rem;margin-bottom:6px}
 
   /* ---------- BOOKING SLOTS ---------- */
-  .slot-status{color:var(--slate);font-size:.95rem;padding:6px 0 12px}
+  .slot-status{color:var(--slate);font-size:1rem;padding:10px 0 14px;text-align:center}
   .slot-status a{color:var(--blue);font-weight:600}
-  .slot-day{margin-bottom:16px}
-  .slot-date{font-family:'Sora',sans-serif;font-weight:600;font-size:.78rem;color:var(--slate);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px}
-  .slot-times{display:flex;flex-wrap:wrap;gap:8px}
-  .slot-btn{font-family:'Sora',sans-serif;font-weight:600;font-size:.95rem;color:var(--navy);background:var(--white);border:1.5px solid var(--line);border-radius:8px;padding:10px 16px;cursor:pointer;transition:border .12s,background .12s}
-  .slot-btn:hover{border-color:var(--blue)}
-  .slot-btn.sel{border-color:var(--blue);background:var(--mist)}
   .slot-chosen{font-family:'Sora',sans-serif;font-weight:600;color:var(--blue);margin:-6px 0 16px}
-  .form-err{color:#c0392b;font-size:.9rem;margin:2px 0 12px}
-  .field select{width:100%;padding:13px 14px;border:1.5px solid var(--line);border-radius:8px;font-size:1rem;background:var(--white);font-family:inherit;color:var(--ink);appearance:none;-webkit-appearance:none}
-  .field select:focus{outline:none;border-color:var(--blue)}
+  .form-err{color:#c0392b;font-size:.95rem;font-weight:600;margin:4px 0 12px;background:#fdecea;border:1px solid #f5c6c0;border-radius:8px;padding:10px 12px}
+  .field select{width:100%;padding:15px 16px;border:2px solid var(--line);border-radius:10px;font-size:1.05rem;background:var(--white) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%233f566a' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E") no-repeat right 16px center;font-family:inherit;color:var(--ink);appearance:none;-webkit-appearance:none}
+  .field select:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 3px rgba(43,108,176,.15)}
   .hp{position:absolute;left:-9999px;width:1px;height:1px;opacity:0}
+
+  /* ---------- PROGRESS STEPS ---------- */
+  .steps{display:flex;gap:6px;margin:14px 0 20px}
+  .steps .seg{height:6px;flex:1;border-radius:99px;background:var(--line);transition:background .25s ease}
+  .steps .seg.on{background:var(--blue)}
+
+  /* ---------- CALENDAR ---------- */
+  .cal{border:2px solid var(--line);border-radius:14px;padding:14px 14px 18px}
+  .cal-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+  .cal-title{font-family:'Sora',sans-serif;font-weight:700;font-size:1.12rem;color:var(--navy)}
+  .cal-nav{width:46px;height:46px;flex:none;border:2px solid var(--line);background:var(--white);border-radius:11px;font-size:1.5rem;line-height:1;color:var(--navy);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:border .12s,background .12s}
+  .cal-nav:hover:not(:disabled){border-color:var(--blue);background:var(--mist)}
+  .cal-nav:disabled{opacity:.28;cursor:default}
+  .cal-dow{display:grid;grid-template-columns:repeat(7,1fr);gap:5px;margin-bottom:7px}
+  .cal-dow span{text-align:center;font-size:.72rem;font-weight:700;color:var(--slate);text-transform:uppercase;letter-spacing:.02em}
+  .cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:5px}
+  .cal-cell{aspect-ratio:1/1;border:2px solid transparent;background:transparent;border-radius:11px;font-family:'Sora',sans-serif;font-weight:600;font-size:1.02rem;color:#9fb0be;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;padding:0;cursor:default}
+  .cal-cell.empty{visibility:hidden}
+  .cal-cell.avail{color:var(--navy);background:var(--mist);border-color:var(--blue);cursor:pointer}
+  .cal-cell.avail:hover{background:#dbe7f2}
+  .cal-cell.sel{background:var(--blue);border-color:var(--blue);color:#fff;cursor:pointer}
+  .cal-cell .dot{width:5px;height:5px;border-radius:50%;background:var(--copper);line-height:0}
+  .cal-cell.sel .dot{background:#fff}
+  .cal-hint{text-align:center;font-size:.86rem;color:var(--slate);margin-top:14px}
+
+  .cal-times{margin-top:22px}
+  .cal-times-h{font-family:'Sora',sans-serif;font-weight:700;font-size:1.05rem;color:var(--ink);margin-bottom:12px;text-align:center}
+  .time-btn{display:flex;align-items:center;gap:12px;width:100%;border:2px solid var(--line);background:var(--white);border-radius:12px;padding:18px;margin-bottom:11px;cursor:pointer;text-align:left;transition:border .12s,background .12s}
+  .time-btn:hover{border-color:var(--blue)}
+  .time-btn.sel{border-color:var(--blue);background:var(--mist)}
+  .time-btn .t-time{font-family:'Sora',sans-serif;font-weight:700;font-size:1.2rem;color:var(--navy)}
+  .time-btn .t-label{margin-left:auto;font-size:.82rem;font-weight:700;letter-spacing:.02em;color:var(--white);background:var(--copper);padding:5px 13px;border-radius:99px}
+
+  /* ---------- PACKAGE CHOOSE BUTTON ---------- */
+  .pkg-btn{display:block;width:100%;margin-top:20px;background:var(--navy);color:var(--white);border:none;border-radius:9px;padding:15px;font-family:'Sora',sans-serif;font-weight:700;font-size:1.02rem;cursor:pointer;transition:background .12s,transform .12s}
+  .pkg-btn:hover{background:var(--blue);transform:translateY(-1px)}
+  .pkg.featured .pkg-btn{background:var(--copper)}
+  .pkg.featured .pkg-btn:hover{background:var(--copper-2)}
+
+  /* ---------- STICKY MOBILE BOOK BAR ---------- */
+  body.modal-open{overflow:hidden}
+  .mobile-cta{display:none}
+  @media(max-width:819px){
+    .mobile-cta{position:fixed;left:0;right:0;bottom:0;z-index:40;display:block;
+      padding:12px 16px calc(12px + env(safe-area-inset-bottom));
+      background:rgba(255,255,255,.97);backdrop-filter:blur(8px);
+      border-top:1px solid var(--line);box-shadow:0 -6px 22px rgba(15,44,68,.1)}
+    .mobile-cta .btn{display:block;width:100%;text-align:center;font-size:1.12rem;padding:16px}
+    body{padding-bottom:88px}
+    body.modal-open .mobile-cta{display:none}
+  }
 
   /* ---------- DESKTOP / WIDER SCREENS ---------- */
   @media (min-width:820px){
@@ -290,6 +340,7 @@
         <li>Interior vacuum</li>
         <li>Windows in &amp; out</li>
       </ul>
+      <button class="pkg-btn" onclick="openBooking('express')">Book Express — $60</button>
     </div>
 
     <div class="pkg featured">
@@ -300,6 +351,7 @@
         <li>Clay bar &amp; wax finish</li>
         <li>Door jambs &amp; trim dressed</li>
       </ul>
+      <button class="pkg-btn" onclick="openBooking('full')">Book Full Detail — $150</button>
     </div>
 
     <div class="pkg">
@@ -310,6 +362,7 @@
         <li>Sealant for lasting protection</li>
         <li>Leather cleaned &amp; conditioned</li>
       </ul>
+      <button class="pkg-btn" onclick="openBooking('show')">Book Showroom — $275</button>
     </div>
     </div>
   </div>
@@ -363,6 +416,10 @@
   </div>
   <div class="foot-bottom">© 2026 Detail Valley · Valley County, ID</div>
 </footer>
+
+<div class="mobile-cta">
+  <button class="btn" onclick="openBooking()">Book a detail</button>
+</div>
 
 <div class="modal-bg" id="modal" role="dialog" aria-modal="true" aria-label="Booking">
   <div class="modal" id="modalInner"></div>
@@ -453,16 +510,25 @@ const ADDONS = [
   {id:'engine', name:'Engine bay clean', price:30},
 ];
 
-let state = {step:1, pkg:null, addons:[], slot:null, name:'', phone:'', address:'', town:'', hp:false};
+function freshState(){ return {step:1, pkg:null, addons:[], slot:null, calDate:null, name:'', phone:'', address:'', town:'', hp:false}; }
+let state = freshState();
 let slotCache = null;
 let submitting = false;
 const modal = document.getElementById('modal');
 const inner = document.getElementById('modalInner');
 const TOWNS = ['McCall','Cascade','Donnelly','Other'];
 
-function openBooking(){ state={step:1,pkg:null,addons:[],slot:null,name:'',phone:'',address:'',town:'',hp:false}; slotCache=null; submitting=false; modal.classList.add('open'); render(); }
-function closeBooking(){ modal.classList.remove('open'); }
+function openBooking(pre){
+  state = freshState();
+  slotCache = null; submitting = false;
+  if(pre && PACKAGES.some(p=>p.id===pre)){ state.pkg = pre; state.step = 2; }
+  document.body.classList.add('modal-open');
+  modal.classList.add('open');
+  render();
+}
+function closeBooking(){ document.body.classList.remove('modal-open'); modal.classList.remove('open'); }
 modal.addEventListener('click', e=>{ if(e.target===modal) closeBooking(); });
+document.addEventListener('keydown', e=>{ if(e.key==='Escape' && modal.classList.contains('open')) closeBooking(); });
 
 function pickPkg(id){ state.pkg=id; go(2); }
 function toggleAddon(id){
@@ -477,8 +543,14 @@ function total(){
 }
 function go(step){ state.step=step; render(); if(step===3) loadSlots(); }
 function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
-const topBar = n => `<div class="modal-top"><span class="step-label">Step ${n} of 5</span>`+
-  `<button class="close" onclick="closeBooking()" aria-label="Close">×</button></div>`;
+const STEP_LABELS = {1:'Choose your service', 2:'Add extras', 3:'Pick a day & time', 4:'Your details', 5:'Confirm'};
+function topBar(n){
+  const segs = [1,2,3,4,5].map(i=>`<span class="seg ${i<=n?'on':''}"></span>`).join('');
+  return `<div class="modal-top">`+
+    `<span class="step-label">Step ${n} of 5 · ${STEP_LABELS[n]}</span>`+
+    `<button class="close" onclick="closeBooking()" aria-label="Close">×</button></div>`+
+    `<div class="steps" aria-hidden="true">${segs}</div>`;
+}
 
 function render(){
   if(state.step===1){
@@ -493,7 +565,8 @@ function render(){
   }
   else if(state.step===2){
     inner.innerHTML = topBar(2) + `
-      <h3>Add anything extra?</h3>
+      <h3>Want to add anything?</h3>
+      <p class="field-intro">Optional — tap to add, or just keep going.</p>
       ${ADDONS.map(a=>`
         <label class="addon ${state.addons.includes(a.id)?'sel':''}">
           <input type="checkbox" ${state.addons.includes(a.id)?'checked':''} onchange="toggleAddon('${a.id}')">
@@ -506,8 +579,8 @@ function render(){
   }
   else if(state.step===3){
     inner.innerHTML = topBar(3) + `
-      <h3>Pick a time</h3>
-      <div id="slotArea"><p class="slot-status">Loading available times…</p></div>
+      <h3>When works for you?</h3>
+      <div id="slotArea"><p class="slot-status">Loading available days…</p></div>
       <button class="back" onclick="go(2)">← Back</button>
     `;
   }
@@ -515,11 +588,15 @@ function render(){
     inner.innerHTML = topBar(4) + `
       <h3>Your details</h3>
       <p class="slot-chosen">${state.slot ? fmtDay(state.slot.instant)+' · '+fmtTime(state.slot.instant) : ''}</p>
-      <div class="field"><label>Name</label><input id="f-name" value="${esc(state.name)}" placeholder="Jordan Smith"></div>
-      <div class="field"><label>Phone</label><input id="f-phone" type="tel" value="${esc(state.phone)}" placeholder="(555) 000-0000"></div>
-      <div class="field"><label>Service address</label><input id="f-address" value="${esc(state.address)}" placeholder="123 Main St"></div>
+      <div class="field"><label>Your name</label>
+        <input id="f-name" value="${esc(state.name)}" placeholder="Jordan Smith" autocomplete="name" autocapitalize="words" enterkeyhint="next"></div>
+      <div class="field"><label>Phone number</label>
+        <input id="f-phone" type="tel" inputmode="tel" value="${esc(state.phone)}" placeholder="(208) 555-0123" autocomplete="tel" oninput="onPhoneInput(this)" enterkeyhint="next">
+        <p class="hint">We'll text you here to confirm.</p></div>
+      <div class="field"><label>Where should we come?</label>
+        <input id="f-address" value="${esc(state.address)}" placeholder="123 Main St" autocomplete="street-address" autocapitalize="words" enterkeyhint="next"></div>
       <div class="field"><label>Town</label><select id="f-town">
-        <option value="" ${state.town?'':'selected'} disabled>Select your town…</option>
+        <option value="" ${state.town?'':'selected'} disabled>Tap to choose your town…</option>
         ${TOWNS.map(t=>`<option value="${t}" ${state.town===t?'selected':''}>${t}</option>`).join('')}
       </select></div>
       <input type="text" id="f-company" class="hp" tabindex="-1" autocomplete="off" aria-hidden="true">
@@ -531,7 +608,7 @@ function render(){
   else if(state.step===5){
     const p = PACKAGES.find(x=>x.id===state.pkg);
     inner.innerHTML = topBar(5) + `
-      <h3>Confirm your booking</h3>
+      <h3>Does this look right?</h3>
       <div class="summary">
         <div class="summary-row"><span>${p.name}</span><span>$${p.price}</span></div>
         ${state.addons.map(a=>{const x=ADDONS.find(z=>z.id===a);return `<div class="summary-row"><span class="muted">+ ${x.name}</span><span class="muted">$${x.price}</span></div>`}).join('')}
@@ -557,6 +634,13 @@ function render(){
   }
 }
 
+/* ---------- Calendar booking ---------- */
+const CAL_MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+const CAL_DOW = ['Su','Mo','Tu','We','Th','Fr','Sa'];
+let slotsByDate = {};   // 'y-m-d' -> [slot,…]
+let calMonths = [];     // [{y,m}] months that have availability
+let calIdx = 0;
+
 async function loadSlots(){
   const area = () => document.getElementById('slotArea');
   let slots;
@@ -568,28 +652,105 @@ async function loadSlots(){
   if(state.step!==3) return;
   slotCache = slots;
   if(!slots.length){
-    area().innerHTML = `<p class="slot-status">No open slots in the next ${DAYS_AHEAD} days. Call or text <a href="tel:+12083151420">${BIZ_PHONE}</a> and we'll fit you in.</p>`;
+    area().innerHTML = `<p class="slot-status">No open days in the next ${DAYS_AHEAD} days. Call or text <a href="tel:+12083151420">${BIZ_PHONE}</a> and we'll fit you in.</p>`;
     return;
   }
-  const groups = [];
+  // Group every open slot by its Mountain-Time calendar date, and note which months are in play.
+  slotsByDate = {};
+  const monthSet = {};
   slots.forEach(s=>{
-    const label = fmtDay(s.instant);
-    let g = groups[groups.length-1];
-    if(!g || g.label!==label){ g={label, items:[]}; groups.push(g); }
-    g.items.push(s);
+    const {y,m,d} = mtDateParts(s.instant);
+    (slotsByDate[y+'-'+m+'-'+d] ||= []).push(s);
+    monthSet[y*12+(m-1)] = true;
   });
-  area().innerHTML = groups.map(g=>`
-    <div class="slot-day">
-      <div class="slot-date">${g.label}</div>
-      <div class="slot-times">
-        ${g.items.map(s=>`<button class="slot-btn ${state.slot&&state.slot.key===s.key?'sel':''}" onclick="pickSlot(${s.key})">${fmtTime(s.instant)}</button>`).join('')}
-      </div>
-    </div>`).join('');
+  calMonths = Object.keys(monthSet).map(Number).sort((a,b)=>a-b)
+    .map(n=>({y:Math.floor(n/12), m:(n%12)+1}));
+  // Forget a previously chosen day/time if it just got booked out.
+  if(state.slot && !slots.some(s=>s.key===state.slot.key)){ state.slot=null; state.calDate=null; }
+  if(state.calDate && !slotsByDate[state.calDate]){ state.calDate=null; }
+  // Open on the month of the chosen day, otherwise the first month with openings.
+  calIdx = 0;
+  if(state.calDate){
+    const [yy,mm] = state.calDate.split('-').map(Number);
+    const i = calMonths.findIndex(c=>c.y===yy && c.m===mm);
+    if(i>=0) calIdx = i;
+  }
+  drawCalendar();
 }
+
+function drawCalendar(){
+  const area = document.getElementById('slotArea');
+  if(!area || !calMonths.length) return;
+  const cur = calMonths[calIdx];
+  const startDow = new Date(cur.y, cur.m-1, 1).getDay();   // 0=Sun … 6=Sat
+  const daysInMonth = new Date(cur.y, cur.m, 0).getDate();
+
+  let cells = '';
+  for(let i=0;i<startDow;i++) cells += `<div class="cal-cell empty"></div>`;
+  for(let d=1; d<=daysInMonth; d++){
+    const k = cur.y+'-'+cur.m+'-'+d;
+    const avail = !!slotsByDate[k];
+    const sel = state.calDate===k;
+    const cls = 'cal-cell' + (sel?' sel':(avail?' avail':' disabled'));
+    const aria = `${CAL_MONTHS[cur.m-1]} ${d}, ${avail?'has openings':'no openings'}`;
+    cells += avail
+      ? `<button class="${cls}" onclick="pickDate('${k}')" aria-label="${aria}">${d}<span class="dot"></span></button>`
+      : `<div class="${cls}" aria-label="${aria}">${d}</div>`;
+  }
+
+  area.innerHTML = `
+    <div class="cal">
+      <div class="cal-head">
+        <button class="cal-nav" onclick="calMove(-1)" ${calIdx<=0?'disabled':''} aria-label="Previous month">‹</button>
+        <div class="cal-title">${CAL_MONTHS[cur.m-1]} ${cur.y}</div>
+        <button class="cal-nav" onclick="calMove(1)" ${calIdx>=calMonths.length-1?'disabled':''} aria-label="Next month">›</button>
+      </div>
+      <div class="cal-dow">${CAL_DOW.map(x=>`<span>${x}</span>`).join('')}</div>
+      <div class="cal-grid">${cells}</div>
+      <p class="cal-hint">Highlighted days have openings — tap one to see times.</p>
+    </div>
+    <div id="timeArea">${state.calDate?renderTimes():''}</div>`;
+}
+
+function calMove(dir){
+  calIdx = Math.max(0, Math.min(calMonths.length-1, calIdx+dir));
+  drawCalendar();
+}
+
+function pickDate(k){
+  state.calDate = k;
+  drawCalendar();
+  const ta = document.getElementById('timeArea');
+  if(ta && ta.scrollIntoView) ta.scrollIntoView({behavior:'smooth', block:'nearest'});
+}
+
+function renderTimes(){
+  const items = slotsByDate[state.calDate] || [];
+  if(!items.length) return '';
+  return `
+    <div class="cal-times">
+      <div class="cal-times-h">${fmtDay(items[0].instant)} — choose a time</div>
+      ${items.map(s=>`
+        <button class="time-btn ${state.slot&&state.slot.key===s.key?'sel':''}" onclick="pickSlot(${s.key})">
+          <span class="t-time">${fmtTime(s.instant)}</span>
+          <span class="t-label">${s.label}</span>
+        </button>`).join('')}
+    </div>`;
+}
+
 function pickSlot(key){
   state.slot = (slotCache||[]).find(s=>s.key===key) || null;
   if(state.slot) go(4);
 }
+
+/* Format a US phone as the customer types: (208) 315-1420 */
+function fmtPhone(v){
+  const d = String(v||'').replace(/\D/g,'').slice(0,10);
+  if(d.length<=3) return d;
+  if(d.length<=6) return `(${d.slice(0,3)}) ${d.slice(3)}`;
+  return `(${d.slice(0,3)}) ${d.slice(3,6)}-${d.slice(6)}`;
+}
+function onPhoneInput(el){ el.value = fmtPhone(el.value); }
 
 function showErr(el,msg){ if(el){ el.textContent=msg; el.hidden=false; } }
 function saveDetails(){

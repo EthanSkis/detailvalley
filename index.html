@@ -196,6 +196,12 @@
   .field input{width:100%;padding:15px 16px;border:2px solid var(--line);border-radius:10px;font-size:1.05rem;background:var(--white);font-family:inherit}
   .field input:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 3px rgba(43,108,176,.15)}
   .field .hint{font-size:.85rem;color:var(--slate);margin-top:6px}
+  .util-grp{display:flex;gap:8px}
+  .util-opt{flex:1;padding:13px 8px;border:2px solid var(--line);border-radius:10px;background:var(--white);font-family:'Sora',sans-serif;font-weight:600;font-size:1rem;color:var(--ink);cursor:pointer;transition:border-color .12s,background .12s}
+  .util-opt.sel{border-color:var(--blue);background:var(--mist);color:var(--blue)}
+  .util-note{font-size:.9rem;color:var(--slate);margin-top:10px;line-height:1.5;background:var(--mist);border-radius:8px;padding:11px 13px}
+  .util-note.warn-note{color:#8a3b12;background:#fbf0e9;border:1px solid #e7c3aa}
+  .util-note b{color:#c0392b}
 
   .summary{background:var(--mist);border:1px solid var(--line);border-radius:9px;padding:16px;margin-bottom:18px}
   .summary-row{display:flex;justify-content:space-between;padding:5px 0;font-size:.95rem}
@@ -526,7 +532,7 @@ const SIZES = [
   {id:'oversize', name:'Oversized or extra-dirty', meta:'+$40 · 3-row, lifted, heavy mud', price:40},
 ];
 
-function freshState(){ return {step:1, pkg:null, size:'standard', addons:[], slot:null, calDate:null, name:'', phone:'', address:'', town:'', hp:false}; }
+function freshState(){ return {step:1, pkg:null, size:'standard', addons:[], slot:null, calDate:null, name:'', phone:'', address:'', town:'', utilities:null, hp:false}; }
 let state = freshState();
 let slotCache = null;
 let submitting = false;
@@ -548,6 +554,22 @@ document.addEventListener('keydown', e=>{ if(e.key==='Escape' && modal.classList
 
 function pickPkg(id){ state.pkg=id; go(2); }
 function pickSize(id){ state.size=id; render(); }
+function utilNoteText(v){
+  if(v==='no') return `<b>We can't complete the detail without this.</b> We bring all our own gear, but we need access to an outdoor water tap <b>and</b> a power outlet where the car will be parked. Text us at ${BIZ_PHONE} and we'll sort out a spot that works.`;
+  if(v==='unsure') return `No worries — just double-check before your appointment. We do need an outdoor water tap and a power outlet on site to get the job done.`;
+  return '';
+}
+function pickUtil(v){
+  // Update without a full re-render so the customer's typed name/phone/address aren't wiped.
+  state.utilities = v;
+  document.querySelectorAll('#utilGrp .util-opt').forEach(b=>b.classList.toggle('sel', b.dataset.v===v));
+  const note = document.getElementById('utilNote');
+  if(note){
+    note.innerHTML = utilNoteText(v);
+    note.classList.toggle('warn-note', v==='no');
+    note.hidden = (v==='yes' || !v);
+  }
+}
 function toggleAddon(id){
   const i=state.addons.indexOf(id);
   if(i>-1) state.addons.splice(i,1); else state.addons.push(id);
@@ -624,6 +646,14 @@ function render(){
         <option value="" ${state.town?'':'selected'} disabled>Tap to choose your town…</option>
         ${TOWNS.map(t=>`<option value="${t}" ${state.town===t?'selected':''}>${t}</option>`).join('')}
       </select></div>
+      <div class="field"><label>Is there an outdoor water tap &amp; power outlet we can use?</label>
+        <div class="util-grp" id="utilGrp">
+          <button type="button" class="util-opt ${state.utilities==='yes'?'sel':''}" data-v="yes" onclick="pickUtil('yes')">Yes</button>
+          <button type="button" class="util-opt ${state.utilities==='no'?'sel':''}" data-v="no" onclick="pickUtil('no')">No</button>
+          <button type="button" class="util-opt ${state.utilities==='unsure'?'sel':''}" data-v="unsure" onclick="pickUtil('unsure')">Not sure</button>
+        </div>
+        <p class="util-note ${state.utilities==='no'?'warn-note':''}" id="utilNote" ${state.utilities==='no'||state.utilities==='unsure'?'':'hidden'}>${utilNoteText(state.utilities)}</p>
+      </div>
       <input type="text" id="f-company" class="hp" tabindex="-1" autocomplete="off" aria-hidden="true">
       <p id="detailErr" class="form-err" hidden></p>
       <button class="btn" onclick="saveDetails()">Review booking</button>
@@ -641,6 +671,7 @@ function render(){
         ${state.addons.map(a=>{const x=ADDONS.find(z=>z.id===a);return `<div class="summary-row"><span class="muted">+ ${x.name}</span><span class="muted">$${x.price}</span></div>`}).join('')}
         <div class="summary-row"><span class="muted">${fmtDay(state.slot.instant)} · ${fmtTime(state.slot.instant)}</span><span class="muted">${esc(state.name)}</span></div>
         <div class="summary-row"><span class="muted">${esc(state.address)}, ${esc(state.town)}</span><span class="muted">${esc(state.phone)}</span></div>
+        ${state.utilities!=='yes' ? `<div class="summary-row"><span class="muted">Water &amp; power on site</span><span class="muted">${state.utilities==='no'?'⚠ Not available':'Unsure'}</span></div>` : ''}
         <div class="summary-row total"><span>Total</span><span>$${total()}</span></div>
       </div>
       <p id="confirmErr" class="form-err" hidden></p>
@@ -791,6 +822,7 @@ function saveDetails(){
   if(state.phone.replace(/\D/g,'').length < 7) return showErr(err,'Please enter a valid phone number.');
   if(state.address.length < 5) return showErr(err,'Please enter the address we should come to.');
   if(!state.town) return showErr(err,'Please choose your town.');
+  if(!state.utilities) return showErr(err,'Please let us know if a water tap and power outlet are available.');
   go(5);
 }
 
@@ -805,7 +837,7 @@ async function submitBooking(){
   const sz = SIZES.find(s=>s.id===state.size);
   const { error } = await sb.from('bookings').insert({
     slot_start: state.slot.iso,
-    package: PACKAGES.find(p=>p.id===state.pkg).name + (sz ? ` · ${sz.name}` : ''),
+    package: PACKAGES.find(p=>p.id===state.pkg).name + (sz ? ` · ${sz.name}` : '') + (state.utilities!=='yes' ? ` · ⚠ Water/power: ${state.utilities==='no'?'NOT available':'unsure'}` : ''),
     addons: state.addons.map(a=>ADDONS.find(x=>x.id===a).name),
     customer_name: state.name,
     customer_phone: state.phone,

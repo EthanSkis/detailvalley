@@ -91,6 +91,13 @@
   .spec:first-child{border-left:none}
   .spec .k{font-family:'Sora',sans-serif;font-weight:600;font-size:.95rem;color:var(--white)}
   .spec .v{font-size:.8rem;color:#9fb2c1;margin-top:3px}
+  /* On phones the 3-up grid squeezes the longer values onto uneven multi-line
+     blocks; stack into one centred column with dividers between rows instead. */
+  @media(max-width:520px){
+    .strip-inner{grid-template-columns:1fr;max-width:360px}
+    .spec{border-left:none;border-top:1px solid rgba(255,255,255,.08);padding:16px 14px}
+    .spec:first-child{border-top:none}
+  }
 
   /* ---------- PACKAGES ---------- */
   section{padding:62px 0}

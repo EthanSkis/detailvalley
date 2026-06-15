@@ -24,7 +24,7 @@
     --line:#d9e2ea;
   }
   *{margin:0;padding:0;box-sizing:border-box}
-  html{scroll-behavior:smooth}
+  html{scroll-behavior:smooth;overflow-y:scroll}
   body{
     font-family:'Inter',system-ui,sans-serif;
     color:var(--ink);
@@ -280,7 +280,7 @@
   .pkg.featured .pkg-btn:hover{background:var(--copper-2)}
 
   /* ---------- STICKY MOBILE BOOK BAR ---------- */
-  body.modal-open{overflow:hidden}
+  body.modal-open{position:fixed;left:0;right:0;overflow:hidden}
   .mobile-cta{display:none}
   @media(max-width:819px){
     .mobile-cta{position:fixed;left:0;right:0;bottom:0;z-index:40;display:block;
@@ -648,6 +648,7 @@ function freshState(){ return {step:1, pkg:null, size:'standard', addons:[], slo
 let state = freshState();
 let slotCache = null;
 let submitting = false;
+let scrollLockY = 0;
 const modal = document.getElementById('modal');
 const inner = document.getElementById('modalInner');
 const TOWNS = ['McCall','Cascade','Donnelly','Other'];
@@ -656,11 +657,18 @@ function openBooking(pre){
   state = freshState();
   slotCache = null; submitting = false;
   if(pre && PACKAGES.some(p=>p.id===pre)){ state.pkg = pre; state.step = 2; }
+  scrollLockY = window.scrollY || window.pageYOffset || 0;
+  document.body.style.top = `-${scrollLockY}px`;
   document.body.classList.add('modal-open');
   modal.classList.add('open');
   render();
 }
-function closeBooking(){ document.body.classList.remove('modal-open'); modal.classList.remove('open'); }
+function closeBooking(){
+  document.body.classList.remove('modal-open');
+  document.body.style.top = '';
+  window.scrollTo({ top: scrollLockY, left: 0, behavior: 'instant' });
+  modal.classList.remove('open');
+}
 modal.addEventListener('click', e=>{ if(e.target===modal) closeBooking(); });
 document.addEventListener('keydown', e=>{ if(e.key==='Escape' && modal.classList.contains('open')) closeBooking(); });
 

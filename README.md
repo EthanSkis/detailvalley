@@ -45,6 +45,7 @@ command and no publish directory beyond the root are needed.
 | File | Purpose |
 |------|---------|
 | `index.html` | The live Detail Valley site (final, professional design). |
+| `admin.html` | Private **owner job board** — sign in to manage bookings on your phone. See [Owner dashboard](#owner-dashboard-adminhtml). |
 | `CNAME` | Custom domain for GitHub Pages (`detailvalley.com`). |
 | `logo.svg` | The logo, as vector — used on the site (hero, footer, favicon). Scales crisply at any size. |
 | `logo.png` | Raster version of the logo — social profile picture / raster fallback. |
@@ -69,7 +70,9 @@ The booking flow is backed by a Supabase project (**valleydetail1**). Confirmed
 bookings are written to a `public.bookings` table, and the calendar only offers
 slots that aren't already taken.
 
-**See your bookings:** Supabase dashboard → your project → **Table editor →
+**See your bookings:** the easiest way is the [**owner dashboard**](#owner-dashboard-adminhtml)
+(`admin.html`) — a phone-friendly job board with one-tap status buttons. You can
+also read the raw rows in the Supabase dashboard → your project → **Table editor →
 `bookings`**. Each row has the package, add-ons, customer name + phone, the
 service address + town, the chosen slot, and total. Set a booking's `status` to `cancelled` to free that
 slot back up, or `confirmed` / `completed` to track it.
@@ -92,3 +95,48 @@ numbers through the public API. Only you, via the dashboard, can read them.
 
 **Optional next step:** get notified on new bookings — a Supabase Database
 Webhook or a small Edge Function can email or text you whenever a row is inserted.
+(Detail Valley already does this via Resend.)
+
+## Owner dashboard (`admin.html`)
+
+`admin.html` is a private, mobile-first **job board** for managing bookings —
+the day-to-day way to keep track of jobs instead of digging through the raw
+Supabase table. It's deployed alongside the site (e.g. `detailvalley.com/admin.html`).
+
+**What it does**
+- Lists every booking grouped by day, soonest first, with a colour-coded status
+  badge (**New → Confirmed → Done → Cancelled**).
+- One-tap actions move a job through its lifecycle: **Confirm**, **Mark done**,
+  **Cancel**, **Reopen**, **Restore**.
+- Tap the phone number to call/text, tap the address to open Google Maps.
+- A per-job **notes** field (gate codes, "big dog in yard", reminders) — saved
+  automatically, never visible to customers.
+- Filter chips (To do · New · Confirmed · Done · Cancelled · All) and a summary
+  strip (new count · upcoming count · dollars booked).
+
+**Signing in.** The dashboard uses Supabase Auth, so only you can read customer
+details — the page itself is harmless to host publicly. Enter your owner email
+(`ethangardner298@gmail.com`) and tap **"Email me a sign-in link"**; open the
+link on the same device to finish. (A password field is offered as a fallback if
+you've set one.)
+
+**One-time setup for the sign-in link.** In the Supabase dashboard →
+**Authentication → URL Configuration**, set the **Site URL** to
+`https://detailvalley.com` and add your dashboard URL(s) to **Redirect URLs**:
+- `https://detailvalley.com/admin.html`
+- `https://ethanskis.github.io/detailvalley/admin.html` (only if you also use the GitHub Pages URL)
+
+Without this, the emailed link won't return you to the dashboard.
+
+**How access is locked down**
+- A `public.admins` allowlist table holds the user IDs allowed to manage
+  bookings; an `is_admin()` helper checks it. It's seeded with your account.
+- Row-level security on `bookings` grants **read + update only to admins**
+  (`is_admin()`), so a signed-in non-admin sees zero rows. Anonymous visitors
+  still can't read any booking through the API (they can only insert one and see
+  which slots are taken). This was verified per-role before launch.
+- **Add another person** (e.g. an employee) later by inserting their auth user ID
+  into `public.admins`:
+  ```sql
+  insert into public.admins (user_id) values ('THEIR-AUTH-USER-UUID');
+  ```

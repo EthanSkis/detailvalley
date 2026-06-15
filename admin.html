@@ -113,6 +113,14 @@
   .empty{text-align:center;color:var(--slate);padding:40px 16px;font-size:.95rem}
   .meta-foot{font-size:.76rem;color:var(--grey);margin-top:10px}
 
+  /* Account / password */
+  .acct{margin-top:24px;background:#fff;border:1px solid var(--line);border-radius:12px;padding:4px 16px 16px}
+  .acct summary{cursor:pointer;font-weight:600;color:var(--slate);font-size:.92rem;padding:12px 0;list-style:none}
+  .acct summary::-webkit-details-marker{display:none}
+  .acct summary::before{content:'⚙ ';opacity:.7}
+  .acct .note{text-align:left;margin-top:10px}
+  .acct .msg{margin-bottom:6px}
+
   /* Toast */
   #toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%) translateY(20px);
     background:var(--navy);color:#fff;padding:11px 18px;border-radius:10px;font-size:.9rem;font-weight:600;
@@ -137,18 +145,18 @@
     <h2>Owner sign-in</h2>
     <p class="sub">Private dashboard for managing Detail Valley bookings.</p>
     <label for="email">Email</label>
-    <input id="email" type="email" inputmode="email" autocomplete="email" placeholder="you@detailvalley.com">
+    <input id="email" type="email" inputmode="email" autocomplete="username" placeholder="you@detailvalley.com">
 
-    <div id="linkPane">
-      <button class="btn" id="sendLink" onclick="sendLink()">Email me a sign-in link</button>
-      <button class="linkbtn" onclick="togglePw(true)">Use a password instead</button>
-    </div>
-
-    <div id="pwPane" hidden>
+    <div id="pwPane">
       <label for="pw">Password</label>
       <input id="pw" type="password" autocomplete="current-password" placeholder="Your password">
       <button class="btn" id="pwSignin" onclick="passwordSignIn()">Sign in</button>
-      <button class="linkbtn" onclick="togglePw(false)">Email me a link instead</button>
+      <button class="linkbtn" onclick="togglePw(false)">Email me a sign-in link instead</button>
+    </div>
+
+    <div id="linkPane" hidden>
+      <button class="btn" id="sendLink" onclick="sendLink()">Email me a sign-in link</button>
+      <button class="linkbtn" onclick="togglePw(true)">Use a password instead</button>
     </div>
 
     <div class="msg" id="loginMsg"></div>
@@ -159,6 +167,15 @@
     <div class="summary" id="summary"></div>
     <div class="filters" id="filters"></div>
     <div id="jobs"></div>
+
+    <details class="acct">
+      <summary>Account &amp; password</summary>
+      <label for="newpw">Set a new password</label>
+      <input id="newpw" type="password" autocomplete="new-password" placeholder="New password (8+ characters)">
+      <button class="btn alt" onclick="changePassword()">Save password</button>
+      <p class="note">On iPhone, tap “Save Password” when prompted — next time you can sign in with Face ID.</p>
+      <div class="msg" id="acctMsg"></div>
+    </details>
   </section>
 
   <p class="empty" id="boot">Loading…</p>
@@ -255,6 +272,18 @@ async function passwordSignIn(){
 }
 
 async function signOut(){ await sb.auth.signOut(); }
+
+function acctMsg(text, kind){
+  const m = $('acctMsg'); m.textContent = text; m.className = 'msg show ' + (kind || 'ok');
+}
+async function changePassword(){
+  const pw = $('newpw').value;
+  if(pw.length < 8){ acctMsg('Use at least 8 characters.', 'err'); return; }
+  const { error } = await sb.auth.updateUser({ password: pw });
+  if(error){ acctMsg(error.message, 'err'); return; }
+  $('newpw').value = '';
+  acctMsg('Password updated. Save it to your iPhone Keychain when prompted.', 'ok');
+}
 
 /* ---------- Jobs ---------- */
 async function loadJobs(){

@@ -115,18 +115,23 @@ Supabase table. It's deployed alongside the site (e.g. `detailvalley.com/admin.h
   strip (new count · upcoming count · dollars booked).
 
 **Signing in.** The dashboard uses Supabase Auth, so only you can read customer
-details — the page itself is harmless to host publicly. Enter your owner email
-(`ethangardner298@gmail.com`) and tap **"Email me a sign-in link"**; open the
-link on the same device to finish. (A password field is offered as a fallback if
-you've set one.)
+details — the page itself is harmless to host publicly. Sign in with your owner
+email (`ethangardner298@gmail.com`) and password.
 
-**One-time setup for the sign-in link.** In the Supabase dashboard →
-**Authentication → URL Configuration**, set the **Site URL** to
+**Face ID on iPhone.** The first time you sign in, iOS offers to **save the
+password to iCloud Keychain** — tap *Save*. After that, the email + password
+autofill behind **Face ID**, so signing in is just a glance. To set your own
+password, open the dashboard → **Account & password** → *Set a new password*
+(this also re-prompts your phone to save it to Keychain).
+
+**Email-link fallback.** If you'd rather not use a password, tap **"Email me a
+sign-in link instead"**. For that link to return you to the dashboard, set it up
+once in Supabase → **Authentication → URL Configuration**: set **Site URL** to
 `https://detailvalley.com` and add your dashboard URL(s) to **Redirect URLs**:
 - `https://detailvalley.com/admin.html`
 - `https://ethanskis.github.io/detailvalley/admin.html` (only if you also use the GitHub Pages URL)
 
-Without this, the emailed link won't return you to the dashboard.
+(The password sign-in needs none of that.)
 
 **How access is locked down**
 - A `public.admins` allowlist table holds the user IDs allowed to manage

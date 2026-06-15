@@ -521,16 +521,21 @@ const DAYS_AHEAD = 21;                // size of the booking window (days shown 
 const MIN_LEAD_DAYS = 3;             // earliest a customer can book — must be ≥ this many days out
 const OPEN_FROM = '2026-07-01';      // closed until this date (MT, 'YYYY-MM-DD'); set '' to remove
 const BIZ_PHONE  = '(208) 315-1420';
-// Bookable start times per weekday (0=Sun … 6=Sat). Omit a day to close it.
-// Two slots/day, within the posted hours (Mon–Fri 8–6, Sat 9–4).
-const DAY_SLOTS = {
-  1:[['09:00','Morning'],['13:30','Afternoon']],
-  2:[['09:00','Morning'],['13:30','Afternoon']],
-  3:[['09:00','Morning'],['13:30','Afternoon']],
-  4:[['09:00','Morning'],['13:30','Afternoon']],
-  5:[['09:00','Morning'],['13:30','Afternoon']],
-  6:[['09:30','Morning'],['13:00','Afternoon']]
+// Working hours per weekday (0=Sun … 6=Sat). Omit a day to close it.
+// Posted hours: Mon–Fri 8–6, Sat 9–4. Start times are offered on a grid within
+// these hours, and each booking blocks off the time its job actually needs.
+const HOURS = {
+  1:['08:00','18:00'], 2:['08:00','18:00'], 3:['08:00','18:00'],
+  4:['08:00','18:00'], 5:['08:00','18:00'],
+  6:['09:00','16:00']
 };
+const STEP_MIN = 60;            // spacing of offered start times (minutes)
+const BUFFER_MIN = 45;          // travel / cleanup gap kept between jobs
+const MAX_JOBS_PER_DAY = 3;     // never offer more than this many jobs in one day
+// How long each job runs (minutes) — drives how much time a booking blocks off.
+const PKG_MIN   = { express:60, full:180, signature:270 };
+const SIZE_MIN  = { standard:0, midsize:30, oversize:60 };
+const ADDON_MIN = { pet:30, seats:45, engine:30 };
 const DOW = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
 
 /* Minutes SLOT_TZ is offset from UTC at a given instant (handles DST). */
@@ -567,34 +572,59 @@ function earliestBookable(now){
   }
   return earliest;
 }
-/* Open start times: a DAYS_AHEAD-day window starting at the first bookable day. */
-function candidateSlots(){
-  const out = [], now = new Date();
-  const earliest = earliestBookable(now);
+/* How long the chosen job runs, in minutes (package + vehicle size + add-ons). */
+function jobMinutes(){
+  const addons = state.addons.reduce((s,a)=> s + (pkgIncludes(a) ? 0 : (ADDON_MIN[a]||0)), 0);
+  return (PKG_MIN[state.pkg] || 180) + (SIZE_MIN[state.size] || 0) + addons;
+}
+
+/* Every grid start that fits a jobMin-minute job inside working hours, within
+   the booking window, at/after the earliest bookable instant. */
+function candidateStarts(jobMin){
+  const out = [], now = new Date(), earliest = earliestBookable(now);
   const startDay = Math.floor((earliest - now.getTime())/86400000);
   for(let i=startDay;i<=startDay+DAYS_AHEAD;i++){
     const {y,m,d,dow} = mtDateParts(new Date(now.getTime()+i*86400000));
-    const times = DAY_SLOTS[dow];
-    if(!times) continue;
-    for(const [hhmm,label] of times){
-      const [hh,mm] = hhmm.split(':').map(Number);
-      const instant = mtToInstant(y,m,d,hh,mm);
+    const hrs = HOURS[dow];
+    if(!hrs) continue;
+    const [oH,oM] = hrs[0].split(':').map(Number);
+    const [cH,cM] = hrs[1].split(':').map(Number);
+    const closeMin = cH*60 + cM;
+    for(let t = oH*60+oM; t + jobMin <= closeMin; t += STEP_MIN){
+      const instant = mtToInstant(y,m,d,Math.floor(t/60),t%60);
       if(instant.getTime() < earliest) continue;
-      out.push({key:instant.getTime(), iso:instant.toISOString(), instant, label});
+      const end = new Date(instant.getTime() + jobMin*60000);
+      out.push({key:instant.getTime(), iso:instant.toISOString(), instant,
+                label:`ends ~${fmtTime(end)}`});
     }
   }
   return out;
 }
-/* Open slots minus already-booked ones (booked times come from Supabase, no PII). */
+
+/* Candidate starts minus anything that would overlap an existing job (keeping a
+   travel buffer) or exceed the daily job cap. Booked starts + durations come
+   from Supabase via taken_slots — no PII. */
 async function availableSlots(){
-  const all = candidateSlots();
+  const jobMin = jobMinutes();
+  const all = candidateStarts(jobMin);
   if(!sb || !all.length) return all;
   const from = new Date(all[0].key - 86400000).toISOString();
   const to   = new Date(all[all.length-1].key + 86400000).toISOString();
   const { data, error } = await sb.rpc('taken_slots',{p_from:from,p_to:to});
   if(error) throw error;
-  const taken = new Set((data||[]).map(r=>new Date(r.slot_start).getTime()));
-  return all.filter(s=>!taken.has(s.key));
+  const taken = (data||[]).map(r=>({ start:new Date(r.slot_start).getTime(), dur:(r.duration_min||180) }));
+  const perDay = {};
+  taken.forEach(t=>{ const {y,m,d}=mtDateParts(new Date(t.start)); const k=y+'-'+m+'-'+d; perDay[k]=(perDay[k]||0)+1; });
+  const buf = BUFFER_MIN*60000, len = jobMin*60000;
+  return all.filter(s=>{
+    const {y,m,d} = mtDateParts(s.instant);
+    if((perDay[y+'-'+m+'-'+d]||0) >= MAX_JOBS_PER_DAY) return false;      // day already full
+    for(const t of taken){
+      const te = t.start + t.dur*60000;
+      if(s.key < te + buf && t.start < s.key + len + buf) return false;    // too close to a booked job
+    }
+    return true;
+  });
 }
 
 const PACKAGES = [
@@ -939,11 +969,12 @@ async function submitBooking(){
     address: state.address,
     town: state.town,
     total_usd: total(),
+    duration_min: jobMinutes(),
     status: 'pending'
   });
   submitting = false; if(btn){ btn.disabled=false; btn.textContent='Confirm booking'; }
   if(error){
-    if(error.code==='23505'){
+    if(error.code==='23505' || error.code==='23P01'){
       showErr(err,'Sorry — that time was just booked. Choose another.');
       setTimeout(()=>go(3), 1300);
     } else {

@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<title>Detail Valley — Jobs</title>
+<link rel="icon" type="image/svg+xml" href="logo.svg">
+<link rel="alternate icon" href="logo.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --navy:#0f2c44; --navy-2:#15395a;
+    --blue:#2b6cb0; --blue-dark:#225a93;
+    --mist:#eef3f7; --ink:#0f2233; --slate:#3f566a;
+    --copper:#b8632c; --copper-2:#974f22;
+    --white:#fff; --line:#d9e2ea;
+    --green:#1f7a4d; --green-bg:#e6f4ec;
+    --amber:#9a5b13; --amber-bg:#fbeedd;
+    --grey:#5b6b78; --grey-bg:#eceff2;
+    --blue-bg:#e4eef8;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:'Inter',system-ui,sans-serif;color:var(--ink);background:var(--mist);line-height:1.55;-webkit-font-smoothing:antialiased}
+  h1,h2,h3{font-family:'Sora',sans-serif;letter-spacing:-.015em}
+  a{color:var(--blue);text-decoration:none}
+  .wrap{max-width:680px;margin:0 auto;padding:0 16px}
+
+  /* Header */
+  header{background:var(--navy);color:#fff;padding:18px 0}
+  .head-row{display:flex;align-items:center;gap:12px}
+  .brand{display:flex;align-items:center;gap:10px;flex:1;min-width:0}
+  .brand img{width:38px;height:38px;border-radius:50%;display:block}
+  .brand b{font-family:'Sora',sans-serif;font-weight:700;font-size:1.05rem}
+  .brand span{display:block;font-size:.72rem;color:#aebfce;font-weight:500;letter-spacing:.02em}
+  .ghost{background:transparent;border:1px solid rgba(255,255,255,.28);color:#fff;
+    padding:7px 12px;border-radius:8px;font:inherit;font-size:.82rem;font-weight:600;cursor:pointer}
+  .ghost:hover{background:rgba(255,255,255,.1)}
+
+  main{padding:18px 0 60px}
+
+  /* Login */
+  .card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:22px}
+  .login{max-width:420px;margin:24px auto}
+  .login h2{font-size:1.3rem;margin-bottom:6px}
+  .login p.sub{color:var(--slate);font-size:.92rem;margin-bottom:18px}
+  label{display:block;font-size:.8rem;font-weight:600;color:var(--slate);margin:14px 0 6px}
+  input{width:100%;padding:13px 14px;border:1.5px solid var(--line);border-radius:10px;
+    font:inherit;font-size:1rem;color:var(--ink);background:#fff}
+  input:focus{outline:none;border-color:var(--blue)}
+  .btn{display:block;width:100%;margin-top:16px;padding:14px;border:none;border-radius:10px;
+    background:var(--blue);color:#fff;font:inherit;font-size:1rem;font-weight:600;cursor:pointer}
+  .btn:hover{background:var(--blue-dark)}
+  .btn:disabled{opacity:.6;cursor:default}
+  .btn.alt{background:#fff;color:var(--blue);border:1.5px solid var(--line)}
+  .btn.alt:hover{background:var(--mist)}
+  .linkbtn{background:none;border:none;color:var(--blue);font:inherit;font-size:.86rem;
+    font-weight:600;cursor:pointer;padding:10px 0;display:block;margin:6px auto 0}
+  .note{font-size:.86rem;color:var(--slate);text-align:center;margin-top:14px}
+  .msg{font-size:.88rem;padding:11px 13px;border-radius:9px;margin-top:14px;display:none}
+  .msg.show{display:block}
+  .msg.ok{background:var(--green-bg);color:var(--green)}
+  .msg.err{background:#fbe9e7;color:#a3372b}
+
+  /* Summary */
+  .summary{display:flex;gap:10px;margin-bottom:14px}
+  .stat{flex:1;background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px 8px;text-align:center}
+  .stat b{display:block;font-family:'Sora',sans-serif;font-size:1.5rem;line-height:1.1;color:var(--navy)}
+  .stat span{font-size:.72rem;color:var(--slate);font-weight:600;text-transform:uppercase;letter-spacing:.03em}
+
+  /* Filters */
+  .filters{display:flex;gap:8px;overflow-x:auto;padding-bottom:10px;margin-bottom:6px;-webkit-overflow-scrolling:touch}
+  .chip{flex:0 0 auto;background:#fff;border:1.5px solid var(--line);color:var(--slate);
+    padding:8px 14px;border-radius:999px;font:inherit;font-size:.84rem;font-weight:600;cursor:pointer;white-space:nowrap}
+  .chip.on{background:var(--navy);border-color:var(--navy);color:#fff}
+  .chip i{font-style:normal;opacity:.7;font-weight:600}
+
+  /* Day groups + cards */
+  .day-h{font-family:'Sora',sans-serif;font-weight:600;font-size:.95rem;color:var(--navy);
+    margin:18px 4px 10px;display:flex;align-items:center;gap:8px}
+  .day-h:first-child{margin-top:6px}
+  .day-h em{font-style:normal;color:var(--slate);font-weight:500;font-size:.82rem}
+  .job{background:#fff;border:1px solid var(--line);border-radius:14px;padding:16px;margin-bottom:12px}
+  .job-top{display:flex;align-items:flex-start;gap:10px;margin-bottom:10px}
+  .time{font-family:'Sora',sans-serif;font-weight:700;font-size:1.05rem;color:var(--navy);white-space:nowrap}
+  .who{flex:1;min-width:0}
+  .who b{font-weight:600;font-size:1rem;display:block}
+  .who a.tel{font-size:.9rem;font-weight:600}
+  .badge{flex:0 0 auto;font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.03em;
+    padding:4px 9px;border-radius:7px}
+  .b-pending{background:var(--amber-bg);color:var(--amber)}
+  .b-confirmed{background:var(--blue-bg);color:var(--blue-dark)}
+  .b-completed{background:var(--green-bg);color:var(--green)}
+  .b-cancelled{background:var(--grey-bg);color:var(--grey)}
+  .meta{font-size:.9rem;color:var(--ink);margin:2px 0}
+  .meta.addons{color:var(--slate)}
+  .total{font-family:'Sora',sans-serif;font-weight:700;color:var(--copper);font-size:1.05rem;margin-top:4px}
+  .addr{display:inline-flex;align-items:center;gap:5px;font-size:.9rem;font-weight:600;margin-top:6px}
+  .warn{background:#fff6f3;border:1px solid #f0c9bb;color:#a3502f;font-size:.84rem;
+    padding:7px 10px;border-radius:8px;margin-top:8px;font-weight:600}
+  textarea.notes{width:100%;margin-top:10px;padding:10px 12px;border:1.5px solid var(--line);
+    border-radius:9px;font:inherit;font-size:.9rem;color:var(--ink);resize:vertical;min-height:42px;background:var(--mist)}
+  textarea.notes:focus{outline:none;border-color:var(--blue);background:#fff}
+  .actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+  .act{flex:1 1 auto;min-width:120px;padding:11px;border:none;border-radius:9px;font:inherit;
+    font-size:.9rem;font-weight:600;cursor:pointer}
+  .act-pri{background:var(--green);color:#fff}
+  .act-blue{background:var(--blue);color:#fff}
+  .act-ghost{background:#fff;border:1.5px solid var(--line);color:var(--slate)}
+  .act:disabled{opacity:.5;cursor:default}
+  .empty{text-align:center;color:var(--slate);padding:40px 16px;font-size:.95rem}
+  .meta-foot{font-size:.76rem;color:var(--grey);margin-top:10px}
+
+  /* Toast */
+  #toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%) translateY(20px);
+    background:var(--navy);color:#fff;padding:11px 18px;border-radius:10px;font-size:.9rem;font-weight:600;
+    opacity:0;pointer-events:none;transition:.25s;z-index:50;max-width:90vw;text-align:center}
+  #toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap head-row">
+    <div class="brand">
+      <img src="logo.svg" alt="Detail Valley">
+      <div><b>Detail Valley</b><span>Job board</span></div>
+    </div>
+    <button class="ghost" id="signout" hidden onclick="signOut()">Sign out</button>
+  </div>
+</header>
+
+<main class="wrap">
+  <!-- Login -->
+  <section id="login" class="card login" hidden>
+    <h2>Owner sign-in</h2>
+    <p class="sub">Private dashboard for managing Detail Valley bookings.</p>
+    <label for="email">Email</label>
+    <input id="email" type="email" inputmode="email" autocomplete="email" placeholder="you@detailvalley.com">
+
+    <div id="linkPane">
+      <button class="btn" id="sendLink" onclick="sendLink()">Email me a sign-in link</button>
+      <button class="linkbtn" onclick="togglePw(true)">Use a password instead</button>
+    </div>
+
+    <div id="pwPane" hidden>
+      <label for="pw">Password</label>
+      <input id="pw" type="password" autocomplete="current-password" placeholder="Your password">
+      <button class="btn" id="pwSignin" onclick="passwordSignIn()">Sign in</button>
+      <button class="linkbtn" onclick="togglePw(false)">Email me a link instead</button>
+    </div>
+
+    <div class="msg" id="loginMsg"></div>
+  </section>
+
+  <!-- Board -->
+  <section id="board" hidden>
+    <div class="summary" id="summary"></div>
+    <div class="filters" id="filters"></div>
+    <div id="jobs"></div>
+  </section>
+
+  <p class="empty" id="boot">Loading…</p>
+</main>
+
+<div id="toast"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+/* ---------- Supabase (same project + publishable key as the site) ---------- */
+const SUPABASE_URL = 'https://utybbdrthxgsijplowup.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_48352eB1w0mLVwvLm3gXUg_BpGKN67o';
+const sb = window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY) : null;
+const TZ = 'America/Boise';   // Valley County, Idaho — Mountain Time
+
+const $ = id => document.getElementById(id);
+let JOBS = [];
+let FILTER = 'todo';
+
+/* ---------- Helpers ---------- */
+const dayFmt  = new Intl.DateTimeFormat('en-US',{weekday:'short',month:'short',day:'numeric',timeZone:TZ});
+const timeFmt = new Intl.DateTimeFormat('en-US',{hour:'numeric',minute:'2-digit',timeZone:TZ});
+const dateKeyFmt = new Intl.DateTimeFormat('en-CA',{year:'numeric',month:'2-digit',day:'2-digit',timeZone:TZ});
+const shortDate = new Intl.DateTimeFormat('en-US',{month:'short',day:'numeric',timeZone:TZ});
+const esc = s => (s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const dayKey = iso => dateKeyFmt.format(new Date(iso));
+const todayKey = () => dateKeyFmt.format(new Date());
+
+function toast(msg){
+  const t = $('toast'); t.textContent = msg; t.classList.add('show');
+  clearTimeout(toast._t); toast._t = setTimeout(()=>t.classList.remove('show'), 2200);
+}
+function loginMsg(text, kind){
+  const m = $('loginMsg'); m.textContent = text;
+  m.className = 'msg show ' + (kind || 'ok');
+}
+
+/* ---------- Auth flow ---------- */
+async function boot(){
+  if(!sb){ $('boot').textContent = 'Could not load Supabase. Check your connection and refresh.'; return; }
+  const { data:{ session } } = await sb.auth.getSession();
+  // React to login link returns + sign in/out.
+  sb.auth.onAuthStateChange((_e, s)=>render(s));
+  render(session);
+}
+
+async function render(session){
+  $('boot').hidden = true;
+  if(!session){
+    $('signout').hidden = true;
+    $('board').hidden = true;
+    $('login').hidden = false;
+    return;
+  }
+  // Confirm this account is actually an admin (RLS-backed).
+  const { data:isAdmin, error } = await sb.rpc('is_admin');
+  if(error || !isAdmin){
+    $('login').hidden = false; $('board').hidden = true; $('signout').hidden = false;
+    loginMsg('This account isn’t set up as an owner. Sign out and use your owner email, or ask to be added.', 'err');
+    return;
+  }
+  $('login').hidden = true;
+  $('board').hidden = false;
+  $('signout').hidden = false;
+  loadJobs();
+}
+
+function togglePw(showPw){
+  $('linkPane').hidden = showPw;
+  $('pwPane').hidden = !showPw;
+}
+
+async function sendLink(){
+  const email = $('email').value.trim();
+  if(!email){ loginMsg('Enter your email first.', 'err'); return; }
+  const btn = $('sendLink'); btn.disabled = true; btn.textContent = 'Sending…';
+  const { error } = await sb.auth.signInWithOtp({
+    email,
+    options:{ shouldCreateUser:false, emailRedirectTo: location.origin + location.pathname }
+  });
+  btn.disabled = false; btn.textContent = 'Email me a sign-in link';
+  if(error){ loginMsg(error.message, 'err'); return; }
+  loginMsg('Check your email and tap the sign-in link. Open it on this device to finish.', 'ok');
+}
+
+async function passwordSignIn(){
+  const email = $('email').value.trim();
+  const password = $('pw').value;
+  if(!email || !password){ loginMsg('Enter your email and password.', 'err'); return; }
+  const btn = $('pwSignin'); btn.disabled = true; btn.textContent = 'Signing in…';
+  const { error } = await sb.auth.signInWithPassword({ email, password });
+  btn.disabled = false; btn.textContent = 'Sign in';
+  if(error){ loginMsg(error.message, 'err'); return; }
+}
+
+async function signOut(){ await sb.auth.signOut(); }
+
+/* ---------- Jobs ---------- */
+async function loadJobs(){
+  $('jobs').innerHTML = '<p class="empty">Loading jobs…</p>';
+  const { data, error } = await sb.from('bookings').select('*').order('slot_start',{ascending:true});
+  if(error){ $('jobs').innerHTML = '<p class="empty">Couldn’t load jobs: '+esc(error.message)+'</p>'; return; }
+  JOBS = data || [];
+  drawSummary();
+  drawFilters();
+  drawJobs();
+}
+
+const FILTERS = [
+  { id:'todo',      label:'To do',     match:j => (j.status==='pending'||j.status==='confirmed') },
+  { id:'pending',   label:'New',       match:j => j.status==='pending' },
+  { id:'confirmed', label:'Confirmed', match:j => j.status==='confirmed' },
+  { id:'completed', label:'Done',      match:j => j.status==='completed' },
+  { id:'cancelled', label:'Cancelled', match:j => j.status==='cancelled' },
+  { id:'all',       label:'All',       match:_ => true },
+];
+
+function drawSummary(){
+  const tk = todayKey();
+  const newCount = JOBS.filter(j=>j.status==='pending').length;
+  const upcoming = JOBS.filter(j=>j.status==='confirmed' && dayKey(j.slot_start)>=tk);
+  const booked = upcoming.reduce((s,j)=>s+(j.total_usd||0),0);
+  $('summary').innerHTML =
+    `<div class="stat"><b>${newCount}</b><span>New</span></div>`+
+    `<div class="stat"><b>${upcoming.length}</b><span>Upcoming</span></div>`+
+    `<div class="stat"><b>$${booked}</b><span>Booked</span></div>`;
+}
+
+function drawFilters(){
+  $('filters').innerHTML = FILTERS.map(f=>{
+    const n = JOBS.filter(f.match).length;
+    return `<button class="chip ${FILTER===f.id?'on':''}" onclick="setFilter('${f.id}')">`+
+           `${f.label} <i>${n}</i></button>`;
+  }).join('');
+}
+
+function setFilter(id){ FILTER = id; drawFilters(); drawJobs(); }
+
+function drawJobs(){
+  const f = FILTERS.find(x=>x.id===FILTER);
+  let list = JOBS.filter(f.match);
+  // "To do" reads best soonest-first; history reads best newest-first.
+  if(FILTER==='completed' || FILTER==='cancelled') list = list.slice().reverse();
+
+  if(!list.length){ $('jobs').innerHTML = '<p class="empty">Nothing here right now.</p>'; return; }
+
+  const tk = todayKey();
+  let html = '', lastDay = '';
+  for(const j of list){
+    const dk = dayKey(j.slot_start);
+    if(dk !== lastDay){
+      lastDay = dk;
+      let tag = '';
+      if(dk===tk) tag = '<em>Today</em>';
+      else if(dk < tk) tag = '<em>Past</em>';
+      html += `<div class="day-h">${dayFmt.format(new Date(j.slot_start))} ${tag}</div>`;
+    }
+    html += jobCard(j);
+  }
+  $('jobs').innerHTML = html;
+}
+
+function jobCard(j){
+  const addons = (j.addons && j.addons.length) ? `<p class="meta addons">+ ${esc(j.addons.join(', '))}</p>` : '';
+  const mapQ = encodeURIComponent(`${j.address}, ${j.town}, Idaho`);
+  const phoneDigits = (j.customer_phone||'').replace(/[^\d+]/g,'');
+  // The booking form folds a water/power warning into the package text.
+  const warn = /Water\/power/i.test(j.package)
+    ? `<div class="warn">⚠ ${esc(j.package.split('·').pop().trim())}</div>` : '';
+  const pkg = esc(j.package.replace(/·\s*⚠[^·]*$/,'').trim());
+  const booked = shortDate.format(new Date(j.created_at));
+
+  let actions = '';
+  if(j.status==='pending')
+    actions = `<button class="act act-pri" onclick="setStatus('${j.id}','confirmed')">Confirm</button>`+
+              `<button class="act act-ghost" onclick="setStatus('${j.id}','cancelled')">Cancel</button>`;
+  else if(j.status==='confirmed')
+    actions = `<button class="act act-pri" onclick="setStatus('${j.id}','completed')">Mark done</button>`+
+              `<button class="act act-ghost" onclick="setStatus('${j.id}','cancelled')">Cancel</button>`;
+  else if(j.status==='completed')
+    actions = `<button class="act act-ghost" onclick="setStatus('${j.id}','confirmed')">Reopen</button>`;
+  else if(j.status==='cancelled')
+    actions = `<button class="act act-blue" onclick="setStatus('${j.id}','pending')">Restore</button>`;
+
+  return `<div class="job" id="job-${j.id}">
+    <div class="job-top">
+      <div class="time">${timeFmt.format(new Date(j.slot_start))}</div>
+      <div class="who">
+        <b>${esc(j.customer_name)}</b>
+        <a class="tel" href="tel:${esc(phoneDigits)}">${esc(j.customer_phone)}</a>
+      </div>
+      <span class="badge b-${j.status}">${j.status}</span>
+    </div>
+    <p class="meta">${pkg}</p>
+    ${addons}
+    <p class="total">$${j.total_usd}</p>
+    <a class="addr" href="https://maps.google.com/?q=${mapQ}" target="_blank" rel="noopener">📍 ${esc(j.address)}, ${esc(j.town)}</a>
+    ${warn}
+    <textarea class="notes" placeholder="Notes — gate code, dog, reminders…"
+      data-id="${j.id}" onblur="saveNotes(this)">${esc(j.notes)}</textarea>
+    <div class="actions">${actions}</div>
+    <div class="meta-foot">Booked ${booked}</div>
+  </div>`;
+}
+
+async function setStatus(id, status){
+  const card = $('job-'+id);
+  if(card) card.querySelectorAll('.act').forEach(b=>b.disabled=true);
+  const { error } = await sb.from('bookings').update({ status }).eq('id', id);
+  if(error){ toast('Update failed: '+error.message); if(card) card.querySelectorAll('.act').forEach(b=>b.disabled=false); return; }
+  const j = JOBS.find(x=>x.id===id); if(j) j.status = status;
+  toast(status==='confirmed'?'Confirmed ✓':status==='completed'?'Marked done ✓':status==='cancelled'?'Cancelled':'Updated');
+  drawSummary(); drawFilters(); drawJobs();
+}
+
+async function saveNotes(el){
+  const id = el.dataset.id;
+  const j = JOBS.find(x=>x.id===id);
+  const val = el.value;
+  if(!j || j.notes === val) return;
+  const { error } = await sb.from('bookings').update({ notes: val }).eq('id', id);
+  if(error){ toast('Couldn’t save note'); return; }
+  j.notes = val; toast('Note saved');
+}
+
+boot();
+</script>
+</body>
+</html>

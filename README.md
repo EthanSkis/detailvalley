@@ -78,15 +78,27 @@ service address + town, the chosen slot, and total. Set a booking's `status` to 
 slot back up, or `confirmed` / `completed` to track it.
 
 **How availability works:**
-- Slots are generated in code from your hours, in Mountain Time, for the next
-  ~3 weeks. Edit `DAY_SLOTS` / `DAYS_AHEAD` near the top of the `<script>` in
-  `index.html` to change the times, the number of slots per day, or how far
-  ahead people can book.
+- Start times are generated in code, in Mountain Time, on a grid within your
+  working hours — and **each booking blocks off the time its job actually
+  needs** (package + vehicle size + add-ons), plus a travel/cleanup buffer. So a
+  quick Express only ties up ~1¾ hr while a Signature takes most of the day, and
+  the calendar never offers a time that would overlap an existing job.
 - Customers see a month-grid **calendar**: days with openings are highlighted
-  (with a dot), fully-booked or out-of-range days are greyed out, and tapping a
-  day reveals that day's available times.
-- Currently **2 slots/day** (a morning and an afternoon), Mon–Sat; Sunday closed.
-- A unique database index makes double-booking the same slot impossible.
+  (with a dot), full/out-of-range days are greyed out, and tapping a day reveals
+  that day's available start times (each labelled with roughly when it finishes).
+- Knobs near the top of the `<script>` in `index.html`:
+  - `HOURS` — working hours per weekday (omit a day to close it; Sunday is closed)
+  - `STEP_MIN` — spacing of offered start times (default 60 min)
+  - `BUFFER_MIN` — travel/cleanup gap kept between jobs (default 45 min)
+  - `MAX_JOBS_PER_DAY` — daily job cap (default **3**)
+  - `PKG_MIN` / `SIZE_MIN` / `ADDON_MIN` — how long each job runs, which drives
+    how much time it blocks. Tune these to your real time-per-car.
+  - `OPEN_FROM` — closed until this date (currently `2026-07-01`; `''` to remove)
+  - `MIN_LEAD_DAYS` — minimum lead time (currently **3** days out)
+  - `DAYS_AHEAD` — how big a window to show, starting from the first bookable day
+- **Double-booking is impossible**: a database exclusion constraint rejects any
+  two active jobs whose times overlap (and the calendar won't offer them in the
+  first place).
 
 **Security:** the key in `index.html` is the Supabase *publishable* key — it's
 meant to be public. Row-level security lets visitors only *create* a booking and

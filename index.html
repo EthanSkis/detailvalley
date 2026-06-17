@@ -719,13 +719,13 @@ function total(){
   state.addons.forEach(a=>{ if(!pkgIncludes(a)) t += ADDONS.find(x=>x.id===a).price; });
   return t;
 }
-function go(step){ state.step=step; render(); if(step===3) loadSlots(); }
+function go(step){ state.step=step; render(); if(step===4) loadSlots(); }
 function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
-const STEP_LABELS = {1:'Choose your service', 2:'Add extras', 3:'Pick a day & time', 4:'Your details', 5:'Confirm'};
+const STEP_LABELS = {1:'Choose your service', 2:'Your vehicle', 3:'Add extras', 4:'Pick a day & time', 5:'Your details', 6:'Confirm'};
 function topBar(n){
-  const segs = [1,2,3,4,5].map(i=>`<span class="seg ${i<=n?'on':''}"></span>`).join('');
+  const segs = [1,2,3,4,5,6].map(i=>`<span class="seg ${i<=n?'on':''}"></span>`).join('');
   return `<div class="modal-top">`+
-    `<span class="step-label">Step ${n} of 5 · ${STEP_LABELS[n]}</span>`+
+    `<span class="step-label">Step ${n} of 6 · ${STEP_LABELS[n]}</span>`+
     `<button class="close" onclick="closeBooking()" aria-label="Close">×</button></div>`+
     `<div class="steps" aria-hidden="true">${segs}</div>`;
 }
@@ -742,8 +742,6 @@ function render(){
     `;
   }
   else if(state.step===2){
-    state.addons = state.addons.filter(id=>!pkgIncludes(id));   // drop anything the chosen package already covers
-    const pkgNm = PACKAGES.find(x=>x.id===state.pkg)?.name || 'this package';
     inner.innerHTML = topBar(2) + `
       <h3>What are you driving?</h3>
       <p class="field-intro">Bigger or muddier rigs take more time, so pick the closest match.</p>
@@ -752,6 +750,14 @@ function render(){
           <span class="o-name">${s.name}</span>
           <span class="o-meta">${s.meta}</span>
         </button>`).join('')}
+      <button class="btn" onclick="go(3)">Continue · $${total()}</button>
+      <button class="back" onclick="go(1)">← Back</button>
+    `;
+  }
+  else if(state.step===3){
+    state.addons = state.addons.filter(id=>!pkgIncludes(id));   // drop anything the chosen package already covers
+    const pkgNm = PACKAGES.find(x=>x.id===state.pkg)?.name || 'this package';
+    inner.innerHTML = topBar(3) + `
       <h3>Want to add anything?</h3>
       <p class="field-intro">Optional — tap to add, or just keep going.</p>
       ${ADDONS.map(a=> pkgIncludes(a.id)
@@ -765,19 +771,19 @@ function render(){
             <span class="a-name">${a.name}</span>
             <span class="a-price">+$${a.price}</span>
           </label>`).join('')}
-      <button class="btn" onclick="go(3)">Continue · $${total()}</button>
-      <button class="back" onclick="go(1)">← Back</button>
-    `;
-  }
-  else if(state.step===3){
-    inner.innerHTML = topBar(3) + `
-      <h3>When works for you?</h3>
-      <div id="slotArea"><p class="slot-status">Loading available days…</p></div>
+      <button class="btn" onclick="go(4)">Continue · $${total()}</button>
       <button class="back" onclick="go(2)">← Back</button>
     `;
   }
   else if(state.step===4){
     inner.innerHTML = topBar(4) + `
+      <h3>When works for you?</h3>
+      <div id="slotArea"><p class="slot-status">Loading available days…</p></div>
+      <button class="back" onclick="go(3)">← Back</button>
+    `;
+  }
+  else if(state.step===5){
+    inner.innerHTML = topBar(5) + `
       <h3>Your details</h3>
       <p class="slot-chosen">${state.slot ? fmtDay(state.slot.instant)+' · '+fmtTime(state.slot.instant) : ''}</p>
       <div class="field"><label>Your name</label>
@@ -802,13 +808,13 @@ function render(){
       <input type="text" id="f-company" class="hp" tabindex="-1" autocomplete="off" aria-hidden="true">
       <p id="detailErr" class="form-err" hidden></p>
       <button class="btn" onclick="saveDetails()">Review booking</button>
-      <button class="back" onclick="go(3)">← Back</button>
+      <button class="back" onclick="go(4)">← Back</button>
     `;
   }
-  else if(state.step===5){
+  else if(state.step===6){
     const p = PACKAGES.find(x=>x.id===state.pkg);
     const sz = SIZES.find(s=>s.id===state.size);
-    inner.innerHTML = topBar(5) + `
+    inner.innerHTML = topBar(6) + `
       <h3>Does this look right?</h3>
       <div class="summary">
         <div class="summary-row"><span>${p.name}</span><span>$${p.price}</span></div>
@@ -821,10 +827,10 @@ function render(){
       </div>
       <p id="confirmErr" class="form-err" hidden></p>
       <button class="btn" id="confirmBtn" onclick="submitBooking()">Confirm booking</button>
-      <button class="back" onclick="go(4)">← Back</button>
+      <button class="back" onclick="go(5)">← Back</button>
     `;
   }
-  else if(state.step===6){
+  else if(state.step===7){
     inner.innerHTML = `
       <div class="done">
         <div class="tick"></div>
@@ -852,7 +858,7 @@ async function loadSlots(){
     if(area()) area().innerHTML = `<p class="slot-status">Couldn't load available times. Call or text <a href="tel:+12083151420">${BIZ_PHONE}</a> to book.</p>`;
     return;
   }
-  if(state.step!==3) return;
+  if(state.step!==4) return;
   slotCache = slots;
   if(!slots.length){
     area().innerHTML = `<p class="slot-status">No open days right now. Call or text <a href="tel:+12083151420">${BIZ_PHONE}</a> and we'll fit you in.</p>`;
@@ -943,7 +949,7 @@ function renderTimes(){
 
 function pickSlot(key){
   state.slot = (slotCache||[]).find(s=>s.key===key) || null;
-  if(state.slot) go(4);
+  if(state.slot) go(5);
 }
 
 /* Format a US phone as the customer types: (208) 315-1420 */
@@ -968,15 +974,15 @@ function saveDetails(){
   if(state.address.length < 5) return showErr(err,'Please enter the address we should come to.');
   if(!state.town) return showErr(err,'Please choose your town.');
   if(!state.utilities) return showErr(err,'Please let us know if a water tap and power outlet are available.');
-  go(5);
+  go(6);
 }
 
 async function submitBooking(){
   if(submitting) return;
   const btn = document.getElementById('confirmBtn');
   const err = document.getElementById('confirmErr');
-  if(!state.slot){ go(3); return; }
-  if(state.hp){ go(6); return; }                       // honeypot: bot, skip silently
+  if(!state.slot){ go(4); return; }
+  if(state.hp){ go(7); return; }                       // honeypot: bot, skip silently
   if(!sb) return showErr(err, `Booking is offline right now — call or text ${BIZ_PHONE}.`);
   submitting = true; if(btn){ btn.disabled=true; btn.textContent='Booking…'; }
   const sz = SIZES.find(s=>s.id===state.size);
@@ -996,13 +1002,13 @@ async function submitBooking(){
   if(error){
     if(error.code==='23505' || error.code==='23P01'){
       showErr(err,'Sorry — that time was just booked. Choose another.');
-      setTimeout(()=>go(3), 1300);
+      setTimeout(()=>go(4), 1300);
     } else {
       showErr(err, `Couldn't complete the booking. Call or text ${BIZ_PHONE}.`);
     }
     return;
   }
-  go(6);
+  go(7);
 }
 </script>
 </body>

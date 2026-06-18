@@ -146,38 +146,47 @@
       orbs.forEach(function (o) {
         var px = (o.x+Math.sin(t*o.sp+o.ph)*0.12)*w, py = (o.y+Math.cos(t*o.sp*0.8+o.ph)*0.08)*h, rr = o.r*Math.min(w, h);
         var g = ctx.createRadialGradient(px, py, 0, px, py, rr);
-        g.addColorStop(0, 'rgba(45,95,155,0.12)'); g.addColorStop(1, 'rgba(45,95,155,0)');
+        g.addColorStop(0, 'rgba(45,95,155,0.20)'); g.addColorStop(1, 'rgba(45,95,155,0)');
         ctx.fillStyle = g; ctx.beginPath(); ctx.arc(px, py, rr, 0, 6.2832); ctx.fill();
       });
       ctx.restore();
-      var span = Math.hypot(w, h), prog = ((t*0.09*mult)%1.7)-0.35;
+      var span = Math.hypot(w, h), prog = ((t*0.16*mult)%1.7)-0.35;
       ctx.save(); ctx.globalCompositeOperation = 'lighter';
       ctx.translate(w/2, h/2); ctx.rotate(-0.62);
       var bx = (prog-0.5)*span*1.25, bw = span*0.55;
       var lg = ctx.createLinearGradient(bx-bw/2, 0, bx+bw/2, 0);
-      lg.addColorStop(0, 'rgba(130,175,225,0)'); lg.addColorStop(0.42, 'rgba(150,195,235,0.05)');
-      lg.addColorStop(0.5, 'rgba(190,220,250,0.16)'); lg.addColorStop(0.58, 'rgba(205,150,95,0.09)');
+      lg.addColorStop(0, 'rgba(130,175,225,0)'); lg.addColorStop(0.42, 'rgba(150,195,235,0.10)');
+      lg.addColorStop(0.5, 'rgba(190,220,250,0.30)'); lg.addColorStop(0.58, 'rgba(205,150,95,0.16)');
       lg.addColorStop(1, 'rgba(130,175,225,0)');
       ctx.fillStyle = lg; ctx.fillRect(-span, -span, span*2, span*2);
       ctx.restore();
       glints.forEach(function (gl) {
         var sweep = Math.max(0, 1-Math.abs(gl.x-prog)*5);
-        var tw = 0.35+0.65*Math.abs(Math.sin(t*1.1*mult+gl.ph));
-        var a = Math.min(1, tw*0.38+sweep*0.9);
-        spark(gl.x*w, gl.y*h, gl.sz, a*0.8, sweep>0.3?'226,190,150':'208,226,244');
+        var tw = 0.4+0.6*Math.abs(Math.sin(t*1.1*mult+gl.ph));
+        var a = Math.min(1, tw*0.5+sweep*0.95);
+        spark(gl.x*w, gl.y*h, gl.sz, a*0.95, sweep>0.3?'226,190,150':'208,226,244');
       });
     }
 
+    function paint(t) {
+      if (!w || !h) return;
+      variant === 'alpine' ? drawAlpine(t) : variant === 'droplets' ? drawDroplets(t) : drawSheen(t);
+    }
     function frame(ts) {
       if (!t0) t0 = ts;
-      var t = (ts-t0)/1000;
-      if (w && h) { variant === 'alpine' ? drawAlpine(t) : variant === 'droplets' ? drawDroplets(t) : drawSheen(t); }
+      paint((ts-t0)/1000);
       requestAnimationFrame(frame);
     }
 
-    window.addEventListener('resize', resize);
+    /* Accessibility: under prefers-reduced-motion we don't animate, but instead of
+       a blank canvas we paint a single calm static frame so the backdrop is still
+       visible (no motion). Repaint that frame on resize. */
+    var rm = window.matchMedia ? window.matchMedia('(prefers-reduced-motion: reduce)') : null;
+    var reduce = !!(rm && rm.matches);
+    window.addEventListener('resize', function () { resize(); if (reduce) paint(5.3); });
     resize();
-    requestAnimationFrame(frame);
+    if (reduce) paint(5.3);
+    else requestAnimationFrame(frame);
   }
 
   function boot() {

@@ -402,11 +402,27 @@
     .hours-row{margin-left:auto;margin-right:auto}
     .socials{justify-content:center}
   }
+
+  /* ---------- ANIMATED HERO BACKGROUND ---------- */
+  /* Lightweight canvas loop behind the hero headline (see dv-hero-bg.js).
+     header already sets position:relative / background:var(--navy) / overflow:hidden,
+     and .hero-inner is already z-index:2 — so the canvas sits at z-index:0 behind
+     the content and .sheen layers above it at z-index:1. */
+  .dv-hero-bg{position:absolute;inset:0;width:100%;height:100%;display:block;z-index:0}
+  .sheen{z-index:1}
+  /* Calm zone so the white headline stays legible over the motion */
+  header::after{
+    content:"";position:absolute;inset:0;z-index:1;pointer-events:none;
+    background:radial-gradient(72% 64% at 50% 50%, rgba(7,20,34,.5) 0%, rgba(7,20,34,0) 74%);
+  }
+  /* Accessibility: respect reduced-motion -> fall back to solid navy */
+  @media (prefers-reduced-motion: reduce){ .dv-hero-bg{display:none} }
 </style>
 </head>
 <body>
 
 <header>
+  <canvas class="dv-hero-bg" data-variant="sheen"></canvas>
   <div class="sheen"></div>
   <div class="hero-inner">
     <div class="brand-lockup">
@@ -1082,5 +1098,7 @@ async function submitBooking(){
   go(6);
 }
 </script>
+<!-- Animated hero background — auto-inits every canvas.dv-hero-bg on the page -->
+<script src="dv-hero-bg.js" defer></script>
 </body>
 </html>

@@ -415,8 +415,8 @@
     content:"";position:absolute;inset:0;z-index:1;pointer-events:none;
     background:radial-gradient(72% 64% at 50% 50%, rgba(7,20,34,.5) 0%, rgba(7,20,34,0) 74%);
   }
-  /* Accessibility: respect reduced-motion -> fall back to solid navy */
-  @media (prefers-reduced-motion: reduce){ .dv-hero-bg{display:none} }
+  /* Accessibility: under reduced-motion the script paints one static (non-moving)
+     sheen frame instead of animating — see dv-hero-bg.js. No CSS hide needed. */
 </style>
 </head>
 <body>

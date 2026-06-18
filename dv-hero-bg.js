@@ -38,11 +38,17 @@
 
     function resize() {
       var r = canvas.getBoundingClientRect();
-      if (!r.width || !r.height) return;
-      w = r.width; h = r.height;
+      if (!r.width || !r.height) return false;
+      var nw = r.width, nh = r.height;
+      /* Ignore resize events that don't actually change our size. Mobile browsers
+         fire 'resize' repeatedly while the URL bar slides in/out during scroll;
+         re-running this (and re-seeding) on each one is what made the starfield
+         appear to jump around ~every frame while scrolling. */
+      if (Math.round(nw) === Math.round(w) && Math.round(nh) === Math.round(h)) return false;
+      w = nw; h = nh;
       canvas.width = Math.round(w*dpr); canvas.height = Math.round(h*dpr);
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-      seed();
+      return true;
     }
 
     function spark(x, y, size, alpha, rgb) {
@@ -183,7 +189,10 @@
        visible (no motion). Repaint that frame on resize. */
     var rm = window.matchMedia ? window.matchMedia('(prefers-reduced-motion: reduce)') : null;
     var reduce = !!(rm && rm.matches);
-    window.addEventListener('resize', function () { resize(); if (reduce) paint(5.3); });
+    /* Seed once: positions are normalised (0..1) and scaled to w/h at draw time,
+       so they adapt to any size without re-seeding (which would teleport them). */
+    seed();
+    window.addEventListener('resize', function () { if (resize() && reduce) paint(5.3); });
     resize();
     if (reduce) paint(5.3);
     else requestAnimationFrame(frame);

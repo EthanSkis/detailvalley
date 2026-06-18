@@ -14,12 +14,63 @@
     var w = 0, h = 0, t0 = 0, lastT = 0;
     var stars = [], sparks = [], ridges = [], drops = [], orbs = [], glints = [];
 
+    /* Keep-out rectangles: the hero's text/UI boxes (logo, badge, headline,
+       lead, button...) in canvas-normalised space, so decorative points never
+       spawn on top of them. Falls back to no rectangles (pure random) if the
+       layout can't be measured or there is no recognisable hero content. */
+    function avoidEls() {
+      var host = (canvas.closest && canvas.closest('header')) || canvas.parentElement;
+      if (!host) return [];
+      var scope = host.querySelector('.hero-inner') || host;
+      var kids = scope.children, out = [];
+      for (var i = 0; i < kids.length; i++) {
+        var el = kids[i];
+        if (el === canvas || (el.classList && el.classList.contains('sheen'))) continue;
+        out.push(el);
+      }
+      return out;
+    }
+    function avoidRects() {
+      var cr = canvas.getBoundingClientRect(), rects = [];
+      if (!cr.width || !cr.height) return rects;
+      var els = avoidEls(), padX = 0.03, padY = 0.04;
+      for (var i = 0; i < els.length; i++) {
+        var b = els[i].getBoundingClientRect();
+        if (!b.width || !b.height) continue;
+        rects.push({
+          x0: (b.left - cr.left) / cr.width - padX,
+          y0: (b.top - cr.top) / cr.height - padY,
+          x1: (b.right - cr.left) / cr.width + padX,
+          y1: (b.bottom - cr.top) / cr.height + padY
+        });
+      }
+      return rects;
+    }
+    function clear(x, y, rects) {
+      for (var i = 0; i < rects.length; i++) {
+        var r = rects[i];
+        if (x >= r.x0 && x <= r.x1 && y >= r.y0 && y <= r.y1) return false;
+      }
+      return true;
+    }
+    /* A point in [0,1]x[yMin,yMin+ySpan] that clears every keep-out rect.
+       Returns null after many tries (cramped layout) so the caller can skip it
+       rather than place a star on the text. */
+    function spot(rects, yMin, ySpan) {
+      for (var k = 0; k < 40; k++) {
+        var x = R(), y = yMin + R() * ySpan;
+        if (clear(x, y, rects)) return { x: x, y: y };
+      }
+      return null;
+    }
+
     function seed() {
+      var av = avoidRects();
       if (variant === 'alpine') {
         stars = [];
-        for (var i = 0; i < 44; i++) stars.push({ x: R(), y: R()*0.62, r: R()*1.3+0.4, ph: R()*6.28, sp: (R()*1.5+0.4)*mult, cu: R() < 0.16 });
+        for (var i = 0; i < 44; i++) { var sp1 = spot(av, 0, 0.62); if (!sp1) continue; stars.push({ x: sp1.x, y: sp1.y, r: R()*1.3+0.4, ph: R()*6.28, sp: (R()*1.5+0.4)*mult, cu: R() < 0.16 }); }
         sparks = [];
-        for (var j = 0; j < 4; j++) sparks.push({ x: R(), y: R()*0.42+0.06, ph: R()*6.28, sp: (R()*0.035+0.018)*mult, sz: R()*6+5 });
+        for (var j = 0; j < 4; j++) { var sp2 = spot(av, 0.06, 0.42); if (!sp2) continue; sparks.push({ x: sp2.x, y: sp2.y, ph: R()*6.28, sp: (R()*0.035+0.018)*mult, sz: R()*6+5 }); }
         ridges = [
           { baseY: 0.72, amp: 0.05,  sp: 0.006*mult, col: '#173f60', layers: [[1.3,0.0],[2.6,1.1],[0.8,2.0]] },
           { baseY: 0.83, amp: 0.07,  sp: 0.012*mult, col: '#0f2c48', layers: [[1.1,0.5],[2.2,1.7],[3.4,0.3]] },
@@ -32,7 +83,7 @@
         orbs = [];
         for (var o = 0; o < 3; o++) orbs.push({ x: R(), y: R(), r: R()*0.42+0.42, ph: R()*6.28, sp: (R()*0.04+0.02)*mult });
         glints = [];
-        for (var g = 0; g < 8; g++) glints.push({ x: R(), y: R()*0.7+0.13, sz: R()*6+5, ph: R()*6.28 });
+        for (var g = 0; g < 8; g++) { var sp3 = spot(av, 0.13, 0.7); if (!sp3) continue; glints.push({ x: sp3.x, y: sp3.y, sz: R()*6+5, ph: R()*6.28 }); }
       }
     }
 
@@ -189,11 +240,17 @@
        visible (no motion). Repaint that frame on resize. */
     var rm = window.matchMedia ? window.matchMedia('(prefers-reduced-motion: reduce)') : null;
     var reduce = !!(rm && rm.matches);
-    /* Seed once: positions are normalised (0..1) and scaled to w/h at draw time,
-       so they adapt to any size without re-seeding (which would teleport them). */
-    seed();
-    window.addEventListener('resize', function () { if (resize() && reduce) paint(5.3); });
+    function reseed() { seed(); if (reduce) paint(5.3); }
+    /* Place once now, then re-place only when the layout genuinely changes, so the
+       keep-out zones stay aligned with the text:
+         - a real resize (resize() returns true) — NOT the mobile URL-bar scroll
+           storm, which is filtered out, so this never causes the scrolling jitter;
+         - once web fonts load, since the headline reflows and moves the text boxes.
+       Positions are normalised (0..1) and scaled to w/h at draw time. */
     resize();
+    seed();
+    window.addEventListener('resize', function () { if (resize()) reseed(); });
+    if (document.fonts && document.fonts.ready && document.fonts.ready.then) document.fonts.ready.then(reseed);
     if (reduce) paint(5.3);
     else requestAnimationFrame(frame);
   }

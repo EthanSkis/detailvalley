@@ -14,10 +14,13 @@ Supabase client from a CDN).
 ## The site
 
 `index.html` is the production site. Open it in any browser to preview it, or
-host it on any static host.
+host it on any static host. `service-areas.html` is a companion local-SEO page
+covering the towns we serve (McCall · Cascade · Donnelly). `robots.txt` and
+`sitemap.xml` help search engines crawl the site (the sitemap lists the public
+pages; `admin.html` is disallowed).
 
-> `index.html`, `logo.svg`, and `logo.png` must live in the **same folder** —
-> the page references them by relative path.
+> `index.html`, `service-areas.html`, `logo.svg`, and `logo.png` must live in
+> the **same folder** — the pages reference them by relative path.
 
 ### Deploy on GitHub Pages
 1. Repo **Settings → Pages**

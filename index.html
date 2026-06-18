@@ -466,7 +466,7 @@
     </div>
 
     <div class="pkg featured">
-      <div class="pkg-head"><span class="pkg-name">Full Detail</span><span class="pkg-price">$150</span></div>
+      <div class="pkg-head"><span class="pkg-name">Full Detail</span><span class="pkg-price">$175</span></div>
       <ul>
         <li>Everything in Express</li>
         <li>Deep interior clean — door panels, vents, crevices</li>
@@ -476,11 +476,11 @@
         <li>Door jambs &amp; trim dressed</li>
         <li>Streak-free glass &amp; plastics conditioned</li>
       </ul>
-      <button class="pkg-btn" onclick="openBooking('full')">Book Full Detail — $150</button>
+      <button class="pkg-btn" onclick="openBooking('full')">Book Full Detail — $175</button>
     </div>
 
     <div class="pkg">
-      <div class="pkg-head"><span class="pkg-name">Signature</span><span class="pkg-price">$210</span></div>
+      <div class="pkg-head"><span class="pkg-name">Signature</span><span class="pkg-price">$240</span></div>
       <ul>
         <li>Everything in Full Detail</li>
         <li>Seats &amp; carpets shampooed &amp; extracted</li>
@@ -490,7 +490,7 @@
         <li>Tires &amp; exterior trim dressed</li>
         <li>Finished with a fresh scent</li>
       </ul>
-      <button class="pkg-btn" onclick="openBooking('signature')">Book Signature — $210</button>
+      <button class="pkg-btn" onclick="openBooking('signature')">Book Signature — $240</button>
     </div>
 
     </div>
@@ -734,8 +734,8 @@ async function availableSlots(){
 
 const PACKAGES = [
   {id:'express',   name:'Express', price:60, meta:'Wash, vacuum, windows · ~1 hr'},
-  {id:'full',      name:'Full Detail', price:150, meta:'Deep clean, clay, wax · ~3 hrs'},
-  {id:'signature', name:'Signature', price:210, meta:'Everything — seats, engine bay, double wax · ~4½ hrs', includes:['seats','engine']},
+  {id:'full',      name:'Full Detail', price:175, meta:'Deep clean, clay, wax · ~3 hrs'},
+  {id:'signature', name:'Signature', price:240, meta:'Everything — seats, engine bay, double wax · ~4½ hrs', includes:['seats','engine']},
 ];
 const ADDONS = [
   {id:'pet', name:'Pet hair removal', price:35},
@@ -745,8 +745,8 @@ const ADDONS = [
 // Vehicle size surcharge — bigger / dirtier rigs take more time. 'standard' is the default (no charge).
 const SIZES = [
   {id:'standard', name:'Car / sedan / coupe', meta:'No extra charge', price:0},
-  {id:'midsize',  name:'SUV / crossover / crew-cab truck', meta:'+$20 · more space to cover', price:20},
-  {id:'oversize', name:'Oversized or extra-dirty', meta:'+$40 · 3-row, lifted, heavy mud', price:40},
+  {id:'midsize',  name:'SUV / crossover / crew-cab truck', meta:'+$30 · more space to cover', price:30},
+  {id:'oversize', name:'Oversized or extra-dirty', meta:'+$60 · 3-row, lifted, heavy mud', price:60},
 ];
 
 function freshState(){ return {step:1, pkg:null, size:'standard', addons:[], slot:null, calDate:null, name:'', phone:'', address:'', town:'', utilities:null, hp:false}; }

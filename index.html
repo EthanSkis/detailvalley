@@ -453,47 +453,45 @@
 
     <div class="pkgs">
     <div class="pkg">
-      <div class="pkg-head"><span class="pkg-name">Express</span><span class="pkg-price">$60</span></div>
+      <div class="pkg-head"><span class="pkg-name">Maintenance Wash</span><span class="pkg-price">$65</span></div>
       <ul>
-        <li>Exterior hand wash &amp; dry</li>
+        <li>Pre-rinse &amp; foam pre-wash</li>
         <li>Wheels, tires &amp; wheel wells cleaned</li>
+        <li>Gentle two-bucket hand wash</li>
+        <li>Hand dry — no water spots</li>
         <li>Tire shine &amp; dressing</li>
-        <li>Interior vacuum (seats, carpets, mats)</li>
-        <li>Quick dash &amp; console wipe-down</li>
-        <li>Windows in &amp; out</li>
+        <li>Exterior glass cleaned</li>
       </ul>
-      <button class="pkg-btn" onclick="openBooking('express')">Book Express — $60</button>
+      <button class="pkg-btn" onclick="openBooking('maintenance')">Book Maintenance Wash — $65</button>
     </div>
 
     <div class="pkg featured">
-      <div class="pkg-head"><span class="pkg-name">Full Detail</span><span class="pkg-price">$150</span></div>
+      <div class="pkg-head"><span class="pkg-name">Full Detail</span><span class="pkg-price">$175</span></div>
       <ul>
-        <li>Everything in Express</li>
-        <li>Deep interior clean — door panels, vents, crevices</li>
-        <li>Floor mats deep-cleaned</li>
-        <li>Clay bar &amp; wax finish</li>
-        <li>Bug &amp; sap removal</li>
-        <li>Door jambs &amp; trim dressed</li>
-        <li>Streak-free glass &amp; plastics conditioned</li>
+        <li>Everything in the Maintenance Wash</li>
+        <li>Full interior vacuum — seats, carpets &amp; mats</li>
+        <li>Carpet &amp; upholstery shampoo</li>
+        <li>Interior surfaces &amp; vents cleaned</li>
+        <li>Interior glass cleaned</li>
+        <li>Dash &amp; trim dressed</li>
       </ul>
-      <button class="pkg-btn" onclick="openBooking('full')">Book Full Detail — $150</button>
+      <button class="pkg-btn" onclick="openBooking('full')">Book Full Detail — $175</button>
     </div>
 
     <div class="pkg">
-      <div class="pkg-head"><span class="pkg-name">Signature</span><span class="pkg-price">$210</span></div>
+      <div class="pkg-head"><span class="pkg-name">Showroom</span><span class="pkg-price">$260</span></div>
       <ul>
-        <li>Everything in Full Detail</li>
-        <li>Seats &amp; carpets shampooed &amp; extracted</li>
-        <li>Engine bay cleaned &amp; dressed</li>
-        <li>Double coat of hand wax — deeper gloss, longer protection</li>
-        <li>Vents, buttons &amp; interior trim detailed</li>
-        <li>Tires &amp; exterior trim dressed</li>
-        <li>Finished with a fresh scent</li>
+        <li>Everything in the Full Detail</li>
+        <li>Clay bar paint decontamination</li>
+        <li>Wax protection — sealed &amp; glossed</li>
+        <li>Smooth, slick finish that beads water</li>
+        <li>Clean, smooth, protected, glossed</li>
       </ul>
-      <button class="pkg-btn" onclick="openBooking('signature')">Book Signature — $210</button>
+      <button class="pkg-btn" onclick="openBooking('showroom')">Book Showroom — $260</button>
     </div>
 
     </div>
+    <p class="section-sub" style="margin-top:22px">Showroom is a clay-and-wax finish — clean, smooth, protected and glossed. It's not paint correction.</p>
   </div>
 </section>
 
@@ -503,7 +501,7 @@
     <h2 class="section-title">Why Valley County books Detail Valley</h2>
     <div class="prose">
       <p>Detail Valley is a mobile car detailing service built around one simple idea: a spotless car shouldn't cost you a Saturday. We bring all our own gear and pro-grade products straight to your home or workplace, so you get a showroom finish without ever leaving your driveway.</p>
-      <p>Every detail is done by hand. From a quick Express refresh to a full interior-and-exterior Signature detail with a clay-bar and wax finish, we treat each vehicle like it's our own — wheels, glass, seats, carpets, and trim all included. No rushed, assembly-line work and no surprise fees on the day.</p>
+      <p>Every detail is done by hand. From a quick Maintenance Wash to a full interior-and-exterior detail or our Showroom clay-and-wax finish, we treat each vehicle like it's our own — wheels, glass, seats, carpets, and trim all included. No rushed, assembly-line work and no surprise fees on the day.</p>
       <p>We're proud to serve Valley County, Idaho and the surrounding communities, including McCall, Cascade, and Donnelly. Compare our <a href="#packages">detailing packages</a>, see the <a href="service-areas.html">areas we serve in Valley County</a>, or book your detail online in under a minute.</p>
     </div>
   </div>
@@ -638,9 +636,9 @@ const STEP_MIN = 60;            // spacing of offered start times (minutes)
 const BUFFER_MIN = 45;          // travel / cleanup gap kept between jobs
 const MAX_JOBS_PER_DAY = 3;     // never offer more than this many jobs in one day
 // How long each job runs (minutes) — drives how much time a booking blocks off.
-const PKG_MIN   = { express:60, full:180, signature:270 };
+const PKG_MIN   = { maintenance:75, full:210, showroom:300 };
 const SIZE_MIN  = { standard:0, midsize:30, oversize:60 };
-const ADDON_MIN = { pet:30, seats:45, engine:30 };
+const ADDON_MIN = { pet:30, dirt:30, engine:20, intglass:10, wax:20 };
 const DOW = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
 
 /* Minutes SLOT_TZ is offset from UTC at a given instant (handles DST). */
@@ -733,20 +731,22 @@ async function availableSlots(){
 }
 
 const PACKAGES = [
-  {id:'express',   name:'Express', price:60, meta:'Wash, vacuum, windows · ~1 hr'},
-  {id:'full',      name:'Full Detail', price:150, meta:'Deep clean, clay, wax · ~3 hrs'},
-  {id:'signature', name:'Signature', price:210, meta:'Everything — seats, engine bay, double wax · ~4½ hrs', includes:['seats','engine']},
+  {id:'maintenance', name:'Maintenance Wash', price:65, meta:'Exterior wash, wheels, tires, glass · ~1¼ hr'},
+  {id:'full',        name:'Full Detail', price:175, meta:'Adds full interior clean & shampoo · ~3½ hrs', includes:['intglass']},
+  {id:'showroom',    name:'Showroom', price:260, meta:'Adds clay bar & wax protection · ~5 hrs', includes:['intglass']},
 ];
 const ADDONS = [
-  {id:'pet', name:'Pet hair removal', price:35},
-  {id:'seats', name:'Seat shampoo', price:45},
-  {id:'engine', name:'Engine bay clean', price:30},
+  {id:'pet', name:'Pet hair removal', price:25},
+  {id:'dirt', name:'Excessive dirt, mud or sand', price:30},
+  {id:'engine', name:'Engine bay wipe-down', price:25},
+  {id:'intglass', name:'Interior glass refresh', price:15},
+  {id:'wax', name:'Extra wax coat — longer protection', price:30},
 ];
-// Vehicle size surcharge — bigger / dirtier rigs take more time. 'standard' is the default (no charge).
+// Vehicle size surcharge — bigger rigs take more time. 'standard' is the default (no charge).
 const SIZES = [
-  {id:'standard', name:'Car / sedan / coupe', meta:'No extra charge', price:0},
-  {id:'midsize',  name:'SUV / crossover / crew-cab truck', meta:'+$20 · more space to cover', price:20},
-  {id:'oversize', name:'Oversized or extra-dirty', meta:'+$40 · 3-row, lifted, heavy mud', price:40},
+  {id:'standard', name:'Sedan / coupe', meta:'No extra charge', price:0},
+  {id:'midsize',  name:'SUV / crossover / small truck', meta:'+$25 · more surface to cover', price:25},
+  {id:'oversize', name:'Large truck / 3-row SUV / van', meta:'+$50 · the big rigs', price:50},
 ];
 
 function freshState(){ return {step:1, pkg:null, size:'standard', addons:[], slot:null, calDate:null, name:'', phone:'', address:'', town:'', utilities:null, hp:false}; }
@@ -839,7 +839,7 @@ function render(){
     const pkgNm = PACKAGES.find(x=>x.id===state.pkg)?.name || 'this package';
     inner.innerHTML = topBar(2) + `
       <h3>What are you driving?</h3>
-      <p class="field-intro">Bigger or muddier rigs take more time, so pick the closest match.</p>
+      <p class="field-intro">Bigger rigs take more time, so pick the closest match.</p>
       ${SIZES.map(s=>`
         <button class="opt size-opt ${state.size===s.id?'sel':''}" onclick="pickSize('${s.id}')">
           <span class="o-name">${s.name}</span>

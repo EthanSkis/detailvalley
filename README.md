@@ -84,7 +84,7 @@ slot back up, or `confirmed` / `completed` to track it.
 - Start times are generated in code, in Mountain Time, on a grid within your
   working hours — and **each booking blocks off the time its job actually
   needs** (package + vehicle size + add-ons), plus a travel/cleanup buffer. So a
-  quick Express only ties up ~1¾ hr while a Signature takes most of the day, and
+  quick Maintenance Wash only ties up ~1¼ hr while a Showroom takes most of the day, and
   the calendar never offers a time that would overlap an existing job.
 - Customers see a month-grid **calendar**: days with openings are highlighted
   (with a dot), full/out-of-range days are greyed out, and tapping a day reveals

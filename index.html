@@ -367,10 +367,16 @@
     .mobile-cta{position:fixed;left:0;right:0;bottom:0;z-index:40;display:block;
       padding:12px 16px calc(12px + env(safe-area-inset-bottom));
       background:rgba(255,255,255,.97);backdrop-filter:blur(8px);
-      border-top:1px solid var(--line);box-shadow:0 -6px 22px rgba(15,44,68,.1)}
+      border-top:1px solid var(--line);box-shadow:0 -6px 22px rgba(15,44,68,.1);
+      transform:translateY(120%);transition:transform .28s ease;will-change:transform}
+    /* Revealed once the hero "Book a detail" button scrolls out of view (see script) */
+    .mobile-cta.show{transform:translateY(0)}
     .mobile-cta .btn{display:block;width:100%;text-align:center;font-size:1.12rem;padding:16px}
     body{padding-bottom:88px}
     body.modal-open .mobile-cta{display:none}
+  }
+  @media(max-width:819px) and (prefers-reduced-motion:reduce){
+    .mobile-cta{transition:none}
   }
 
   /* ---------- DESKTOP / WIDER SCREENS ---------- */
@@ -440,7 +446,7 @@
     <span class="badge"><span class="dot"></span>Valley County · We come to you</span>
     <h1>A spotless car,<br>without leaving <span class="accent">your driveway.</span></h1>
     <p class="lead">Professional mobile detailing brought to your home or workplace. You hand us the keys, we hand back a car that looks brand new.</p>
-    <button class="btn" onclick="openBooking()">Book a detail</button>
+    <button class="btn" id="heroBook" onclick="openBooking()">Book a detail</button>
     <p class="reassure">No deposit to book. Pay when the work is done.</p>
   </div>
 </header>
@@ -1114,6 +1120,19 @@ async function submitBooking(){
   }
   go(6);
 }
+
+/* Sticky bottom "Book a detail" bar: stays hidden while the hero button is in
+   view, then slides up once it scrolls off-screen — so the top button visually
+   hands off to the sticky one. Behaves exactly like before once revealed. */
+(function(){
+  const hero = document.getElementById('heroBook');
+  const bar  = document.querySelector('.mobile-cta');
+  if(!hero || !bar) return;
+  if(!('IntersectionObserver' in window)){ bar.classList.add('show'); return; }
+  new IntersectionObserver(function(entries){
+    bar.classList.toggle('show', !entries[0].isIntersecting);
+  }, {threshold:0}).observe(hero);
+})();
 </script>
 <!-- Animated hero background — auto-inits every canvas.dv-hero-bg on the page -->
 <script src="dv-hero-bg.js" defer></script>

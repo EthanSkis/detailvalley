@@ -188,6 +188,11 @@
   .pkg-head{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:16px;padding-bottom:14px;border-bottom:1px solid var(--line)}
   .pkg-name{font-family:'Sora',sans-serif;font-size:1.25rem;font-weight:600}
   .pkg-price{font-family:'Sora',sans-serif;font-size:1.5rem;font-weight:700;color:var(--blue)}
+  /* Interior-only — a standalone option that sits apart from the three-tier ladder */
+  .pkg-inside{margin-top:22px;background:var(--mist);border-style:dashed}
+  .pkg-inside .pkg-head{border-bottom:none;padding-bottom:0;margin-bottom:10px}
+  .inside-tag{font-family:'Sora',sans-serif;font-size:.62rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--blue);background:var(--white);border:1px solid var(--line);padding:3px 8px;border-radius:5px;margin-left:10px;vertical-align:middle;white-space:nowrap}
+  .inside-sub{color:var(--slate);font-size:.98rem;line-height:1.55;margin:0}
   .pkg ul{list-style:none}
   .pkg li{padding:6px 0 6px 28px;position:relative;font-size:.96rem;color:var(--ink)}
   .pkg li::before{
@@ -362,10 +367,16 @@
     .mobile-cta{position:fixed;left:0;right:0;bottom:0;z-index:40;display:block;
       padding:12px 16px calc(12px + env(safe-area-inset-bottom));
       background:rgba(255,255,255,.97);backdrop-filter:blur(8px);
-      border-top:1px solid var(--line);box-shadow:0 -6px 22px rgba(15,44,68,.1)}
+      border-top:1px solid var(--line);box-shadow:0 -6px 22px rgba(15,44,68,.1);
+      transform:translateY(120%);transition:transform .28s ease;will-change:transform}
+    /* Revealed once the hero "Book a detail" button scrolls out of view (see script) */
+    .mobile-cta.show{transform:translateY(0)}
     .mobile-cta .btn{display:block;width:100%;text-align:center;font-size:1.12rem;padding:16px}
     body{padding-bottom:88px}
     body.modal-open .mobile-cta{display:none}
+  }
+  @media(max-width:819px) and (prefers-reduced-motion:reduce){
+    .mobile-cta{transition:none}
   }
 
   /* ---------- DESKTOP / WIDER SCREENS ---------- */
@@ -391,6 +402,9 @@
     .pkgs{display:grid;grid-template-columns:repeat(3,1fr);gap:22px;align-items:stretch}
     .pkg{margin-bottom:0}
     .pkg.featured{transform:translateY(-10px)}
+    .pkg-inside{display:grid;grid-template-columns:1fr auto;align-items:center;gap:28px}
+    .pkg-inside .pkg-head{margin-bottom:8px}
+    .pkg-inside .pkg-btn{width:auto;margin-top:0;white-space:nowrap}
 
     .final{padding:92px 24px}
     .final h2{font-size:2.2rem}
@@ -432,7 +446,7 @@
     <span class="badge"><span class="dot"></span>Valley County · We come to you</span>
     <h1>A spotless car,<br>without leaving <span class="accent">your driveway.</span></h1>
     <p class="lead">Professional mobile detailing brought to your home or workplace. You hand us the keys, we hand back a car that looks brand new.</p>
-    <button class="btn" onclick="openBooking()">Book a detail</button>
+    <button class="btn" id="heroBook" onclick="openBooking()">Book a detail</button>
     <p class="reassure">No deposit to book. Pay when the work is done.</p>
   </div>
 </header>
@@ -492,6 +506,14 @@
 
     </div>
     <p class="section-sub" style="margin-top:22px">Showroom is a clay-and-wax finish — clean, smooth, protected and glossed. It's not paint correction.</p>
+
+    <div class="pkg pkg-inside">
+      <div>
+        <div class="pkg-head"><span class="pkg-name">Interior Detail <span class="inside-tag">Inside only</span></span><span class="pkg-price">$145</span></div>
+        <p class="inside-sub">Just need the inside done? Full interior vacuum, carpet &amp; upholstery shampoo, surfaces, vents, interior glass and dressed trim — no exterior wash.</p>
+      </div>
+      <button class="pkg-btn" onclick="openBooking('interior')">Book Interior Detail — $145</button>
+    </div>
   </div>
 </section>
 
@@ -636,7 +658,7 @@ const STEP_MIN = 60;            // spacing of offered start times (minutes)
 const BUFFER_MIN = 45;          // travel / cleanup gap kept between jobs
 const MAX_JOBS_PER_DAY = 3;     // never offer more than this many jobs in one day
 // How long each job runs (minutes) — drives how much time a booking blocks off.
-const PKG_MIN   = { maintenance:75, full:210, showroom:300 };
+const PKG_MIN   = { maintenance:75, interior:150, full:210, showroom:300 };
 const SIZE_MIN  = { standard:0, midsize:30, oversize:60 };
 const ADDON_MIN = { pet:30, dirt:30, engine:20, intglass:10, wax:20 };
 const DOW = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
@@ -732,6 +754,7 @@ async function availableSlots(){
 
 const PACKAGES = [
   {id:'maintenance', name:'Maintenance Wash', price:65, meta:'Exterior wash, wheels, tires, glass · ~1¼ hr'},
+  {id:'interior',    name:'Interior Detail', price:145, meta:'Inside only — vacuum, shampoo, surfaces & glass · ~2½ hrs', includes:['intglass']},
   {id:'full',        name:'Full Detail', price:175, meta:'Adds full interior clean & shampoo · ~3½ hrs', includes:['intglass']},
   {id:'showroom',    name:'Showroom', price:260, meta:'Adds clay bar & wax protection · ~5 hrs', includes:['intglass']},
 ];
@@ -1097,6 +1120,19 @@ async function submitBooking(){
   }
   go(6);
 }
+
+/* Sticky bottom "Book a detail" bar: stays hidden while the hero button is in
+   view, then slides up once it scrolls off-screen — so the top button visually
+   hands off to the sticky one. Behaves exactly like before once revealed. */
+(function(){
+  const hero = document.getElementById('heroBook');
+  const bar  = document.querySelector('.mobile-cta');
+  if(!hero || !bar) return;
+  if(!('IntersectionObserver' in window)){ bar.classList.add('show'); return; }
+  new IntersectionObserver(function(entries){
+    bar.classList.toggle('show', !entries[0].isIntersecting);
+  }, {threshold:0}).observe(hero);
+})();
 </script>
 <!-- Animated hero background — auto-inits every canvas.dv-hero-bg on the page -->
 <script src="dv-hero-bg.js" defer></script>

@@ -73,6 +73,16 @@ The booking flow is backed by a Supabase project (**valleydetail1**). Confirmed
 bookings are written to a `public.bookings` table, and the calendar only offers
 slots that aren't already taken.
 
+**Pricing is authoritative on the backend.** Each booking sends its structured
+selection (`pkg_id`, `size_id`, `addon_ids`) and a `BEFORE INSERT` trigger
+(`compute_booking_total`) recomputes `total_usd` from a canonical
+`public.service_prices` table — so the saved (and emailed) total always matches
+the advertised prices, even if the browser's copy is stale, cached, or tampered.
+The package already bundling an add-on (e.g. interior glass in Full/Showroom)
+isn't double-charged. **When you change a price, update it in *both* places:** the
+`PACKAGES` / `SIZES` / `ADDONS` arrays in `index.html` (what customers see) and
+the `public.service_prices` table (what gets charged). They must stay in sync.
+
 **See your bookings:** the easiest way is the [**owner dashboard**](#owner-dashboard-adminhtml)
 (`admin.html`) — a phone-friendly job board with one-tap status buttons. You can
 also read the raw rows in the Supabase dashboard → your project → **Table editor →

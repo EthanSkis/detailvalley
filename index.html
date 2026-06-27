@@ -1104,6 +1104,11 @@ async function submitBooking(){
     customer_phone: state.phone,
     address: state.address,
     town: state.town,
+    // Structured selection — the backend re-prices total_usd from these against its own
+    // canonical price list, so the saved/emailed total always matches the advertised cost.
+    pkg_id: state.pkg,
+    size_id: state.size,
+    addon_ids: state.addons,
     total_usd: total(),
     duration_min: jobMinutes(),
     status: 'pending'

@@ -84,6 +84,12 @@
   .wrap{max-width:760px;margin:0 auto;padding:0 24px}
   h1,h2,h3{font-family:'Sora',sans-serif;letter-spacing:-.015em}
   a{color:var(--blue)}
+  /* Keyboard users can jump past the hero straight to the content. */
+  .skip-link{position:absolute;left:-9999px;top:0;z-index:100;background:var(--white);color:var(--navy);
+    font-family:'Sora',sans-serif;font-weight:600;font-size:.95rem;padding:12px 20px;
+    border-radius:0 0 8px 0;text-decoration:none}
+  .skip-link:focus{left:0}
+  .skip-link:focus-visible{outline:3px solid var(--blue);outline-offset:-3px}
 
   /* ---------- HERO ---------- */
   header{position:relative;background:var(--navy);color:var(--white);padding:64px 24px 56px;overflow:hidden}
@@ -128,7 +134,7 @@
   footer .tag{font-size:.88rem;color:#8ba1b3;margin-bottom:14px}
   .foot-contact a{color:var(--white);text-decoration:none;font-weight:500;display:block;margin-bottom:8px;font-size:.92rem}
   .foot-contact a:hover{color:var(--copper)}
-  .foot-bottom{max-width:760px;margin:30px auto 0;padding-top:20px;border-top:1px solid rgba(255,255,255,.1);font-size:.8rem;color:#7e93a4}
+  .foot-bottom{max-width:760px;margin:30px auto 0;padding-top:20px;border-top:1px solid rgba(255,255,255,.1);font-size:.8rem;color:#8fa5b6}
 
   @media(min-width:820px){
     header{padding:96px 24px 80px}
@@ -140,6 +146,8 @@
 </style>
 </head>
 <body>
+
+<a class="skip-link" href="#main">Skip to content</a>
 
 <header>
   <div class="sheen"></div>
@@ -154,6 +162,8 @@
     <a class="btn" href="index.html#packages">Book a detail</a>
   </div>
 </header>
+
+<main id="main">
 
 <section>
   <div class="wrap">
@@ -200,6 +210,8 @@
     <a class="btn" href="index.html#packages">Book a detail</a>
   </div>
 </div>
+
+</main>
 
 <footer>
   <span class="name">Detail Valley</span>

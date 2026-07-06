@@ -647,16 +647,17 @@ const MIN_LEAD_DAYS = 3;             // earliest a customer can book — must be
 const OPEN_FROM = '2026-07-01';      // closed until this date (MT, 'YYYY-MM-DD'); set '' to remove
 const BIZ_PHONE  = '(208) 315-1420';
 // Working hours per weekday (0=Sun … 6=Sat). Omit a day to close it.
-// Posted hours: Mon–Fri 8–6, Sat 9–4. Start times are offered on a grid within
-// these hours, and each booking blocks off the time its job actually needs.
+// Posted hours: Mon–Fri 8–6, Sat 9–4. Jobs may only START at the times in
+// START_TIMES (and must still fit inside working hours); each booking blocks
+// off the time its job actually needs.
 const HOURS = {
   1:['08:00','18:00'], 2:['08:00','18:00'], 3:['08:00','18:00'],
   4:['08:00','18:00'], 5:['08:00','18:00'],
   6:['09:00','16:00']
 };
-const STEP_MIN = 60;            // spacing of offered start times (minutes)
+const START_TIMES = ['08:00','09:00','10:00']; // only arrival times offered
 const BUFFER_MIN = 45;          // travel / cleanup gap kept between jobs
-const MAX_JOBS_PER_DAY = 3;     // never offer more than this many jobs in one day
+const MAX_JOBS_PER_DAY = 1;     // never offer more than this many jobs in one day
 // How long each job runs (minutes) — drives how much time a booking blocks off.
 const PKG_MIN   = { maintenance:75, interior:150, full:210, showroom:300 };
 const SIZE_MIN  = { standard:0, midsize:30, oversize:60 };
@@ -703,8 +704,9 @@ function jobMinutes(){
   return (PKG_MIN[state.pkg] || 180) + (SIZE_MIN[state.size] || 0) + addons;
 }
 
-/* Every grid start that fits a jobMin-minute job inside working hours, within
-   the booking window, at/after the earliest bookable instant. */
+/* Every allowed start time (START_TIMES) that fits a jobMin-minute job inside
+   working hours, within the booking window, at/after the earliest bookable
+   instant. */
 function candidateStarts(jobMin){
   const out = [], now = new Date(), earliest = earliestBookable(now);
   const startDay = Math.floor((earliest - now.getTime())/86400000);
@@ -714,9 +716,12 @@ function candidateStarts(jobMin){
     if(!hrs) continue;
     const [oH,oM] = hrs[0].split(':').map(Number);
     const [cH,cM] = hrs[1].split(':').map(Number);
-    const closeMin = cH*60 + cM;
-    for(let t = oH*60+oM; t + jobMin <= closeMin; t += STEP_MIN){
-      const instant = mtToInstant(y,m,d,Math.floor(t/60),t%60);
+    const openMin = oH*60 + oM, closeMin = cH*60 + cM;
+    for(const st of START_TIMES){
+      const [sH,sM] = st.split(':').map(Number);
+      const t = sH*60 + sM;
+      if(t < openMin || t + jobMin > closeMin) continue;
+      const instant = mtToInstant(y,m,d,sH,sM);
       if(instant.getTime() < earliest) continue;
       const end = new Date(instant.getTime() + jobMin*60000);
       out.push({key:instant.getTime(), iso:instant.toISOString(), instant,

@@ -81,8 +81,9 @@ service address + town, the chosen slot, and total. Set a booking's `status` to 
 slot back up, or `confirmed` / `completed` to track it.
 
 **How availability works:**
-- Start times are generated in code, in Mountain Time, on a grid within your
-  working hours — and **each booking blocks off the time its job actually
+- Start times are generated in code, in Mountain Time, from a fixed list of
+  arrival times (`START_TIMES`, currently 8, 9, and 10am) that must fit within
+  your working hours — and **each booking blocks off the time its job actually
   needs** (package + vehicle size + add-ons), plus a travel/cleanup buffer. So a
   quick Maintenance Wash only ties up ~1¼ hr while a Showroom takes most of the day, and
   the calendar never offers a time that would overlap an existing job.
@@ -91,9 +92,9 @@ slot back up, or `confirmed` / `completed` to track it.
   that day's available start times (each labelled with roughly when it finishes).
 - Knobs near the top of the `<script>` in `index.html`:
   - `HOURS` — working hours per weekday (omit a day to close it; Sunday is closed)
-  - `STEP_MIN` — spacing of offered start times (default 60 min)
+  - `START_TIMES` — the only arrival times offered (currently 8, 9, 10am)
   - `BUFFER_MIN` — travel/cleanup gap kept between jobs (default 45 min)
-  - `MAX_JOBS_PER_DAY` — daily job cap (default **3**)
+  - `MAX_JOBS_PER_DAY` — daily job cap (currently **1** — one booking per day)
   - `PKG_MIN` / `SIZE_MIN` / `ADDON_MIN` — how long each job runs, which drives
     how much time it blocks. Tune these to your real time-per-car.
   - `OPEN_FROM` — closed until this date (currently `2026-07-01`; `''` to remove)

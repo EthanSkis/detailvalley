@@ -229,11 +229,15 @@
       if (!w || !h) return;
       variant === 'alpine' ? drawAlpine(t) : variant === 'droplets' ? drawDroplets(t) : drawSheen(t);
     }
+    var running = false;
     function frame(ts) {
+      if (!running) return;
       if (!t0) t0 = ts;
       paint((ts-t0)/1000);
       requestAnimationFrame(frame);
     }
+    function start() { if (running) return; running = true; requestAnimationFrame(frame); }
+    function stop() { running = false; }
 
     /* Accessibility: under prefers-reduced-motion we don't animate, but instead of
        a blank canvas we paint a single calm static frame so the backdrop is still
@@ -252,7 +256,15 @@
     window.addEventListener('resize', function () { if (resize()) reseed(); });
     if (document.fonts && document.fonts.ready && document.fonts.ready.then) document.fonts.ready.then(reseed);
     if (reduce) paint(5.3);
-    else requestAnimationFrame(frame);
+    /* Run the loop only while the canvas is actually on screen — no point
+       burning CPU/battery painting a backdrop the visitor has scrolled past.
+       Time is absolute ((ts-t0)/1000), so resuming mid-timeline is seamless. */
+    else if ('IntersectionObserver' in window) {
+      new IntersectionObserver(function (entries) {
+        entries[0].isIntersecting ? start() : stop();
+      }).observe(canvas);
+    }
+    else start();
   }
 
   function boot() {

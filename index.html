@@ -97,6 +97,12 @@
   }
   .wrap{max-width:760px;margin:0 auto;padding:0 24px}
   h1,h2,h3,.display{font-family:'Sora',sans-serif;letter-spacing:-.015em}
+  /* Keyboard users can jump past the hero straight to the packages. */
+  .skip-link{position:absolute;left:-9999px;top:0;z-index:100;background:var(--white);color:var(--navy);
+    font-family:'Sora',sans-serif;font-weight:600;font-size:.95rem;padding:12px 20px;
+    border-radius:0 0 8px 0;text-decoration:none}
+  .skip-link:focus{left:0}
+  .skip-link:focus-visible{outline:3px solid var(--blue);outline-offset:-3px}
 
   /* ---------- HERO ---------- */
   header{
@@ -236,7 +242,7 @@
   }
   .socials a:hover{transform:translateY(-2px);box-shadow:0 5px 14px rgba(0,0,0,.28)}
   .socials svg{width:22px;height:22px;display:block}
-  .foot-bottom{max-width:760px;margin:34px auto 0;padding-top:20px;border-top:1px solid rgba(255,255,255,.1);text-align:center;font-size:.8rem;color:#7e93a4}
+  .foot-bottom{max-width:760px;margin:34px auto 0;padding-top:20px;border-top:1px solid rgba(255,255,255,.1);text-align:center;font-size:.8rem;color:#8fa5b6}
 
   /* ---------- FOOTER PAYMENTS ---------- */
   .foot-pay{max-width:600px;margin:34px auto 0;padding-top:26px;border-top:1px solid rgba(255,255,255,.1);text-align:center}
@@ -435,6 +441,8 @@
 </head>
 <body>
 
+<a class="skip-link" href="#main">Skip to content</a>
+
 <header>
   <canvas class="dv-hero-bg" data-variant="sheen"></canvas>
   <div class="sheen"></div>
@@ -458,6 +466,8 @@
     <div class="spec"><div class="k">Guaranteed</div><div class="v">Not happy? We fix it</div></div>
   </div>
 </div>
+
+<main id="main">
 
 <section id="packages">
   <div class="wrap">
@@ -537,6 +547,8 @@
     <button class="btn" onclick="openBooking()">Book a detail</button>
   </div>
 </div>
+
+</main>
 
 <footer>
   <div class="foot-inner">
@@ -628,7 +640,7 @@
   <div class="modal" id="modalInner"></div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
 <script>
 /* ---------- Supabase ---------- */
 const SUPABASE_URL = 'https://utybbdrthxgsijplowup.supabase.co';
@@ -636,9 +648,15 @@ const SUPABASE_KEY = 'sb_publishable_48352eB1w0mLVwvLm3gXUg_BpGKN67o';
 // Public booking is always anonymous. persistSession:false keeps this client
 // from picking up an owner/admin login stored on the same domain (admin.html) —
 // otherwise the calendar's anon-only RPC would 403 for a signed-in owner.
-const sb = window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
-  auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false }
-}) : null;
+// Created lazily on first use so the CDN script can load with `defer`; every
+// first use (modal open, slot load, submit) happens well after page load.
+let _sb;
+function getSb(){
+  if(_sb === undefined) _sb = window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
+    auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false }
+  }) : null;
+  return _sb;
+}
 
 /* ---------- Availability config ---------- */
 const SLOT_TZ    = 'America/Boise';   // Mountain Time (McCall / Valley County)
@@ -737,6 +755,7 @@ function candidateStarts(jobMin){
 async function availableSlots(){
   const jobMin = jobMinutes();
   const all = candidateStarts(jobMin);
+  const sb = getSb();
   if(!sb || !all.length) return all;
   const from = new Date(all[0].key - 86400000).toISOString();
   const to   = new Date(all[all.length-1].key + 86400000).toISOString();
@@ -901,19 +920,19 @@ function render(){
     inner.innerHTML = topBar(4) + `
       <h3>Your details</h3>
       <p class="slot-chosen">${state.slot ? fmtDay(state.slot.instant)+' · '+fmtTime(state.slot.instant) : ''}</p>
-      <div class="field"><label>Your name</label>
+      <div class="field"><label for="f-name">Your name</label>
         <input id="f-name" value="${esc(state.name)}" placeholder="Jordan Smith" autocomplete="name" autocapitalize="words" enterkeyhint="next"></div>
-      <div class="field"><label>Phone number</label>
+      <div class="field"><label for="f-phone">Phone number</label>
         <input id="f-phone" type="tel" inputmode="tel" value="${esc(state.phone)}" placeholder="(208) 555-0123" autocomplete="tel" oninput="onPhoneInput(this)" enterkeyhint="next">
         <p class="hint">We'll text you here to confirm.</p></div>
-      <div class="field"><label>Where should we come?</label>
+      <div class="field"><label for="f-address">Where should we come?</label>
         <input id="f-address" value="${esc(state.address)}" placeholder="123 Main St" autocomplete="street-address" autocapitalize="words" enterkeyhint="next"></div>
-      <div class="field"><label>Town</label><select id="f-town">
+      <div class="field"><label for="f-town">Town</label><select id="f-town">
         <option value="" ${state.town?'':'selected'} disabled>Tap to choose your town…</option>
         ${TOWNS.map(t=>`<option value="${t}" ${state.town===t?'selected':''}>${t}</option>`).join('')}
       </select></div>
-      <div class="field"><label>Is there an outdoor water tap &amp; power outlet we can use?</label>
-        <div class="util-grp" id="utilGrp">
+      <div class="field"><label id="utilLabel">Is there an outdoor water tap &amp; power outlet we can use?</label>
+        <div class="util-grp" id="utilGrp" role="group" aria-labelledby="utilLabel">
           <button type="button" class="util-opt ${state.utilities==='yes'?'sel':''}" data-v="yes" onclick="pickUtil('yes')">Yes</button>
           <button type="button" class="util-opt ${state.utilities==='no'?'sel':''}" data-v="no" onclick="pickUtil('no')">No</button>
           <button type="button" class="util-opt ${state.utilities==='unsure'?'sel':''}" data-v="unsure" onclick="pickUtil('unsure')">Not sure</button>
@@ -1098,6 +1117,7 @@ async function submitBooking(){
   const err = document.getElementById('confirmErr');
   if(!state.slot){ go(3); return; }
   if(state.hp){ go(6); return; }                       // honeypot: bot, skip silently
+  const sb = getSb();
   if(!sb) return showErr(err, `Booking is offline right now — call or text ${BIZ_PHONE}.`);
   submitting = true; if(btn){ btn.disabled=true; btn.textContent='Booking…'; }
   const sz = SIZES.find(s=>s.id===state.size);

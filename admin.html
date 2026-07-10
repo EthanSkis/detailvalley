@@ -486,7 +486,7 @@ function jobCard(j){
       <div class="time">${timeFmt.format(new Date(j.slot_start))}</div>
       <div class="who">
         <b>${esc(j.customer_name)}</b>
-        <a class="tel" href="tel:${esc(phoneDigits)}">${esc(j.customer_phone)}</a>
+        <a class="tel" href="sms:${esc(phoneDigits)}">${esc(j.customer_phone)}</a>
       </div>
       <span class="badge b-${j.status}">${j.status}</span>
     </div>

@@ -23,6 +23,7 @@
     --blue-bg:#e4eef8;
   }
   *{margin:0;padding:0;box-sizing:border-box}
+  [hidden]{display:none!important}
   body{font-family:'Inter',system-ui,sans-serif;color:var(--ink);background:var(--mist);line-height:1.55;-webkit-font-smoothing:antialiased}
   h1,h2,h3{font-family:'Sora',sans-serif;letter-spacing:-.015em}
   a{color:var(--blue);text-decoration:none}
@@ -76,6 +77,59 @@
     padding:8px 14px;border-radius:999px;font:inherit;font-size:.84rem;font-weight:600;cursor:pointer;white-space:nowrap}
   .chip.on{background:var(--navy);border-color:var(--navy);color:#fff}
   .chip i{font-style:normal;opacity:.7;font-weight:600}
+
+  /* View switch (List / Calendar) */
+  .viewswitch{display:flex;background:#e3eaf1;border-radius:10px;padding:3px;gap:3px;margin-bottom:12px}
+  .vw{flex:1;padding:9px;border:none;border-radius:8px;background:transparent;font:inherit;
+    font-size:.88rem;font-weight:600;color:var(--slate);cursor:pointer}
+  .vw.on{background:#fff;color:var(--navy);box-shadow:0 1px 3px rgba(15,44,68,.14)}
+
+  /* Calendar */
+  .cal{padding:14px 14px 12px;margin-bottom:14px}
+  .cal-head{display:flex;align-items:center;gap:8px;margin-bottom:12px}
+  .cal-title{flex:1;min-width:0}
+  .cal-title b{font-family:'Sora',sans-serif;font-size:1.05rem;color:var(--navy);display:block;line-height:1.2}
+  .cal-title span{display:block;font-size:.78rem;color:var(--slate);font-weight:500}
+  .cal-nav{flex:0 0 auto;width:36px;height:36px;border:1.5px solid var(--line);background:#fff;border-radius:9px;
+    font-size:1.15rem;line-height:1;color:var(--navy);cursor:pointer;font-weight:600}
+  .cal-nav:hover{background:var(--mist)}
+  .cal-today{flex:0 0 auto;height:36px;padding:0 12px;border:1.5px solid var(--line);background:#fff;
+    border-radius:9px;font:inherit;font-size:.8rem;font-weight:600;color:var(--blue);cursor:pointer}
+  .cal-today:hover{background:var(--mist)}
+  .cal-dow{display:grid;grid-template-columns:repeat(7,1fr);text-align:center;font-size:.68rem;font-weight:700;
+    color:var(--slate);text-transform:uppercase;letter-spacing:.04em;padding-bottom:6px;border-bottom:1px solid var(--line)}
+  .cal-grid{display:grid;grid-template-columns:repeat(7,1fr);border-left:1px solid var(--line)}
+  .cal-cell{min-height:86px;border:none;border-bottom:1px solid var(--line);border-right:1px solid var(--line);
+    padding:4px;background:#fff;font:inherit;text-align:left;vertical-align:top;cursor:pointer;overflow:hidden}
+  .cal-cell:hover:not(.out){background:#f4f8fc}
+  .cal-cell.out{background:#f6f9fb;cursor:default}
+  .cal-cell.out .cal-num{color:#b6c3cd}
+  .cal-cell.sel{outline:2px solid var(--blue);outline-offset:-2px;border-radius:6px}
+  .cal-num{font-size:.78rem;font-weight:600;color:var(--slate);width:24px;height:24px;
+    display:inline-flex;align-items:center;justify-content:center;border-radius:50%}
+  .cal-cell.today .cal-num{background:var(--navy);color:#fff}
+  .cal-chip{display:block;font-size:.68rem;font-weight:600;border-radius:5px;padding:2px 5px;margin-top:2px;
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;border-left:3px solid}
+  .c-pending{background:var(--amber-bg);color:var(--amber);border-color:var(--amber)}
+  .c-confirmed{background:var(--blue-bg);color:var(--blue-dark);border-color:var(--blue-dark)}
+  .c-completed{background:var(--green-bg);color:var(--green);border-color:var(--green)}
+  .c-cancelled{background:var(--grey-bg);color:var(--grey);border-color:var(--grey);text-decoration:line-through;opacity:.75}
+  .cal-more{display:block;font-size:.66rem;color:var(--slate);font-weight:600;margin-top:2px;padding-left:2px}
+  .cal-dots{display:none;flex-wrap:wrap;gap:3px;margin-top:3px;padding-left:2px}
+  .cal-dots i,.cal-legend i{width:8px;height:8px;border-radius:50%;display:inline-block}
+  .d-pending{background:var(--amber)}
+  .d-confirmed{background:var(--blue)}
+  .d-completed{background:var(--green)}
+  .d-cancelled{background:var(--grey)}
+  .cal-legend{display:flex;gap:14px;flex-wrap:wrap;padding-top:10px;font-size:.72rem;font-weight:600;color:var(--slate)}
+  .cal-legend span{display:inline-flex;align-items:center;gap:5px}
+  @media(max-width:560px){
+    .cal{padding:10px 8px 10px}
+    .cal-cell{min-height:58px;padding:3px 2px}
+    .cal-num{width:20px;height:20px;font-size:.72rem}
+    .cal-chip,.cal-more{display:none}
+    .cal-dots{display:flex}
+  }
 
   /* Day groups + cards */
   .day-h{font-family:'Sora',sans-serif;font-weight:600;font-size:.95rem;color:var(--navy);
@@ -165,8 +219,35 @@
   <!-- Board -->
   <section id="board" hidden>
     <div class="summary" id="summary"></div>
+
+    <div class="viewswitch">
+      <button id="vw-list" class="vw on" onclick="setView('list')">☰ List</button>
+      <button id="vw-cal" class="vw" onclick="setView('cal')">▦ Calendar</button>
+    </div>
+
     <div class="filters" id="filters"></div>
     <div id="jobs"></div>
+
+    <!-- Calendar view -->
+    <div id="calendar" hidden>
+      <div class="card cal">
+        <div class="cal-head">
+          <button class="cal-nav" onclick="calShift(-1)" aria-label="Previous month">‹</button>
+          <div class="cal-title"><b id="calTitle"></b><span id="calSub"></span></div>
+          <button class="cal-nav" onclick="calShift(1)" aria-label="Next month">›</button>
+          <button class="cal-today" onclick="calToday()">Today</button>
+        </div>
+        <div class="cal-dow"><span>Sun</span><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span></div>
+        <div class="cal-grid" id="calGrid"></div>
+        <div class="cal-legend">
+          <span><i class="d-pending"></i>New</span>
+          <span><i class="d-confirmed"></i>Confirmed</span>
+          <span><i class="d-completed"></i>Done</span>
+          <span><i class="d-cancelled"></i>Cancelled</span>
+        </div>
+      </div>
+      <div id="calDay"></div>
+    </div>
 
     <details class="acct">
       <summary>Account &amp; password</summary>
@@ -194,6 +275,9 @@ const TZ = 'America/Boise';   // Valley County, Idaho — Mountain Time
 const $ = id => document.getElementById(id);
 let JOBS = [];
 let FILTER = 'todo';
+let VIEW = 'list';      // 'list' | 'cal'
+let CAL_REF = null;     // {y, m} — month shown in the calendar
+let CAL_SEL = null;     // 'YYYY-MM-DD' — selected day
 
 /* ---------- Helpers ---------- */
 const dayFmt  = new Intl.DateTimeFormat('en-US',{weekday:'short',month:'short',day:'numeric',timeZone:TZ});
@@ -291,9 +375,26 @@ async function loadJobs(){
   const { data, error } = await sb.from('bookings').select('*').order('slot_start',{ascending:true});
   if(error){ $('jobs').innerHTML = '<p class="empty">Couldn’t load jobs: '+esc(error.message)+'</p>'; return; }
   JOBS = data || [];
+  redraw();
+}
+
+/* Repaint whichever view is active (plus the shared summary + filter counts). */
+function redraw(){
   drawSummary();
   drawFilters();
-  drawJobs();
+  if(VIEW==='cal') drawCalendar(); else drawJobs();
+}
+
+function setView(v){
+  VIEW = v;
+  $('vw-list').classList.toggle('on', v==='list');
+  $('vw-cal').classList.toggle('on', v==='cal');
+  $('filters').hidden = v!=='list';
+  $('jobs').hidden = v!=='list';
+  $('calendar').hidden = v!=='cal';
+  // Only one view renders job cards at a time so element ids stay unique.
+  if(v==='list'){ $('calDay').innerHTML=''; drawJobs(); }
+  else { $('jobs').innerHTML=''; drawCalendar(); }
 }
 
 const FILTERS = [
@@ -393,6 +494,92 @@ function jobCard(j){
   </div>`;
 }
 
+/* ---------- Calendar view ---------- */
+const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+const pad2 = n => String(n).padStart(2,'0');
+/* Compact chip time: "9:00 AM" -> "9am", "1:30 PM" -> "1:30pm". */
+const chipTime = iso => timeFmt.format(new Date(iso)).replace(':00','').replace(' AM','am').replace(' PM','pm');
+
+function calInit(){
+  if(CAL_REF) return;
+  const [y,m] = todayKey().split('-').map(Number);
+  CAL_REF = { y, m: m-1 };
+  CAL_SEL = todayKey();
+}
+function calShift(n){
+  calInit();
+  let m = CAL_REF.m + n, y = CAL_REF.y;
+  if(m < 0){ m = 11; y--; } if(m > 11){ m = 0; y++; }
+  CAL_REF = { y, m };
+  drawCalendar();
+}
+function calToday(){
+  const [y,m] = todayKey().split('-').map(Number);
+  CAL_REF = { y, m: m-1 };
+  CAL_SEL = todayKey();
+  drawCalendar();
+}
+function calSelect(k){ CAL_SEL = k; drawCalendar(); }
+
+function drawCalendar(){
+  calInit();
+  const { y, m } = CAL_REF;
+
+  // Jobs grouped by their (Mountain Time) calendar day. JOBS is already time-sorted.
+  const byDay = {};
+  for(const j of JOBS){ const k = dayKey(j.slot_start); (byDay[k] = byDay[k] || []).push(j); }
+
+  // Month headline: live job count + booked revenue (cancelled excluded).
+  const mPrefix = `${y}-${pad2(m+1)}-`;
+  const mJobs = JOBS.filter(j => dayKey(j.slot_start).startsWith(mPrefix) && j.status!=='cancelled');
+  const mRev = mJobs.reduce((s,j)=>s+(j.total_usd||0),0);
+  $('calTitle').textContent = `${MONTHS[m]} ${y}`;
+  $('calSub').textContent = mJobs.length ? `${mJobs.length} job${mJobs.length===1?'':'s'} · $${mRev}` : 'No jobs this month';
+
+  const startDow = new Date(y, m, 1).getDay();
+  const daysIn = new Date(y, m+1, 0).getDate();
+  const daysInPrev = new Date(y, m, 0).getDate();
+  const tk = todayKey();
+  const totalCells = Math.ceil((startDow + daysIn) / 7) * 7;
+  const MAXCHIP = 3;
+
+  let cells = '';
+  for(let i=0; i<totalCells; i++){
+    const dnum = i - startDow + 1;
+    if(dnum < 1 || dnum > daysIn){
+      const shown = dnum < 1 ? daysInPrev + dnum : dnum - daysIn;
+      cells += `<div class="cal-cell out"><span class="cal-num">${shown}</span></div>`;
+      continue;
+    }
+    const k = `${y}-${pad2(m+1)}-${pad2(dnum)}`;
+    const js = byDay[k] || [];
+    const chips = js.slice(0, MAXCHIP).map(j =>
+      `<span class="cal-chip c-${j.status}">${chipTime(j.slot_start)} ${esc((j.customer_name||'').split(' ')[0])}</span>`
+    ).join('') + (js.length > MAXCHIP ? `<span class="cal-more">+${js.length-MAXCHIP} more</span>` : '');
+    const dots = js.length ? `<span class="cal-dots">${js.map(j=>`<i class="d-${j.status}"></i>`).join('')}</span>` : '';
+    cells += `<button class="cal-cell${k===tk?' today':''}${k===CAL_SEL?' sel':''}" onclick="calSelect('${k}')">`+
+             `<span class="cal-num">${dnum}</span>${chips}${dots}</button>`;
+  }
+  $('calGrid').innerHTML = cells;
+  drawCalDay(byDay);
+}
+
+/* Full job cards (same as the list view) for the selected day, under the grid. */
+function drawCalDay(byDay){
+  const el = $('calDay');
+  if(!CAL_SEL){ el.innerHTML = ''; return; }
+  const [yy,mm,dd] = CAL_SEL.split('-').map(Number);
+  const label = new Intl.DateTimeFormat('en-US',{weekday:'long',month:'long',day:'numeric'}).format(new Date(yy, mm-1, dd));
+  const tag = CAL_SEL===todayKey() ? '<em>Today</em>' : '';
+  const js = byDay[CAL_SEL] || [];
+  if(!js.length){
+    el.innerHTML = `<div class="day-h">${label} ${tag}</div><p class="empty" style="padding:14px 16px">No jobs this day.</p>`;
+    return;
+  }
+  const rev = js.filter(j=>j.status!=='cancelled').reduce((s,j)=>s+(j.total_usd||0),0);
+  el.innerHTML = `<div class="day-h">${label} ${tag}<em style="margin-left:auto">$${rev}</em></div>` + js.map(jobCard).join('');
+}
+
 async function setStatus(id, status){
   const card = $('job-'+id);
   if(card) card.querySelectorAll('.act').forEach(b=>b.disabled=true);
@@ -400,7 +587,7 @@ async function setStatus(id, status){
   if(error){ toast('Update failed: '+error.message); if(card) card.querySelectorAll('.act').forEach(b=>b.disabled=false); return; }
   const j = JOBS.find(x=>x.id===id); if(j) j.status = status;
   toast(status==='confirmed'?'Confirmed ✓':status==='completed'?'Marked done ✓':status==='cancelled'?'Cancelled':'Updated');
-  drawSummary(); drawFilters(); drawJobs();
+  redraw();
 }
 
 async function saveNotes(el){

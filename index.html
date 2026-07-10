@@ -291,17 +291,24 @@
   .opt.size-opt::after{content:none}
   .opt.size-opt.sel::after{content:"✓";font-size:1.25rem;color:var(--blue)}
 
-  .addon{display:flex;align-items:center;gap:14px;background:var(--white);border:1.5px solid var(--line);border-radius:14px;padding:16px;margin-bottom:11px;cursor:pointer;transition:border-color .12s,background .12s,box-shadow .12s}
-  .addon.sel{border-color:var(--blue);background:var(--blue-tint);box-shadow:0 0 0 1px var(--blue) inset}
-  .addon input{width:26px;height:26px;accent-color:var(--blue);flex:none}
-  .addon .a-name{font-weight:600;font-size:1.05rem}
-  .addon .a-price{margin-left:auto;font-weight:700;font-size:1.05rem;color:var(--blue)}
+  /* Add-ons: compact two-column toggle grid */
+  .addons{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+  .chip-add{display:flex;flex-direction:column;align-items:flex-start;gap:2px;text-align:left;
+    background:var(--white);border:1.5px solid var(--line);border-radius:12px;padding:11px 12px;
+    cursor:pointer;font-family:var(--font);transition:border-color .12s,background .12s,box-shadow .12s}
+  .chip-add:hover{border-color:var(--blue)}
+  .chip-add.sel{border-color:var(--blue);background:var(--blue-tint);box-shadow:0 0 0 1px var(--blue) inset}
+  .chip-add .ca-name{font-weight:600;font-size:.9rem;color:var(--ink);line-height:1.3}
+  .chip-add .ca-price{font-weight:700;font-size:.84rem;color:var(--blue)}
   /* Add-ons a chosen package already bundles: shown as included, not purchasable */
-  .addon.included{cursor:default;border-color:var(--blue);background:var(--blue-tint);box-shadow:0 0 0 1px var(--blue) inset}
-  .addon.included .a-name{color:var(--ink)}
-  .addon .addon-check{width:26px;height:26px;flex:none;border-radius:50%;background:var(--blue);position:relative}
-  .addon .addon-check::after{content:"";position:absolute;left:9px;top:5px;width:6px;height:11px;border:solid #fff;border-width:0 3px 3px 0;transform:rotate(45deg)}
-  .addon .a-incl{margin-left:auto;font-weight:700;font-size:.8rem;letter-spacing:.02em;color:var(--blue);white-space:nowrap}
+  .chip-add.included{cursor:default;border-color:var(--blue);background:var(--blue-tint);box-shadow:0 0 0 1px var(--blue) inset}
+
+  /* Sticky action bar pinned to the bottom of the sheet */
+  .sheet-foot{position:sticky;bottom:0;z-index:5;margin:14px -24px 0;padding:10px 24px 6px;
+    background:rgba(255,255,255,.94);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
+    border-top:1px solid var(--hairline)}
+  .sheet-foot .btn{width:100%;text-align:center;margin-top:0}
+  .sheet-foot .back{margin-top:2px;padding:9px}
 
   .field{margin-bottom:16px}
   .field label{display:block;font-weight:600;font-size:.95rem;margin-bottom:8px;color:var(--ink)}
@@ -317,33 +324,33 @@
 
   /* ---------- REVIEW TICKET (step 5) ---------- */
   .tix{margin-bottom:18px}
-  .tix-top{position:relative;background:var(--navy);color:var(--white);border-radius:18px 18px 0 0;padding:20px 20px 18px;overflow:hidden}
+  .tix-top{position:relative;background:var(--navy);color:var(--white);border-radius:18px 18px 0 0;padding:16px 18px 14px;overflow:hidden}
   .tix-top::before{content:"";position:absolute;inset:0;pointer-events:none;background:
     radial-gradient(120% 90% at 90% -10%, rgba(43,108,176,.5) 0%, transparent 60%),
     radial-gradient(80% 60% at 0% 110%, rgba(184,99,44,.28) 0%, transparent 55%)}
   .tix-top>*{position:relative}
-  .tix-row1{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:14px}
+  .tix-row1{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:10px}
   .tix-brand{font-size:.64rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:#c5d4e1}
   .tix-admit{font-size:.62rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#e0904e;border:1px solid rgba(224,144,78,.5);padding:3px 10px;border-radius:999px;white-space:nowrap}
-  .tix-feature{font-size:1.55rem;font-weight:700;letter-spacing:-.02em;line-height:1.15;margin-bottom:16px}
-  .tix-cols{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
+  .tix-feature{font-size:1.4rem;font-weight:700;letter-spacing:-.02em;line-height:1.15;margin-bottom:10px}
+  .tix-cols{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:8px}
   .tix-cols.single{grid-template-columns:1fr}
   .tix-cols:last-child{margin-bottom:2px}
   .tix-l{display:block;font-size:.6rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#8ba1b3;margin-bottom:2px}
-  .tix-cols b{font-size:.98rem;font-weight:600;letter-spacing:-.01em;overflow-wrap:anywhere}
+  .tix-cols b{font-size:.94rem;font-weight:600;letter-spacing:-.01em;overflow-wrap:anywhere}
   /* perforation: dashed gaps show the sheet behind; side notches "punch" the edges */
   .tix-tear{position:relative;height:0;border-top:2px dashed rgba(15,44,68,.3)}
   .tix-tear::before,.tix-tear::after{content:"";position:absolute;top:-12px;width:22px;height:22px;border-radius:50%;background:var(--white)}
   .tix-tear::before{left:-11px}
   .tix-tear::after{right:-11px}
-  .tix-stub{background:var(--mist);border:1px solid var(--hairline);border-top:none;border-radius:0 0 18px 18px;padding:14px 20px 18px}
-  .tix-item{display:flex;justify-content:space-between;gap:12px;padding:4px 0;font-size:.92rem;color:var(--slate)}
+  .tix-stub{background:var(--mist);border:1px solid var(--hairline);border-top:none;border-radius:0 0 18px 18px;padding:10px 18px 14px}
+  .tix-item{display:flex;justify-content:space-between;gap:12px;padding:3px 0;font-size:.9rem;color:var(--slate)}
   .tix-item.warn{color:#8a3b12;font-weight:600}
-  .tix-total{display:flex;justify-content:space-between;align-items:baseline;border-top:1px solid var(--hairline);margin-top:8px;padding-top:12px}
+  .tix-total{display:flex;justify-content:space-between;align-items:baseline;border-top:1px solid var(--hairline);margin-top:6px;padding-top:9px}
   .tix-total span{font-size:.68rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--slate)}
-  .tix-total b{font-size:1.5rem;font-weight:700;letter-spacing:-.02em;color:var(--navy)}
-  .tix-code{margin-top:14px;text-align:center}
-  .tix-bar{height:34px;max-width:250px;margin:0 auto 7px;opacity:.85;background:
+  .tix-total b{font-size:1.35rem;font-weight:700;letter-spacing:-.02em;color:var(--navy)}
+  .tix-code{margin-top:10px;text-align:center}
+  .tix-bar{height:26px;max-width:230px;margin:0 auto 6px;opacity:.85;background:
     repeating-linear-gradient(90deg,var(--ink) 0 2px,transparent 2px 4px),
     repeating-linear-gradient(90deg,var(--ink) 0 1px,transparent 1px 7px),
     repeating-linear-gradient(90deg,var(--ink) 0 3px,transparent 3px 11px)}
@@ -392,7 +399,12 @@
   .cal-cell.sel .dot{background:#fff}
   .cal-hint{text-align:center;font-size:.86rem;color:var(--slate);margin-top:14px}
 
-  .cal-times{margin-top:22px}
+  /* Picked day collapses to a chip; times take the calendar's place */
+  .day-chip-row{display:flex;align-items:center;justify-content:space-between;gap:12px;
+    background:var(--mist);border-radius:14px;padding:14px 16px;margin-bottom:14px}
+  .dc-day{font-weight:700;font-size:1.05rem;color:var(--navy);letter-spacing:-.01em}
+  .dc-change{background:none;border:none;color:var(--blue);font-family:var(--font);font-size:.9rem;font-weight:600;cursor:pointer;padding:4px}
+  .cal-times{margin-top:8px}
   .cal-times-h{font-weight:700;font-size:1.05rem;letter-spacing:-.01em;color:var(--ink);margin-bottom:12px;text-align:center}
   .time-btn{display:flex;align-items:center;gap:12px;width:100%;border:1.5px solid var(--line);background:var(--white);border-radius:14px;padding:18px;margin-bottom:11px;cursor:pointer;text-align:left;font-family:var(--font);transition:border-color .12s,background .12s,box-shadow .12s}
   .time-btn:hover{border-color:var(--blue)}
@@ -888,7 +900,7 @@ const SIZES = [
   {id:'oversize', name:'Large truck / 3-row SUV / van', meta:'+$60 · the big rigs', price:60},
 ];
 
-function freshState(){ return {step:1, pkg:null, size:'standard', addons:[], slot:null, calDate:null, name:'', phone:'', address:'', town:'', utilities:null, hp:false}; }
+function freshState(){ return {step:1, v2:'size', pkg:null, size:'standard', addons:[], slot:null, calDate:null, calOpen:true, name:'', phone:'', address:'', town:'', utilities:null, hp:false}; }
 let state = freshState();
 let slotCache = null;
 let submitting = false;
@@ -916,8 +928,10 @@ function closeBooking(){
 modal.addEventListener('click', e=>{ if(e.target===modal) closeBooking(); });
 document.addEventListener('keydown', e=>{ if(e.key==='Escape' && modal.classList.contains('open')) closeBooking(); });
 
-function pickPkg(id){ state.pkg=id; go(2); }
-function pickSize(id){ state.size=id; render(); }
+function pickPkg(id){ state.pkg=id; state.v2='size'; go(2); }
+function pickSize(id){ state.size=id; state.v2='extras'; render(); }   // auto-advance to add-ons
+function v2Size(){ state.v2='size'; render(); }
+function backToExtras(){ state.v2='extras'; go(2); }
 function utilNoteText(v){
   if(v==='no') return `<b>We can't complete the detail without this.</b> We bring all our own gear, but we need access to an outdoor water tap <b>and</b> a power outlet where the car will be parked. Text us at ${BIZ_PHONE} and we'll sort out a spot that works.`;
   if(v==='unsure') return `No worries — just double-check before your appointment. We do need an outdoor water tap and a power outlet on site to get the job done.`;
@@ -943,7 +957,11 @@ function toggleAddon(id){
   if(pkgIncludes(id)) return;            // already part of the chosen package — not a paid extra
   const i=state.addons.indexOf(id);
   if(i>-1) state.addons.splice(i,1); else state.addons.push(id);
-  render();
+  // Update in place — a full re-render would yank the scroll position around.
+  const el = document.getElementById('ad-'+id);
+  if(el) el.classList.toggle('sel', state.addons.includes(id));
+  const ft = document.getElementById('footTotal');
+  if(ft) ft.textContent = total();
 }
 function total(){
   let t = PACKAGES.find(p=>p.id===state.pkg)?.price || 0;
@@ -963,6 +981,7 @@ function topBar(n){
 }
 
 function render(){
+  inner.scrollTop = 0;                   // every step (and sub-view) opens at the top
   if(state.step===1){
     inner.innerHTML = topBar(1) + `
       <h3>What does your car need?</h3>
@@ -973,9 +992,7 @@ function render(){
         </button>`).join('')}
     `;
   }
-  else if(state.step===2){
-    state.addons = state.addons.filter(id=>!pkgIncludes(id));   // drop anything the chosen package already covers
-    const pkgNm = PACKAGES.find(x=>x.id===state.pkg)?.name || 'this package';
+  else if(state.step===2 && state.v2==='size'){
     inner.innerHTML = topBar(2) + `
       <h3>What are you driving?</h3>
       <p class="field-intro">Bigger rigs take more time, so pick the closest match.</p>
@@ -984,28 +1001,37 @@ function render(){
           <span class="o-name">${s.name}</span>
           <span class="o-meta">${s.meta}</span>
         </button>`).join('')}
+      <button class="back" onclick="go(1)">← Back</button>
+    `;
+  }
+  else if(state.step===2){
+    state.addons = state.addons.filter(id=>!pkgIncludes(id));   // drop anything the chosen package already covers
+    inner.innerHTML = topBar(2) + `
       <h3>Want to add anything?</h3>
       <p class="field-intro">Optional — tap to add, or just keep going.</p>
+      <div class="addons">
       ${ADDONS.map(a=> pkgIncludes(a.id)
-        ? `<div class="addon included" aria-disabled="true">
-            <span class="addon-check" aria-hidden="true"></span>
-            <span class="a-name">${a.name}</span>
-            <span class="a-incl">Comes with ${pkgNm}</span>
+        ? `<div class="chip-add included" aria-disabled="true">
+            <span class="ca-name">${a.name}</span>
+            <span class="ca-price">✓ Included</span>
           </div>`
-        : `<label class="addon ${state.addons.includes(a.id)?'sel':''}">
-            <input type="checkbox" ${state.addons.includes(a.id)?'checked':''} onchange="toggleAddon('${a.id}')">
-            <span class="a-name">${a.name}</span>
-            <span class="a-price">+$${a.price}</span>
-          </label>`).join('')}
-      <button class="btn" onclick="go(3)">Continue · $${total()}</button>
-      <button class="back" onclick="go(1)">← Back</button>
+        : `<button class="chip-add ${state.addons.includes(a.id)?'sel':''}" id="ad-${a.id}"
+            aria-pressed="${state.addons.includes(a.id)}" onclick="toggleAddon('${a.id}')">
+            <span class="ca-name">${a.name}</span>
+            <span class="ca-price">+$${a.price}</span>
+          </button>`).join('')}
+      </div>
+      <div class="sheet-foot">
+        <button class="btn" onclick="go(3)">Continue · $<span id="footTotal">${total()}</span></button>
+        <button class="back" onclick="v2Size()">← Back</button>
+      </div>
     `;
   }
   else if(state.step===3){
     inner.innerHTML = topBar(3) + `
       <h3>When works for you?</h3>
       <div id="slotArea"><p class="slot-status">Loading available days…</p></div>
-      <button class="back" onclick="go(2)">← Back</button>
+      <button class="back" onclick="backToExtras()">← Back</button>
     `;
   }
   else if(state.step===4){
@@ -1033,8 +1059,10 @@ function render(){
       </div>
       <input type="text" id="f-company" class="hp" tabindex="-1" autocomplete="off" aria-hidden="true">
       <p id="detailErr" class="form-err" hidden></p>
-      <button class="btn" onclick="saveDetails()">Review booking</button>
-      <button class="back" onclick="go(3)">← Back</button>
+      <div class="sheet-foot">
+        <button class="btn" onclick="saveDetails()">Review booking</button>
+        <button class="back" onclick="go(3)">← Back</button>
+      </div>
     `;
   }
   else if(state.step===5){
@@ -1075,8 +1103,10 @@ function render(){
         </div>
       </div>
       <p id="confirmErr" class="form-err" hidden></p>
-      <button class="btn" id="confirmBtn" onclick="submitBooking()">Confirm booking</button>
-      <button class="back" onclick="go(4)">← Back</button>
+      <div class="sheet-foot">
+        <button class="btn" id="confirmBtn" onclick="submitBooking()">Confirm booking · $${total()}</button>
+        <button class="back" onclick="go(4)">← Back</button>
+      </div>
     `;
   }
   else if(state.step===6){
@@ -1139,6 +1169,17 @@ async function loadSlots(){
 function drawCalendar(){
   const area = document.getElementById('slotArea');
   if(!area || !calMonths.length) return;
+  // A picked day collapses the calendar to a one-line chip so the times sit right there.
+  if(state.calDate && !state.calOpen && slotsByDate[state.calDate]){
+    const day = slotsByDate[state.calDate][0].instant;
+    area.innerHTML = `
+      <div class="day-chip-row">
+        <span class="dc-day">${fmtDay(day)}</span>
+        <button class="dc-change" onclick="calReopen()">Change day</button>
+      </div>
+      <div id="timeArea">${renderTimes()}</div>`;
+    return;
+  }
   const cur = calMonths[calIdx];
   const startDow = new Date(cur.y, cur.m-1, 1).getDay();   // 0=Sun … 6=Sat
   const daysInMonth = new Date(cur.y, cur.m, 0).getDate();
@@ -1177,9 +1218,13 @@ function calMove(dir){
 
 function pickDate(k){
   state.calDate = k;
+  state.calOpen = false;
+  inner.scrollTop = 0;
   drawCalendar();
-  const ta = document.getElementById('timeArea');
-  if(ta && ta.scrollIntoView) ta.scrollIntoView({behavior:'smooth', block:'nearest'});
+}
+function calReopen(){
+  state.calOpen = true;
+  drawCalendar();
 }
 
 function renderTimes(){
@@ -1187,7 +1232,7 @@ function renderTimes(){
   if(!items.length) return '';
   return `
     <div class="cal-times">
-      <div class="cal-times-h">${fmtDay(items[0].instant)} — choose a time</div>
+      <div class="cal-times-h">Choose an arrival time</div>
       ${items.map(s=>`
         <button class="time-btn ${state.slot&&state.slot.key===s.key?'sel':''}" onclick="pickSlot(${s.key})">
           <span class="t-time">${fmtTime(s.instant)}</span>
@@ -1247,7 +1292,7 @@ async function submitBooking(){
     duration_min: jobMinutes(),
     status: 'pending'
   });
-  submitting = false; if(btn){ btn.disabled=false; btn.textContent='Confirm booking'; }
+  submitting = false; if(btn){ btn.disabled=false; btn.textContent='Confirm booking · $'+total(); }
   if(error){
     if(error.code==='23505' || error.code==='23P01'){
       showErr(err,'Sorry — that time was just booked. Choose another.');

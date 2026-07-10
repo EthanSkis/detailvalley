@@ -281,8 +281,15 @@
     .modal{border-radius:20px;padding-top:26px}
     .modal::before{display:none}
   }
-  .modal-top{display:flex;justify-content:space-between;align-items:center;flex:none;padding:0 24px}
-  .step-label{font-weight:700;font-size:.74rem;letter-spacing:.1em;text-transform:uppercase;color:var(--copper-2)}
+  .modal-top{display:flex;justify-content:space-between;align-items:center;gap:10px;flex:none;padding:0 24px}
+  .step-label{flex:1;min-width:0;font-weight:700;font-size:.74rem;letter-spacing:.1em;text-transform:uppercase;color:var(--copper-2)}
+  .run-total{flex:none;font-weight:700;font-size:.92rem;letter-spacing:-.01em;color:var(--navy);background:var(--mist);padding:4px 11px;border-radius:999px}
+  /* step content slides in from the direction of travel */
+  .slide-fwd{animation:slideF .22s ease}
+  .slide-back{animation:slideB .22s ease}
+  @keyframes slideF{from{transform:translateX(26px);opacity:.35}to{transform:none;opacity:1}}
+  @keyframes slideB{from{transform:translateX(-26px);opacity:.35}to{transform:none;opacity:1}}
+  @media(prefers-reduced-motion:reduce){.slide-fwd,.slide-back{animation:none}}
   .close{background:var(--mist);border:none;font-size:1.35rem;line-height:1;cursor:pointer;color:var(--slate);width:36px;height:36px;display:flex;align-items:center;justify-content:center;margin:-2px -4px 0 0;border-radius:50%;transition:background .12s}
   .close:hover{background:var(--line);color:var(--navy)}
   .modal h3{font-size:1.45rem;font-weight:700;letter-spacing:-.02em;margin:14px 0 18px}
@@ -298,12 +305,19 @@
   /* Size options just select (no navigation) — drop the chevron, show a tick when chosen */
   .opt.size-opt::after{content:none}
   .opt.size-opt.sel::after{content:"✓";font-size:1.25rem;color:var(--blue)}
+  .opt.size-opt{display:flex;align-items:center;gap:14px}
+  .o-ic{flex:none;width:46px;color:var(--blue);display:flex;align-items:center}
+  .o-ic svg{width:46px;height:auto;display:block}
+  .o-txt{flex:1;min-width:0}
 
   /* Add-ons: compact two-column toggle grid */
   .addons{display:grid;grid-template-columns:1fr 1fr;gap:9px}
-  .chip-add{display:flex;flex-direction:column;align-items:flex-start;gap:2px;text-align:left;
+  .chip-add{display:flex;align-items:center;gap:10px;text-align:left;
     background:var(--white);border:1.5px solid var(--line);border-radius:12px;padding:11px 12px;
     cursor:pointer;font-family:var(--font);transition:border-color .12s,background .12s,box-shadow .12s}
+  .ca-ic{flex:none;width:22px;height:22px;color:var(--blue)}
+  .ca-ic svg{width:22px;height:22px;display:block}
+  .ca-tx{display:flex;flex-direction:column;gap:2px;min-width:0}
   .chip-add:hover{border-color:var(--blue)}
   .chip-add.sel{border-color:var(--blue);background:var(--blue-tint);box-shadow:0 0 0 1px var(--blue) inset}
   .chip-add .ca-name{font-weight:600;font-size:.9rem;color:var(--ink);line-height:1.3}
@@ -377,6 +391,13 @@
     repeating-linear-gradient(90deg,var(--ink) 0 1px,transparent 1px 7px),
     repeating-linear-gradient(90deg,var(--ink) 0 3px,transparent 3px 11px)}
   .tix-code span{font-size:.72rem;font-weight:700;letter-spacing:.28em;color:var(--slate)}
+  .tix .tap{cursor:pointer}
+  .tix-hint{text-align:center;font-size:.8rem;color:var(--slate);margin-top:10px}
+  .foot-note{text-align:center;font-size:.78rem;color:var(--slate);margin-top:8px}
+  .btn2{display:block;width:100%;margin-top:14px;padding:14px;border:none;border-radius:14px;
+    background:var(--blue-tint);color:var(--blue);font-family:var(--font);font-size:1.02rem;font-weight:600;
+    text-align:center;text-decoration:none;cursor:pointer}
+  .btn2:hover{background:rgba(43,108,176,.2)}
 
   .modal .btn{width:100%;text-align:center;margin-top:10px;font-size:1.12rem;padding:17px 24px}
   .back{background:none;border:none;color:var(--slate);font-size:1rem;font-weight:600;cursor:pointer;margin-top:12px;display:block;width:100%;text-align:center;padding:12px;font-family:inherit}
@@ -922,6 +943,20 @@ const SIZES = [
   {id:'oversize', name:'Large truck / 3-row SUV / van', meta:'+$60 · the big rigs', price:60},
 ];
 
+/* Line-art icons for the vehicle + add-on choices (inline SVG, currentColor). */
+const SIZE_ICON = {
+  standard:'<svg viewBox="0 0 48 22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 15h-1v-3c0-1.1.9-2 2-2h5l6-5h11l7 5h7c1.6 0 3 1.4 3 3v2h-2"/><circle cx="13" cy="16" r="3"/><circle cx="35" cy="16" r="3"/><path d="M16 15h16"/></svg>',
+  midsize:'<svg viewBox="0 0 48 22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 16h-1v-5c0-1.1.9-2 2-2h3l4-5h16l5 5h9c1.1 0 2 .9 2 2v5h-2"/><circle cx="13" cy="17" r="3"/><circle cx="36" cy="17" r="3"/><path d="M16 16h17"/></svg>',
+  oversize:'<svg viewBox="0 0 48 22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 16v-4h2V6c0-.6.4-1 1-1h16c.6 0 1 .4 1 1v6h6l4-4h8c1.1 0 2 .9 2 2v6h-2"/><circle cx="12" cy="17" r="3"/><circle cx="37" cy="17" r="3"/><path d="M15 16h19"/></svg>'
+};
+const ADDON_ICON = {
+  pet:'<svg viewBox="0 0 24 24" fill="currentColor"><ellipse cx="7" cy="9" rx="1.8" ry="2.4"/><ellipse cx="12" cy="7.5" rx="1.8" ry="2.4"/><ellipse cx="17" cy="9" rx="1.8" ry="2.4"/><path d="M12 11c-2.8 0-5.5 2.2-5.5 4.8 0 1.6 1.2 2.7 2.8 2.7 1 0 1.8-.4 2.7-.4s1.7.4 2.7.4c1.6 0 2.8-1.1 2.8-2.7C17.5 13.2 14.8 11 12 11z"/></svg>',
+  dirt:'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.5c2 3.2 3.6 5.4 3.6 7.4A3.6 3.6 0 0 1 12 13.5a3.6 3.6 0 0 1-3.6-3.6c0-2 1.6-4.2 3.6-7.4z"/><circle cx="6" cy="17.5" r="1.7"/><circle cx="12" cy="19.5" r="1.7"/><circle cx="18" cy="17.5" r="1.7"/></svg>',
+  engine:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a4.2 4.2 0 0 0-5.6 5.6L4 17l3 3 5.1-5.1a4.2 4.2 0 0 0 5.6-5.6L15 12l-3-3 2.7-2.7z"/></svg>',
+  intglass:'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M11 2.5l1.7 4.8 4.8 1.7-4.8 1.7L11 15.5 9.3 10.7 4.5 9l4.8-1.7L11 2.5z"/><path d="M18 14l.9 2.6 2.6.9-2.6.9-.9 2.6-.9-2.6-2.6-.9 2.6-.9.9-2.6z"/></svg>',
+  wax:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M12 3l7 3v5c0 4.5-3 8.3-7 10-4-1.7-7-5.5-7-10V6l7-3z"/><path d="M9 11.5l2 2 4-4.5" stroke-linecap="round"/></svg>'
+};
+
 function freshState(){ return {step:1, v2:'size', pkg:null, size:null, addons:[], slot:null, calDate:null, calOpen:true, name:'', phone:'', address:'', town:'', utilities:null, hp:false}; }
 let state = freshState();
 let slotCache = null;
@@ -975,6 +1010,7 @@ function pkgIncludes(id){
   const p = PACKAGES.find(x=>x.id===state.pkg);
   return !!(p && p.includes && p.includes.includes(id));
 }
+function extrasLabel(){ return state.addons.length ? `Continue · $${total()}` : 'No extras — continue'; }
 function toggleAddon(id){
   if(pkgIncludes(id)) return;            // already part of the chosen package — not a paid extra
   const i=state.addons.indexOf(id);
@@ -982,8 +1018,10 @@ function toggleAddon(id){
   // Update in place — a full re-render would yank the scroll position around.
   const el = document.getElementById('ad-'+id);
   if(el) el.classList.toggle('sel', state.addons.includes(id));
-  const ft = document.getElementById('footTotal');
-  if(ft) ft.textContent = total();
+  const eb = document.getElementById('extrasBtn');
+  if(eb) eb.textContent = extrasLabel();
+  const rt = document.getElementById('runTotal');
+  if(rt) rt.textContent = '$'+total();
 }
 function total(){
   let t = PACKAGES.find(p=>p.id===state.pkg)?.price || 0;
@@ -998,6 +1036,7 @@ function topBar(n){
   const segs = [1,2,3,4,5].map(i=>`<span class="seg ${i<=n?'on':''}"></span>`).join('');
   return `<div class="modal-top">`+
     `<span class="step-label">Step ${n} of 5 · ${STEP_LABELS[n]}</span>`+
+    (state.pkg ? `<span class="run-total" id="runTotal">$${total()}</span>` : '')+
     `<button class="close" onclick="closeBooking()" aria-label="Close">×</button></div>`+
     `<div class="steps" aria-hidden="true">${segs}</div>`;
 }
@@ -1012,12 +1051,79 @@ inner.addEventListener('click', e=>{
 }, true);
 
 // Sheet layout: fixed header/steps, scrollable body, optional fixed footer.
+// The body slides in from the direction of travel (forward vs back).
+let lastOrd = 0;
 function sheet(n, body, foot){
   tapGuard();
+  const ord = state.step===2 ? (state.v2==='size'?2:3) : (state.step>=3 ? state.step+1 : 1);
+  const dir = ord >= lastOrd ? 'fwd' : 'back';
+  lastOrd = ord;
   inner.innerHTML = (n ? topBar(n) : '')
-    + `<div class="sheet-body" id="sheetBody">${body}</div>`
+    + `<div class="sheet-body slide-${dir}" id="sheetBody">${body}</div>`
     + (foot ? `<div class="sheet-foot">${foot}</div>` : '');
 }
+/* The review ticket, shared by the confirm step (tappable) and success screen. */
+function ticketHtml(edit){
+  const p = PACKAGES.find(x=>x.id===state.pkg);
+  const sz = SIZES.find(x=>x.id===state.size);
+  // Display-only booking code for the ticket stub, e.g. DV-TUEJUL14-9AM
+  const code = 'DV-' + fmtDay(state.slot.instant).replace(/[^A-Za-z0-9]/g,'').toUpperCase()
+             + '-' + fmtTime(state.slot.instant).replace(/[^0-9APM]/gi,'').toUpperCase();
+  // Tappable regions jump straight to the step that edits them.
+  const T = fn => edit ? ` role="button" tabindex="0" onclick="${fn}"` : '';
+  const tap = edit ? ' tap' : '';
+  return `
+      <div class="tix">
+        <div class="tix-top">
+          <div class="tix-row1">
+            <span class="tix-brand">Detail Valley · Mobile Detailing</span>
+            <span class="tix-admit">Admit one</span>
+          </div>
+          <div class="tix-feature${tap}"${T('go(1)')}>${p.name}</div>
+          <div class="tix-cols${tap}"${T('go(3)')}>
+            <div><span class="tix-l">Date</span><b>${fmtDay(state.slot.instant)}</b></div>
+            <div><span class="tix-l">Arrival</span><b>${fmtTime(state.slot.instant)}</b></div>
+          </div>
+          <div class="tix-cols single${tap}"${T('go(4)')}>
+            <div><span class="tix-l">Location</span><b>${esc(state.address)}, ${esc(state.town)}</b></div>
+          </div>
+          <div class="tix-cols${tap}"${T('go(4)')}>
+            <div><span class="tix-l">Guest</span><b>${esc(state.name)}</b></div>
+            <div><span class="tix-l">Contact</span><b>${esc(state.phone)}</b></div>
+          </div>
+        </div>
+        <div class="tix-tear" aria-hidden="true"></div>
+        <div class="tix-stub">
+          <div class="tix-item${tap}"${T('go(1)')}><span>${p.name}</span><span>$${p.price}</span></div>
+          ${sz && sz.price ? `<div class="tix-item${tap}"${T('editSize()')}><span>+ ${sz.name}</span><span>$${sz.price}</span></div>` : ''}
+          ${state.addons.map(a=>{const x=ADDONS.find(z=>z.id===a);return `<div class="tix-item${tap}"${T('backToExtras()')}><span>+ ${x.name}</span><span>${pkgIncludes(a)?'Included':'$'+x.price}</span></div>`}).join('')}
+          ${state.utilities!=='yes' ? `<div class="tix-item warn${tap}"${T('go(4)')}><span>Water &amp; power on site</span><span>${state.utilities==='no'?'⚠ Not available':'Unsure'}</span></div>` : ''}
+          <div class="tix-total"><span>Total · due after service</span><b>$${total()}</b></div>
+          <div class="tix-code"><div class="tix-bar" aria-hidden="true"></div><span>${code}</span></div>
+        </div>
+      </div>`;
+}
+function editSize(){ state.v2='size'; go(2); }
+
+/* Downloadable calendar event for the success screen (opens iOS/Google Calendar). */
+function icsHref(){
+  const st = state.slot.instant;
+  const en = new Date(st.getTime() + jobMinutes()*60000);
+  const f = d => d.toISOString().replace(/[-:]/g,'').replace(/\.\d{3}/,'');
+  const escT = t => String(t||'').replace(/([,;\\])/g,'\\$1');
+  const pkg = PACKAGES.find(x=>x.id===state.pkg).name;
+  const ics = ['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//Detail Valley//Booking//EN','BEGIN:VEVENT',
+    'UID:'+st.getTime()+'@detailvalley.com',
+    'DTSTAMP:'+f(new Date()),
+    'DTSTART:'+f(st),
+    'DTEND:'+f(en),
+    'SUMMARY:'+escT('Detail Valley — '+pkg),
+    'DESCRIPTION:'+escT(pkg+' · $'+total()+'. We come to you — please have an outdoor water tap and power outlet available.'),
+    'LOCATION:'+escT(state.address+', '+state.town+', ID'),
+    'END:VEVENT','END:VCALENDAR'].join('\r\n');
+  return 'data:text/calendar;charset=utf-8,'+encodeURIComponent(ics);
+}
+
 function render(){
   if(state.step===1){
     sheet(1, `
@@ -1035,8 +1141,9 @@ function render(){
       <p class="field-intro">Bigger rigs take more time, so pick the closest match.</p>
       ${SIZES.map(s=>`
         <button class="opt size-opt ${state.size===s.id?'sel':''}" onclick="pickSize('${s.id}')">
-          <span class="o-name">${s.name}</span>
-          <span class="o-meta">${s.meta}</span>
+          <span class="o-ic" aria-hidden="true">${SIZE_ICON[s.id]||''}</span>
+          <span class="o-txt"><span class="o-name">${s.name}</span>
+          <span class="o-meta">${s.meta}</span></span>
         </button>`).join('')}
       <button class="back" onclick="go(1)">← Back</button>
     `);
@@ -1049,17 +1156,19 @@ function render(){
       <div class="addons">
       ${ADDONS.map(a=> pkgIncludes(a.id)
         ? `<div class="chip-add included" aria-disabled="true">
-            <span class="ca-name">${a.name}</span>
-            <span class="ca-price">✓ Included</span>
+            <span class="ca-ic" aria-hidden="true">${ADDON_ICON[a.id]||''}</span>
+            <span class="ca-tx"><span class="ca-name">${a.name}</span>
+            <span class="ca-price">✓ Included</span></span>
           </div>`
         : `<button class="chip-add ${state.addons.includes(a.id)?'sel':''}" id="ad-${a.id}"
             aria-pressed="${state.addons.includes(a.id)}" onclick="toggleAddon('${a.id}')">
-            <span class="ca-name">${a.name}</span>
-            <span class="ca-price">+$${a.price}</span>
+            <span class="ca-ic" aria-hidden="true">${ADDON_ICON[a.id]||''}</span>
+            <span class="ca-tx"><span class="ca-name">${a.name}</span>
+            <span class="ca-price">+$${a.price}</span></span>
           </button>`).join('')}
       </div>
     `, `
-      <button class="btn" onclick="go(3)">Continue · $<span id="footTotal">${total()}</span></button>
+      <button class="btn" id="extrasBtn" onclick="go(3)">${extrasLabel()}</button>
       <button class="back" onclick="v2Size()">← Back</button>
     `);
   }
@@ -1101,45 +1210,14 @@ function render(){
     `);
   }
   else if(state.step===5){
-    const p = PACKAGES.find(x=>x.id===state.pkg);
-    const sz = SIZES.find(s=>s.id===state.size);
-    // Display-only booking code for the ticket stub, e.g. DV-TUEJUL14-9AM
-    const code = 'DV-' + fmtDay(state.slot.instant).replace(/[^A-Za-z0-9]/g,'').toUpperCase()
-               + '-' + fmtTime(state.slot.instant).replace(/[^0-9APM]/gi,'').toUpperCase();
     sheet(5, `
       <h3>Does this look right?</h3>
-      <div class="tix">
-        <div class="tix-top">
-          <div class="tix-row1">
-            <span class="tix-brand">Detail Valley · Mobile Detailing</span>
-            <span class="tix-admit">Admit one</span>
-          </div>
-          <div class="tix-feature">${p.name}</div>
-          <div class="tix-cols">
-            <div><span class="tix-l">Date</span><b>${fmtDay(state.slot.instant)}</b></div>
-            <div><span class="tix-l">Arrival</span><b>${fmtTime(state.slot.instant)}</b></div>
-          </div>
-          <div class="tix-cols single">
-            <div><span class="tix-l">Location</span><b>${esc(state.address)}, ${esc(state.town)}</b></div>
-          </div>
-          <div class="tix-cols">
-            <div><span class="tix-l">Guest</span><b>${esc(state.name)}</b></div>
-            <div><span class="tix-l">Contact</span><b>${esc(state.phone)}</b></div>
-          </div>
-        </div>
-        <div class="tix-tear" aria-hidden="true"></div>
-        <div class="tix-stub">
-          <div class="tix-item"><span>${p.name}</span><span>$${p.price}</span></div>
-          ${sz && sz.price ? `<div class="tix-item"><span>+ ${sz.name}</span><span>$${sz.price}</span></div>` : ''}
-          ${state.addons.map(a=>{const x=ADDONS.find(z=>z.id===a);return `<div class="tix-item"><span>+ ${x.name}</span><span>${pkgIncludes(a)?'Included':'$'+x.price}</span></div>`}).join('')}
-          ${state.utilities!=='yes' ? `<div class="tix-item warn"><span>Water &amp; power on site</span><span>${state.utilities==='no'?'⚠ Not available':'Unsure'}</span></div>` : ''}
-          <div class="tix-total"><span>Total · due after service</span><b>$${total()}</b></div>
-          <div class="tix-code"><div class="tix-bar" aria-hidden="true"></div><span>${code}</span></div>
-        </div>
-      </div>
+      ${ticketHtml(true)}
+      <p class="tix-hint">Tap any detail on the ticket to change it.</p>
       <p id="confirmErr" class="form-err" hidden></p>
     `, `
       <button class="btn" id="confirmBtn" onclick="submitBooking()">Confirm booking · $${total()}</button>
+      <p class="foot-note">No card needed — pay after the job's done.</p>
       <button class="back" onclick="go(4)">← Back</button>
     `);
   }
@@ -1148,10 +1226,11 @@ function render(){
       <div class="done">
         <div class="tick"></div>
         <h3>You're booked in.</h3>
-        <p>${fmtDay(state.slot.instant)} at ${fmtTime(state.slot.instant)}.</p>
         <p>We'll text ${esc(state.phone)||'you'} to confirm. Nothing to pay until the work's done.</p>
-        <button class="btn" onclick="closeBooking()" style="margin-top:20px">Done</button>
       </div>
+      ${ticketHtml(false)}
+      <a class="btn2" download="detail-valley-booking.ics" href="${icsHref()}">＋ Add to calendar</a>
+      <button class="btn" onclick="closeBooking()" style="display:block;width:100%;margin-top:10px;text-align:center">Done</button>
     `);
   }
 }

@@ -311,6 +311,21 @@
   /* Add-ons a chosen package already bundles: shown as included, not purchasable */
   .chip-add.included{cursor:default;border-color:var(--blue);background:var(--blue-tint);box-shadow:0 0 0 1px var(--blue) inset}
 
+  /* Touch screens: no hover highlights — iOS "sticks" hover on the element under
+     the last tap, which made freshly rendered options look pre-selected. */
+  @media(hover:none){
+    .opt:hover{border-color:var(--line)}
+    .opt.sel:hover{border-color:var(--blue)}
+    .opt:hover::after{color:#aebfce}
+    .chip-add:hover{border-color:var(--line)}
+    .chip-add.sel:hover,.chip-add.included:hover{border-color:var(--blue)}
+    .time-btn:hover{border-color:var(--line)}
+    .time-btn.sel:hover{border-color:var(--blue)}
+    .cal-cell.avail:hover{background:var(--blue-tint)}
+    .cal-nav:hover:not(:disabled){background:transparent}
+    .close:hover{background:var(--mist);color:var(--slate)}
+  }
+
   /* Fixed action bar: a flex row below the scroll area, flush with the sheet edge */
   .sheet-foot{flex:none;padding:10px 24px calc(10px + env(safe-area-inset-bottom));
     background:var(--white);border-top:1px solid var(--hairline)}
@@ -987,8 +1002,18 @@ function topBar(n){
     `<div class="steps" aria-hidden="true">${segs}</div>`;
 }
 
+/* Ghost-tap guard: when a tap swaps the sheet's content, iOS can dispatch a
+   trailing click at the same coordinates that lands on whatever new button is
+   now under the finger. Swallow clicks for a beat after each content swap. */
+let tapBlockUntil = 0;
+function tapGuard(){ tapBlockUntil = performance.now() + 350; }
+inner.addEventListener('click', e=>{
+  if(performance.now() < tapBlockUntil){ e.stopPropagation(); e.preventDefault(); }
+}, true);
+
 // Sheet layout: fixed header/steps, scrollable body, optional fixed footer.
 function sheet(n, body, foot){
+  tapGuard();
   inner.innerHTML = (n ? topBar(n) : '')
     + `<div class="sheet-body" id="sheetBody">${body}</div>`
     + (foot ? `<div class="sheet-foot">${foot}</div>` : '');
@@ -1178,6 +1203,7 @@ async function loadSlots(){
 function drawCalendar(){
   const area = document.getElementById('slotArea');
   if(!area || !calMonths.length) return;
+  tapGuard();   // day cells swap to time buttons at the same spot — swallow the trailing tap
   // A picked day collapses the calendar to a one-line chip so the times sit right there.
   if(state.calDate && !state.calOpen && slotsByDate[state.calDate]){
     const day = slotsByDate[state.calDate][0].instant;

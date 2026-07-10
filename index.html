@@ -259,21 +259,29 @@
     backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);
     align-items:flex-end;justify-content:center;z-index:50}
   .modal-bg.open{display:flex}
-  .modal{background:var(--white);color:var(--ink);width:100%;max-width:480px;border-radius:22px 22px 0 0;padding:14px 24px 34px;max-height:92vh;overflow-y:auto;animation:rise .26s cubic-bezier(.32,.72,.35,1);scrollbar-width:thin;scrollbar-color:#aebfce transparent}
+  /* The sheet is a flex column: grabber + header + steps stay fixed, only
+     .sheet-body scrolls, and .sheet-foot sits flush at the bottom outside the
+     scroll area (no position:sticky — it misbehaves inside iOS sheets).
+     dvh tracks the browser's dynamic toolbars; vh is the fallback. */
+  .modal{background:var(--white);color:var(--ink);width:100%;max-width:480px;border-radius:22px 22px 0 0;
+    display:flex;flex-direction:column;overflow:hidden;padding:14px 0 0;
+    max-height:92vh;max-height:92dvh;animation:rise .26s cubic-bezier(.32,.72,.35,1)}
   /* sheet grabber */
-  .modal::before{content:"";display:block;width:36px;height:5px;border-radius:3px;background:var(--line);margin:0 auto 14px}
-  /* subtle neutral modal scrollbar (WebKit) */
-  .modal::-webkit-scrollbar{width:9px}
-  .modal::-webkit-scrollbar-track{background:transparent;margin:12px 0}
-  .modal::-webkit-scrollbar-thumb{background:#aebfce;border-radius:8px;border:2px solid var(--white)}
-  .modal::-webkit-scrollbar-thumb:hover{background:#8ba1b3}
+  .modal::before{content:"";display:block;flex:none;width:36px;height:5px;border-radius:3px;background:var(--line);margin:0 auto 14px}
+  .sheet-body{flex:1 1 auto;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;
+    padding:2px 24px 26px;scrollbar-width:thin;scrollbar-color:#aebfce transparent}
+  /* subtle neutral scrollbar (WebKit) */
+  .sheet-body::-webkit-scrollbar{width:9px}
+  .sheet-body::-webkit-scrollbar-track{background:transparent;margin:12px 0}
+  .sheet-body::-webkit-scrollbar-thumb{background:#aebfce;border-radius:8px;border:2px solid var(--white)}
+  .sheet-body::-webkit-scrollbar-thumb:hover{background:#8ba1b3}
   @keyframes rise{from{transform:translateY(48px);opacity:.4}to{transform:translateY(0);opacity:1}}
   @media(min-width:520px){
     .modal-bg{align-items:center}
     .modal{border-radius:20px;padding-top:26px}
     .modal::before{display:none}
   }
-  .modal-top{display:flex;justify-content:space-between;align-items:center}
+  .modal-top{display:flex;justify-content:space-between;align-items:center;flex:none;padding:0 24px}
   .step-label{font-weight:700;font-size:.74rem;letter-spacing:.1em;text-transform:uppercase;color:var(--copper-2)}
   .close{background:var(--mist);border:none;font-size:1.35rem;line-height:1;cursor:pointer;color:var(--slate);width:36px;height:36px;display:flex;align-items:center;justify-content:center;margin:-2px -4px 0 0;border-radius:50%;transition:background .12s}
   .close:hover{background:var(--line);color:var(--navy)}
@@ -303,13 +311,9 @@
   /* Add-ons a chosen package already bundles: shown as included, not purchasable */
   .chip-add.included{cursor:default;border-color:var(--blue);background:var(--blue-tint);box-shadow:0 0 0 1px var(--blue) inset}
 
-  /* Sticky action bar pinned to the bottom of the sheet. The negative bottom
-     margin swallows the sheet's 34px bottom padding so the bar sits flush with
-     the sheet edge instead of leaving a visible gap below it. */
-  .sheet-foot{position:sticky;bottom:0;z-index:5;margin:14px -24px -34px;
-    padding:10px 24px calc(10px + env(safe-area-inset-bottom));
-    background:rgba(255,255,255,.94);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
-    border-top:1px solid var(--hairline)}
+  /* Fixed action bar: a flex row below the scroll area, flush with the sheet edge */
+  .sheet-foot{flex:none;padding:10px 24px calc(10px + env(safe-area-inset-bottom));
+    background:var(--white);border-top:1px solid var(--hairline)}
   .sheet-foot .btn{width:100%;text-align:center;margin-top:0}
   .sheet-foot .back{margin-top:2px;margin-bottom:0;padding:9px 9px 2px}
 
@@ -379,7 +383,7 @@
   .hp{position:absolute;left:-9999px;width:1px;height:1px;opacity:0}
 
   /* ---------- PROGRESS STEPS ---------- */
-  .steps{display:flex;gap:6px;margin:14px 0 20px}
+  .steps{display:flex;gap:6px;flex:none;margin:14px 24px 16px}
   .steps .seg{height:6px;flex:1;border-radius:99px;background:var(--line);transition:background .25s ease}
   .steps .seg.on{background:var(--blue)}
 
@@ -983,20 +987,25 @@ function topBar(n){
     `<div class="steps" aria-hidden="true">${segs}</div>`;
 }
 
+// Sheet layout: fixed header/steps, scrollable body, optional fixed footer.
+function sheet(n, body, foot){
+  inner.innerHTML = (n ? topBar(n) : '')
+    + `<div class="sheet-body" id="sheetBody">${body}</div>`
+    + (foot ? `<div class="sheet-foot">${foot}</div>` : '');
+}
 function render(){
-  inner.scrollTop = 0;                   // every step (and sub-view) opens at the top
   if(state.step===1){
-    inner.innerHTML = topBar(1) + `
+    sheet(1, `
       <h3>What does your car need?</h3>
       ${PACKAGES.map(p=>`
         <button class="opt ${state.pkg===p.id?'sel':''}" onclick="pickPkg('${p.id}')">
           <span class="o-name">${p.name} — $${p.price}</span>
           <span class="o-meta">${p.meta}</span>
         </button>`).join('')}
-    `;
+    `);
   }
   else if(state.step===2 && state.v2==='size'){
-    inner.innerHTML = topBar(2) + `
+    sheet(2, `
       <h3>What are you driving?</h3>
       <p class="field-intro">Bigger rigs take more time, so pick the closest match.</p>
       ${SIZES.map(s=>`
@@ -1005,11 +1014,11 @@ function render(){
           <span class="o-meta">${s.meta}</span>
         </button>`).join('')}
       <button class="back" onclick="go(1)">← Back</button>
-    `;
+    `);
   }
   else if(state.step===2){
     state.addons = state.addons.filter(id=>!pkgIncludes(id));   // drop anything the chosen package already covers
-    inner.innerHTML = topBar(2) + `
+    sheet(2, `
       <h3>Want to add anything?</h3>
       <p class="field-intro">Optional — tap to add, or just keep going.</p>
       <div class="addons">
@@ -1024,21 +1033,20 @@ function render(){
             <span class="ca-price">+$${a.price}</span>
           </button>`).join('')}
       </div>
-      <div class="sheet-foot">
-        <button class="btn" onclick="go(3)">Continue · $<span id="footTotal">${total()}</span></button>
-        <button class="back" onclick="v2Size()">← Back</button>
-      </div>
-    `;
+    `, `
+      <button class="btn" onclick="go(3)">Continue · $<span id="footTotal">${total()}</span></button>
+      <button class="back" onclick="v2Size()">← Back</button>
+    `);
   }
   else if(state.step===3){
-    inner.innerHTML = topBar(3) + `
+    sheet(3, `
       <h3>When works for you?</h3>
       <div id="slotArea"><p class="slot-status">Loading available days…</p></div>
       <button class="back" onclick="backToExtras()">← Back</button>
-    `;
+    `);
   }
   else if(state.step===4){
-    inner.innerHTML = topBar(4) + `
+    sheet(4, `
       <h3>Your details</h3>
       <p class="slot-chosen">${state.slot ? fmtDay(state.slot.instant)+' · '+fmtTime(state.slot.instant) : ''}</p>
       <div class="field"><label>Your name</label>
@@ -1062,11 +1070,10 @@ function render(){
       </div>
       <input type="text" id="f-company" class="hp" tabindex="-1" autocomplete="off" aria-hidden="true">
       <p id="detailErr" class="form-err" hidden></p>
-      <div class="sheet-foot">
-        <button class="btn" onclick="saveDetails()">Review booking</button>
-        <button class="back" onclick="go(3)">← Back</button>
-      </div>
-    `;
+    `, `
+      <button class="btn" onclick="saveDetails()">Review booking</button>
+      <button class="back" onclick="go(3)">← Back</button>
+    `);
   }
   else if(state.step===5){
     const p = PACKAGES.find(x=>x.id===state.pkg);
@@ -1074,7 +1081,7 @@ function render(){
     // Display-only booking code for the ticket stub, e.g. DV-TUEJUL14-9AM
     const code = 'DV-' + fmtDay(state.slot.instant).replace(/[^A-Za-z0-9]/g,'').toUpperCase()
                + '-' + fmtTime(state.slot.instant).replace(/[^0-9APM]/gi,'').toUpperCase();
-    inner.innerHTML = topBar(5) + `
+    sheet(5, `
       <h3>Does this look right?</h3>
       <div class="tix">
         <div class="tix-top">
@@ -1106,14 +1113,13 @@ function render(){
         </div>
       </div>
       <p id="confirmErr" class="form-err" hidden></p>
-      <div class="sheet-foot">
-        <button class="btn" id="confirmBtn" onclick="submitBooking()">Confirm booking · $${total()}</button>
-        <button class="back" onclick="go(4)">← Back</button>
-      </div>
-    `;
+    `, `
+      <button class="btn" id="confirmBtn" onclick="submitBooking()">Confirm booking · $${total()}</button>
+      <button class="back" onclick="go(4)">← Back</button>
+    `);
   }
   else if(state.step===6){
-    inner.innerHTML = `
+    sheet(0, `
       <div class="done">
         <div class="tick"></div>
         <h3>You're booked in.</h3>
@@ -1121,7 +1127,7 @@ function render(){
         <p>We'll text ${esc(state.phone)||'you'} to confirm. Nothing to pay until the work's done.</p>
         <button class="btn" onclick="closeBooking()" style="margin-top:20px">Done</button>
       </div>
-    `;
+    `);
   }
 }
 
@@ -1222,7 +1228,8 @@ function calMove(dir){
 function pickDate(k){
   state.calDate = k;
   state.calOpen = false;
-  inner.scrollTop = 0;
+  const sb = document.getElementById('sheetBody');
+  if(sb) sb.scrollTop = 0;
   drawCalendar();
 }
 function calReopen(){
@@ -1258,7 +1265,7 @@ function fmtPhone(v){
 }
 function onPhoneInput(el){ el.value = fmtPhone(el.value); }
 
-function showErr(el,msg){ if(el){ el.textContent=msg; el.hidden=false; } }
+function showErr(el,msg){ if(el){ el.textContent=msg; el.hidden=false; el.scrollIntoView({block:'nearest'}); } }
 function saveDetails(){
   state.name = document.getElementById('f-name').value.trim();
   state.phone = document.getElementById('f-phone').value.trim();

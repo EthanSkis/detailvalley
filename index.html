@@ -467,7 +467,7 @@
 
     <div class="pkgs">
     <div class="pkg">
-      <div class="pkg-head"><span class="pkg-name">Maintenance Wash</span><span class="pkg-price">$65</span></div>
+      <div class="pkg-head"><span class="pkg-name">Maintenance Wash</span><span class="pkg-price">$85</span></div>
       <ul>
         <li>Pre-rinse &amp; foam pre-wash</li>
         <li>Wheels, tires &amp; wheel wells cleaned</li>
@@ -476,11 +476,11 @@
         <li>Tire shine &amp; dressing</li>
         <li>Exterior glass cleaned</li>
       </ul>
-      <button class="pkg-btn" onclick="openBooking('maintenance')">Book Maintenance Wash — $65</button>
+      <button class="pkg-btn" onclick="openBooking('maintenance')">Book Maintenance Wash — $85</button>
     </div>
 
     <div class="pkg featured">
-      <div class="pkg-head"><span class="pkg-name">Full Detail</span><span class="pkg-price">$175</span></div>
+      <div class="pkg-head"><span class="pkg-name">Full Detail</span><span class="pkg-price">$295</span></div>
       <ul>
         <li>Everything in the Maintenance Wash</li>
         <li>Full interior vacuum — seats, carpets &amp; mats</li>
@@ -489,11 +489,11 @@
         <li>Interior glass cleaned</li>
         <li>Dash &amp; trim dressed</li>
       </ul>
-      <button class="pkg-btn" onclick="openBooking('full')">Book Full Detail — $175</button>
+      <button class="pkg-btn" onclick="openBooking('full')">Book Full Detail — $295</button>
     </div>
 
     <div class="pkg">
-      <div class="pkg-head"><span class="pkg-name">Showroom</span><span class="pkg-price">$260</span></div>
+      <div class="pkg-head"><span class="pkg-name">Showroom</span><span class="pkg-price">$360</span></div>
       <ul>
         <li>Everything in the Full Detail</li>
         <li>Clay bar paint decontamination</li>
@@ -501,7 +501,7 @@
         <li>Smooth, slick finish that beads water</li>
         <li>Clean, smooth, protected, glossed</li>
       </ul>
-      <button class="pkg-btn" onclick="openBooking('showroom')">Book Showroom — $260</button>
+      <button class="pkg-btn" onclick="openBooking('showroom')">Book Showroom — $360</button>
     </div>
 
     </div>
@@ -509,10 +509,10 @@
 
     <div class="pkg pkg-inside">
       <div>
-        <div class="pkg-head"><span class="pkg-name">Interior Detail <span class="inside-tag">Inside only</span></span><span class="pkg-price">$145</span></div>
+        <div class="pkg-head"><span class="pkg-name">Interior Detail <span class="inside-tag">Inside only</span></span><span class="pkg-price">$185</span></div>
         <p class="inside-sub">Just need the inside done? Full interior vacuum, carpet &amp; upholstery shampoo, surfaces, vents, interior glass and dressed trim — no exterior wash.</p>
       </div>
-      <button class="pkg-btn" onclick="openBooking('interior')">Book Interior Detail — $145</button>
+      <button class="pkg-btn" onclick="openBooking('interior')">Book Interior Detail — $185</button>
     </div>
   </div>
 </section>
@@ -659,7 +659,7 @@ const START_TIMES = ['08:00','09:00','10:00']; // only arrival times offered
 const BUFFER_MIN = 45;          // travel / cleanup gap kept between jobs
 const MAX_JOBS_PER_DAY = 1;     // never offer more than this many jobs in one day
 // How long each job runs (minutes) — drives how much time a booking blocks off.
-const PKG_MIN   = { maintenance:75, interior:150, full:210, showroom:300 };
+const PKG_MIN   = { maintenance:105, interior:225, full:360, showroom:420 };
 const SIZE_MIN  = { standard:0, midsize:30, oversize:60 };
 const ADDON_MIN = { pet:30, dirt:30, engine:20, intglass:10, wax:20 };
 const DOW = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
@@ -758,13 +758,13 @@ async function availableSlots(){
 }
 
 const PACKAGES = [
-  {id:'maintenance', name:'Maintenance Wash', price:65, meta:'Exterior wash, wheels, tires, glass · ~1¼ hr'},
-  {id:'interior',    name:'Interior Detail', price:145, meta:'Inside only — vacuum, shampoo, surfaces & glass · ~2½ hrs', includes:['intglass']},
-  {id:'full',        name:'Full Detail', price:175, meta:'Adds full interior clean & shampoo · ~3½ hrs', includes:['intglass']},
-  {id:'showroom',    name:'Showroom', price:260, meta:'Adds clay bar & wax protection · ~5 hrs', includes:['intglass']},
+  {id:'maintenance', name:'Maintenance Wash', price:85, meta:'Exterior wash, wheels, tires, glass · ~1½–2 hrs'},
+  {id:'interior',    name:'Interior Detail', price:185, meta:'Inside only — vacuum, shampoo, surfaces & glass · ~3½–4 hrs', includes:['intglass']},
+  {id:'full',        name:'Full Detail', price:295, meta:'Adds full interior clean & shampoo · ~6 hrs', includes:['intglass']},
+  {id:'showroom',    name:'Showroom', price:360, meta:'Adds clay bar & wax protection · ~6½–7½ hrs', includes:['intglass']},
 ];
 const ADDONS = [
-  {id:'pet', name:'Pet hair removal', price:25},
+  {id:'pet', name:'Pet hair removal', price:40},
   {id:'dirt', name:'Excessive dirt, mud or sand', price:30},
   {id:'engine', name:'Engine bay wipe-down', price:25},
   {id:'intglass', name:'Interior glass refresh', price:15},
@@ -773,8 +773,8 @@ const ADDONS = [
 // Vehicle size surcharge — bigger rigs take more time. 'standard' is the default (no charge).
 const SIZES = [
   {id:'standard', name:'Sedan / coupe', meta:'No extra charge', price:0},
-  {id:'midsize',  name:'SUV / crossover / small truck', meta:'+$25 · more surface to cover', price:25},
-  {id:'oversize', name:'Large truck / 3-row SUV / van', meta:'+$50 · the big rigs', price:50},
+  {id:'midsize',  name:'SUV / crossover / small truck', meta:'+$30 · more surface to cover', price:30},
+  {id:'oversize', name:'Large truck / 3-row SUV / van', meta:'+$60 · the big rigs', price:60},
 ];
 
 function freshState(){ return {step:1, pkg:null, size:'standard', addons:[], slot:null, calDate:null, name:'', phone:'', address:'', town:'', utilities:null, hp:false}; }

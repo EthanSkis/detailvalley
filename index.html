@@ -303,12 +303,15 @@
   /* Add-ons a chosen package already bundles: shown as included, not purchasable */
   .chip-add.included{cursor:default;border-color:var(--blue);background:var(--blue-tint);box-shadow:0 0 0 1px var(--blue) inset}
 
-  /* Sticky action bar pinned to the bottom of the sheet */
-  .sheet-foot{position:sticky;bottom:0;z-index:5;margin:14px -24px 0;padding:10px 24px 6px;
+  /* Sticky action bar pinned to the bottom of the sheet. The negative bottom
+     margin swallows the sheet's 34px bottom padding so the bar sits flush with
+     the sheet edge instead of leaving a visible gap below it. */
+  .sheet-foot{position:sticky;bottom:0;z-index:5;margin:14px -24px -34px;
+    padding:10px 24px calc(10px + env(safe-area-inset-bottom));
     background:rgba(255,255,255,.94);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
     border-top:1px solid var(--hairline)}
   .sheet-foot .btn{width:100%;text-align:center;margin-top:0}
-  .sheet-foot .back{margin-top:2px;padding:9px}
+  .sheet-foot .back{margin-top:2px;margin-bottom:0;padding:9px 9px 2px}
 
   .field{margin-bottom:16px}
   .field label{display:block;font-weight:600;font-size:.95rem;margin-bottom:8px;color:var(--ink)}

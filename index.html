@@ -925,7 +925,7 @@ async function availableSlots(){
 
 const PACKAGES = [
   {id:'maintenance', name:'Maintenance Wash', price:85, meta:'Exterior wash, wheels, tires, glass · ~1½–2 hrs'},
-  {id:'interior',    name:'Interior Detail', price:185, meta:'Inside only — vacuum, shampoo, surfaces & glass · ~3½–4 hrs', includes:['intglass']},
+  {id:'interior',    name:'Interior Detail', price:185, meta:'Inside only — vacuum, shampoo, surfaces & glass · ~3½–4 hrs', includes:['intglass'], excludes:['wax']},
   {id:'full',        name:'Full Detail', price:295, meta:'Adds full interior clean & shampoo · ~6 hrs', includes:['intglass']},
   {id:'showroom',    name:'Showroom', price:360, meta:'Adds clay bar & wax protection · ~6½–7½ hrs', includes:['intglass']},
 ];
@@ -1010,9 +1010,14 @@ function pkgIncludes(id){
   const p = PACKAGES.find(x=>x.id===state.pkg);
   return !!(p && p.includes && p.includes.includes(id));
 }
+// True when this add-on doesn't apply to the chosen package (e.g. exterior wax on an inside-only detail).
+function pkgExcludes(id){
+  const p = PACKAGES.find(x=>x.id===state.pkg);
+  return !!(p && p.excludes && p.excludes.includes(id));
+}
 function extrasLabel(){ return state.addons.length ? `Continue · $${total()}` : 'No extras — continue'; }
 function toggleAddon(id){
-  if(pkgIncludes(id)) return;            // already part of the chosen package — not a paid extra
+  if(pkgIncludes(id) || pkgExcludes(id)) return;   // bundled or not applicable — not a paid extra
   const i=state.addons.indexOf(id);
   if(i>-1) state.addons.splice(i,1); else state.addons.push(id);
   // Update in place — a full re-render would yank the scroll position around.
@@ -1026,7 +1031,7 @@ function toggleAddon(id){
 function total(){
   let t = PACKAGES.find(p=>p.id===state.pkg)?.price || 0;
   t += SIZES.find(s=>s.id===state.size)?.price || 0;
-  state.addons.forEach(a=>{ if(!pkgIncludes(a)) t += ADDONS.find(x=>x.id===a).price; });
+  state.addons.forEach(a=>{ if(!pkgIncludes(a) && !pkgExcludes(a)) t += ADDONS.find(x=>x.id===a).price; });
   return t;
 }
 function go(step){ state.step=step; render(); if(step===3) loadSlots(); }
@@ -1149,12 +1154,12 @@ function render(){
     `);
   }
   else if(state.step===2){
-    state.addons = state.addons.filter(id=>!pkgIncludes(id));   // drop anything the chosen package already covers
+    state.addons = state.addons.filter(id=>!pkgIncludes(id) && !pkgExcludes(id));   // drop anything the package covers or can't take
     sheet(2, `
       <h3>Want to add anything?</h3>
       <p class="field-intro">Optional — tap to add, or just keep going.</p>
       <div class="addons">
-      ${ADDONS.map(a=> pkgIncludes(a.id)
+      ${ADDONS.filter(a=>!pkgExcludes(a.id)).map(a=> pkgIncludes(a.id)
         ? `<div class="chip-add included" aria-disabled="true">
             <span class="ca-ic" aria-hidden="true">${ADDON_ICON[a.id]||''}</span>
             <span class="ca-tx"><span class="ca-name">${a.name}</span>

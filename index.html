@@ -539,7 +539,7 @@
       <a href="#how">How it works</a>
       <a href="#reviews">Reviews</a>
       <a href="#faq">FAQ</a>
-      <a href="service-areas.html">Service areas</a>
+      <a href="/service-areas">Service areas</a>
     </div>
     <button class="btn nav-btn" onclick="openBooking()">Book now</button>
   </div>
@@ -656,7 +656,7 @@
     <div class="prose">
       <p>Detail Valley is a mobile car detailing service built around one simple idea: a spotless car shouldn't cost you a Saturday. We bring all our own gear and pro-grade products straight to your home or workplace, so you get a showroom finish without ever leaving your driveway.</p>
       <p>Every detail is done by hand. From a quick Maintenance Wash to a full interior-and-exterior detail or our Showroom clay-and-wax finish, we treat each vehicle like it's our own — wheels, glass, seats, carpets, and trim all included. No rushed, assembly-line work and no surprise fees on the day.</p>
-      <p>We're proud to serve Valley County, Idaho and the surrounding communities, including McCall, Cascade, and Donnelly. Compare our <a href="#packages">detailing packages</a>, see the <a href="service-areas.html">areas we serve in Valley County</a>, or book your detail online in under a minute.</p>
+      <p>We're proud to serve Valley County, Idaho and the surrounding communities, including McCall, Cascade, and Donnelly. Compare our <a href="#packages">detailing packages</a>, see the <a href="/service-areas">areas we serve in Valley County</a>, or book your detail online in under a minute.</p>
     </div>
   </div>
 </section>
@@ -681,7 +681,7 @@
       </details>
       <details>
         <summary>Which areas do you cover?</summary>
-        <p>All of Valley County — McCall, Cascade, Donnelly, Lake Fork, New Meadows and everywhere in between. See the full list on our <a href="service-areas.html">service areas page</a>.</p>
+        <p>All of Valley County — McCall, Cascade, Donnelly, Lake Fork, New Meadows and everywhere in between. See the full list on our <a href="/service-areas">service areas page</a>.</p>
       </details>
       <details>
         <summary>What if the weather turns bad?</summary>
@@ -713,7 +713,7 @@
       <div class="foot-contact">
         <a href="tel:+12083151420">Call or text (208) 315-1420</a>
         <a href="mailto:ethan@detailvalley.com">ethan@detailvalley.com</a>
-        <a href="service-areas.html">Areas we serve in Valley County</a>
+        <a href="/service-areas">Areas we serve in Valley County</a>
       </div>
       <div class="socials">
         <a href="https://www.facebook.com/profile.php?id=61590927205017" target="_blank" rel="noopener" aria-label="Facebook" title="Facebook">
@@ -800,7 +800,7 @@
 const SUPABASE_URL = 'https://utybbdrthxgsijplowup.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_48352eB1w0mLVwvLm3gXUg_BpGKN67o';
 // Public booking is always anonymous. persistSession:false keeps this client
-// from picking up an owner/admin login stored on the same domain (admin.html) —
+// from picking up an owner/admin login stored on the same domain (/admin) —
 // otherwise the calendar's anon-only RPC would 403 for a signed-in owner.
 const sb = window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
   auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false }

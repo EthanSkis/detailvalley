@@ -809,7 +809,7 @@ const sb = window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE
 /* ---------- Availability config ---------- */
 const SLOT_TZ    = 'America/Boise';   // Mountain Time (McCall / Valley County)
 const DAYS_AHEAD = 21;                // size of the booking window (days shown at once)
-const MIN_LEAD_DAYS = 3;             // earliest a customer can book — must be ≥ this many days out
+const MIN_LEAD_DAYS = 1;             // earliest bookable day, in calendar days out (1 = tomorrow)
 const OPEN_FROM = '2026-07-01';      // closed until this date (MT, 'YYYY-MM-DD'); set '' to remove
 const BIZ_PHONE  = '(208) 315-1420';
 // Working hours per weekday (0=Sun … 6=Sat). Omit a day to close it.
@@ -853,11 +853,13 @@ function mtDateParts(date){
 function fmtDay(i){ return i.toLocaleDateString('en-US',{timeZone:SLOT_TZ,weekday:'short',month:'short',day:'numeric'}); }
 function fmtTime(i){ return i.toLocaleTimeString('en-US',{timeZone:SLOT_TZ,hour:'numeric',minute:'2-digit'}); }
 
-/* Earliest instant a customer may book: at least MIN_LEAD_DAYS out, and never
-   before OPEN_FROM (owner unavailable until then). Once OPEN_FROM is in the
-   past it stops mattering and only the lead time applies. */
+/* Earliest instant a customer may book. Lead time counts Mountain-Time calendar
+   days, not rolling 24h blocks — with MIN_LEAD_DAYS = 1, tomorrow morning stays
+   bookable all day today. Never before OPEN_FROM (owner unavailable until then);
+   once OPEN_FROM is in the past it stops mattering and only the lead applies. */
 function earliestBookable(now){
-  let earliest = now.getTime() + MIN_LEAD_DAYS*86400000;
+  const {y,m,d} = mtDateParts(now);
+  let earliest = mtToInstant(y, m, d + MIN_LEAD_DAYS, 0, 0).getTime();
   if(OPEN_FROM){
     const [oy,om,od] = OPEN_FROM.split('-').map(Number);
     earliest = Math.max(earliest, mtToInstant(oy,om,od,0,0).getTime());

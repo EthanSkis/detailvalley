@@ -97,7 +97,8 @@
     --cop:#c97e3a; --cop-2:#e0904e; --cop-3:#f0b98a;
   }
   *{margin:0;padding:0;box-sizing:border-box}
-  html{scroll-behavior:smooth;overflow-y:scroll;scrollbar-width:thin;scrollbar-color:#2a4258 var(--bg)}
+  html{scroll-behavior:smooth;overflow-y:scroll;scrollbar-width:thin;scrollbar-color:#2a4258 var(--bg);
+    -webkit-text-size-adjust:100%;text-size-adjust:100%}
   html::-webkit-scrollbar{width:12px}
   html::-webkit-scrollbar-track{background:var(--bg)}
   html::-webkit-scrollbar-thumb{background:#2a4258;border-radius:8px;border:3px solid var(--bg)}
@@ -292,14 +293,14 @@
   @media(prefers-reduced-motion:reduce){.slide-fwd,.slide-back{animation:none}}
   .close{background:var(--mist);border:none;font-size:1.35rem;line-height:1;cursor:pointer;color:var(--slate);width:36px;height:36px;display:flex;align-items:center;justify-content:center;margin:-2px -4px 0 0;border-radius:50%;transition:background .12s}
   .close:hover{background:var(--line);color:var(--navy)}
-  .modal h3{font-size:1.45rem;font-weight:700;letter-spacing:-.02em;margin:14px 0 18px}
-  .field-intro{color:var(--slate);font-size:.96rem;margin:-12px 0 18px}
+  .modal h3{font-size:1.32rem;font-weight:700;letter-spacing:-.02em;margin:10px 0 14px}
+  .field-intro{color:var(--slate);font-size:.94rem;margin:-8px 0 14px}
 
-  .opt{display:block;width:100%;text-align:left;background:var(--white);border:1.5px solid var(--line);border-radius:14px;padding:18px 46px 18px 18px;margin-bottom:12px;cursor:pointer;font-family:var(--font);font-size:1.05rem;position:relative;transition:border-color .12s,background .12s,box-shadow .12s}
+  .opt{display:block;width:100%;text-align:left;background:var(--white);border:1.5px solid var(--line);border-radius:14px;padding:14px 42px 14px 15px;margin-bottom:10px;cursor:pointer;font-family:var(--font);font-size:1rem;position:relative;transition:border-color .12s,background .12s,box-shadow .12s}
   .opt:hover{border-color:var(--blue)}
   .opt.sel{border-color:var(--blue);background:var(--blue-tint);box-shadow:0 0 0 1px var(--blue) inset}
-  .opt .o-name{font-weight:700;font-size:1.12rem;letter-spacing:-.015em}
-  .opt .o-meta{font-size:.92rem;color:var(--slate);display:block;margin-top:4px}
+  .opt .o-name{font-weight:700;font-size:1.05rem;letter-spacing:-.015em}
+  .opt .o-meta{font-size:.86rem;color:var(--slate);display:block;margin-top:2px;line-height:1.45}
   .opt::after{content:"›";position:absolute;right:18px;top:50%;transform:translateY(-50%);font-size:1.7rem;line-height:1;color:#aebfce}
   .opt:hover::after{color:var(--blue)}
   /* Size options just select (no navigation) — drop the chevron, show a tick when chosen */
@@ -345,6 +346,30 @@
     background:var(--white);border-top:1px solid var(--hairline)}
   .sheet-foot .btn{width:100%;text-align:center;margin-top:0}
   .sheet-foot .back{margin-top:2px;margin-bottom:0;padding:9px 9px 2px}
+
+  /* Short screens (browser toolbars, small phones): tighten further so every
+     option list fits the sheet with no scrolling. */
+  @media(max-height:700px){
+    .modal::before{margin-bottom:8px}
+    .modal h3{font-size:1.2rem;margin:6px 0 10px}
+    .field-intro{margin:-4px 0 10px}
+    .steps{margin:10px 24px 10px}
+    .opt{padding:11px 38px 11px 13px;margin-bottom:8px;border-radius:12px}
+    .opt .o-name{font-size:1rem}
+    .opt .o-meta{font-size:.8rem}
+    .o-ic{width:38px}
+    .o-ic svg{width:38px}
+  }
+  @media(max-height:640px){
+    .addons{gap:7px}
+    .chip-add{padding:8px 10px;gap:8px}
+    .chip-add .ca-name{font-size:.82rem}
+    .chip-add .ca-price{font-size:.78rem}
+    .ca-ic{width:18px;height:18px}
+    .ca-ic svg{width:18px;height:18px}
+    .sheet-foot{padding-top:8px}
+    .sheet-foot .back{padding-bottom:0}
+  }
 
   .field{margin-bottom:16px}
   .field label{display:block;font-weight:600;font-size:.95rem;margin-bottom:8px;color:var(--ink)}

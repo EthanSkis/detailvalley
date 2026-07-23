@@ -459,10 +459,25 @@ function drawJobs(){
   $('jobs').innerHTML = html;
 }
 
+/* Ordinal day number: 9 -> "9th", 21 -> "21st", 12 -> "12th". */
+const nth = d => { const t = d%100, r = d%10;
+  return d + (t>=11 && t<=13 ? 'th' : r===1 ? 'st' : r===2 ? 'nd' : r===3 ? 'rd' : 'th'); };
+
+/* Prefilled confirmation text for the tap-to-text link:
+   "Hey Jhen, confirming your July 9th booking at 9am. See you then!" */
+function confirmText(j){
+  const first = (j.customer_name||'').trim().split(/\s+/)[0];
+  const [, m, d] = dayKey(j.slot_start).split('-').map(Number);
+  return `Hey ${first}, confirming your ${MONTHS[m-1]} ${nth(d)} booking at ${chipTime(j.slot_start)}. See you then!`;
+}
+
 function jobCard(j){
   const addons = (j.addons && j.addons.length) ? `<p class="meta addons">+ ${esc(j.addons.join(', '))}</p>` : '';
   const mapQ = encodeURIComponent(`${j.address}, ${j.town}, Idaho`);
   const phoneDigits = (j.customer_phone||'').replace(/[^\d+]/g,'');
+  // "?&body=" is deliberate — iOS Messages wants "&body=", Android wants
+  // "?body="; the combined form opens with the draft filled in on both.
+  const smsHref = `sms:${phoneDigits}?&body=${encodeURIComponent(confirmText(j))}`;
   // The booking form folds a water/power warning into the package text.
   const warn = /Water\/power/i.test(j.package)
     ? `<div class="warn">⚠ ${esc(j.package.split('·').pop().trim())}</div>` : '';
@@ -486,7 +501,7 @@ function jobCard(j){
       <div class="time">${timeFmt.format(new Date(j.slot_start))}</div>
       <div class="who">
         <b>${esc(j.customer_name)}</b>
-        <a class="tel" href="sms:${esc(phoneDigits)}">${esc(j.customer_phone)}</a>
+        <a class="tel" href="${esc(smsHref)}">${esc(j.customer_phone)}</a>
       </div>
       <span class="badge b-${j.status}">${j.status}</span>
     </div>

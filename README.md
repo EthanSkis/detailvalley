@@ -97,7 +97,9 @@ slot back up, or `confirmed` / `completed` to track it.
   - `MAX_JOBS_PER_DAY` — daily job cap (currently **1** — one booking per day)
   - `PKG_MIN` / `SIZE_MIN` / `ADDON_MIN` — how long each job runs, which drives
     how much time it blocks. Tune these to your real time-per-car.
-  - `OPEN_FROM` — closed until this date (currently `2026-07-01`; `''` to remove)
+  - `OPEN_FROM` — closed until this date (currently `2026-08-11`; `''` to remove).
+    Also the quickest way to block off time you're already booked or away: set it
+    to the first day you're free again and the calendar offers nothing before it.
   - `MIN_LEAD_DAYS` — minimum lead time (currently **3** days out)
   - `DAYS_AHEAD` — how big a window to show, starting from the first bookable day
 - **Double-booking is impossible**: a database exclusion constraint rejects any

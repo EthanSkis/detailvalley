@@ -15,12 +15,14 @@ Supabase client from a CDN).
 
 `index.html` is the production site. Open it in any browser to preview it, or
 host it on any static host. `service-areas.html` is a companion local-SEO page
-covering the towns we serve (McCall · Cascade · Donnelly). `robots.txt` and
+covering the towns we serve (McCall · Cascade · Donnelly), and
+`before-after.html` is the before &amp; after photo gallery. `robots.txt` and
 `sitemap.xml` help search engines crawl the site (the sitemap lists the public
 pages; `admin.html` is disallowed).
 
-> `index.html`, `service-areas.html`, `logo.svg`, and `logo.png` must live in
-> the **same folder** — the pages reference them by relative path.
+> `index.html`, `service-areas.html`, `before-after.html`, `dv-compare.js`,
+> `logo.svg`, `logo.png` and the `gallery/` folder must live in the **same
+> folder** — the pages reference them by relative path.
 
 ### Deploy on GitHub Pages
 1. Repo **Settings → Pages**
@@ -49,10 +51,36 @@ command and no publish directory beyond the root are needed.
 |------|---------|
 | `index.html` | The live Detail Valley site (final, professional design). |
 | `admin.html` | Private **owner job board** — sign in to manage bookings on your phone. See [Owner dashboard](#owner-dashboard-adminhtml). |
+| `before-after.html` | Before &amp; after gallery — 10 drag-to-compare sliders from one Interior Detail. See [Before &amp; after](#before--after-photos). |
+| `dv-compare.js` | Drag / tap / keyboard behaviour for the compare sliders. Shared by the homepage and the gallery page. |
+| `gallery/` | The before &amp; after photos, two widths each (`-sm` = 560px, plain = 900px) for `srcset`. |
 | `CNAME` | Custom domain for GitHub Pages (`detailvalley.com`). |
 | `logo.svg` | The logo, as vector — used on the site (hero, footer, favicon). Scales crisply at any size. |
 | `logo.png` | Raster version of the logo — social profile picture / raster fallback. |
 | `alternate-designs/ridgeline-mountain.html` | Earlier "alpine garage" concept (rugged, mountain-themed, under the working name *Ridgeline Detail*). Kept for reference; not used live. |
+
+## Before &amp; after photos
+
+`before-after.html` (live at `/before-after`) is the proof page: ten
+drag-to-compare sliders from a single Interior Detail, plus a three-slider
+teaser in the `#results` section of the homepage that links through to it.
+
+**Adding a new car.** Shoot each angle twice — same spot, same framing, before
+and after — then:
+
+1. Save the pair into `gallery/` as `<slug>-before.jpg` and `<slug>-after.jpg`,
+   resized to **900px** on the long edge. Save a second copy of each at
+   **560px** named `<slug>-before-sm.jpg` / `<slug>-after-sm.jpg`; the pages use
+   both through `srcset` so phones don't download the big ones.
+2. Copy any existing `<figure>` block in `before-after.html`, swap the four
+   filenames, and rewrite the `alt` text and the `<figcaption>`.
+3. Photos are shot portrait and cropped to `aspect-ratio: 3/4`. Anything close
+   to that ratio drops straight in; anything wildly different will get cropped.
+
+The slider markup is plain HTML — both photos are real `<img>` tags, so they
+still show up for search engines and for anyone with JavaScript off (they just
+render as a fixed 50/50 split). `dv-compare.js` only adds the dragging,
+the arrow-key control and the one-time nudge when a slider scrolls into view.
 
 ## Before going fully live
 

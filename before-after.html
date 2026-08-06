@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Before &amp; After Car Detailing Photos | Detail Valley, Valley County ID</title>
-<meta name="description" content="Real before and after photos from a Detail Valley interior detail in Valley County, Idaho. Drag the handle on any photo to see the difference — floors, seats, console and cargo area.">
+<meta name="description" content="Real before and after photos from Detail Valley interior details in Valley County, Idaho — a 4Runner TRD Pro and a Subaru Crosstrek. Drag the handle on any photo to see the difference.">
 <link rel="canonical" href="https://detailvalley.com/before-after">
 <meta name="theme-color" content="#081420">
 <link rel="icon" type="image/svg+xml" href="logo.svg">
@@ -15,16 +15,16 @@
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://detailvalley.com/before-after">
 <meta property="og:title" content="Before &amp; After Car Detailing Photos | Detail Valley">
-<meta property="og:description" content="Real before and after photos from a Detail Valley interior detail. Drag to compare.">
-<meta property="og:image" content="https://detailvalley.com/gallery/driver-floor-mat-after.jpg">
+<meta property="og:description" content="Real before and after photos from Detail Valley interior details — two vehicles, twenty angles. Drag to compare.">
+<meta property="og:image" content="https://detailvalley.com/gallery/4runner/driver-floor-mat-after.jpg">
 <meta property="og:site_name" content="Detail Valley">
 <meta property="og:locale" content="en_US">
 
 <!-- Twitter -->
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Before &amp; After Car Detailing Photos | Detail Valley">
-<meta name="twitter:description" content="Real before and after photos from a Detail Valley interior detail. Drag to compare.">
-<meta name="twitter:image" content="https://detailvalley.com/gallery/driver-floor-mat-after.jpg">
+<meta name="twitter:description" content="Real before and after photos from Detail Valley interior details — two vehicles, twenty angles. Drag to compare.">
+<meta name="twitter:image" content="https://detailvalley.com/gallery/4runner/driver-floor-mat-after.jpg">
 
 <!-- Structured data -->
 <script type="application/ld+json">
@@ -41,7 +41,7 @@
 {
   "@context": "https://schema.org",
   "@type": "ImageGallery",
-  "name": "Detail Valley — interior detail, before and after",
+  "name": "Detail Valley — interior details, before and after",
   "url": "https://detailvalley.com/before-after",
   "about": "Mobile car detailing results in Valley County, Idaho",
   "provider": {
@@ -102,8 +102,21 @@
   .section-title{font-size:2rem;font-weight:700;margin-bottom:14px}
   .intro p{color:var(--mute);font-size:1.05rem;margin-bottom:16px;max-width:640px}
 
-  .ba-grid{display:grid;grid-template-columns:1fr;gap:34px 26px;margin-top:38px}
+  .ba-grid{display:grid;grid-template-columns:1fr;gap:34px 26px;margin-top:28px}
   figure{display:flex;flex-direction:column;gap:14px}
+
+  /* Jump links between vehicles, so 20 sliders don't read as one wall */
+  .jump{display:flex;flex-wrap:wrap;gap:10px;margin-top:24px}
+  .jump a{border:1px solid var(--edge);background:rgba(255,255,255,.03);border-radius:999px;
+    padding:9px 18px;font-size:.88rem;font-weight:600;color:#c5d4e1;text-decoration:none;
+    transition:border-color .15s ease,color .15s ease}
+  .jump a:hover{border-color:var(--cop-2);color:var(--cop-2)}
+
+  /* One chapter per vehicle */
+  .chapter{margin-top:56px;scroll-margin-top:24px}
+  .chapter-head{border-top:1px solid var(--edge);padding-top:26px}
+  .chapter-head h3{font-size:1.5rem;font-weight:700;color:var(--text);margin-bottom:8px}
+  .chapter-head p{color:var(--mute);font-size:1rem;max-width:640px}
 
   /* ---------- COMPARE SLIDER ---------- */
   .ba{
@@ -178,13 +191,23 @@
   .foot-contact a:hover{color:var(--cop-2)}
   .foot-bottom{max-width:760px;margin:30px auto 0;padding-top:20px;border-top:1px solid var(--edge);font-size:.8rem;color:var(--dim)}
 
+  @media(min-width:620px){
+    .ba-grid{grid-template-columns:1fr 1fr}
+  }
   @media(min-width:820px){
     header{padding:96px 24px 80px}
     header h1{font-size:3rem}
     section{padding:80px 0}
     .wrap{max-width:1000px}
     .section-title{font-size:2.3rem}
-    .ba-grid{grid-template-columns:1fr 1fr}
+    .chapter{margin-top:68px}
+    .chapter-head h3{font-size:1.7rem}
+  }
+  /* Three up on wide screens — 10 sliders per vehicle read as four tight rows
+     instead of five tall ones, which is what keeps the page from feeling long. */
+  @media(min-width:1024px){
+    .wrap{max-width:1120px}
+    .ba-grid{grid-template-columns:repeat(3,1fr)}
   }
   @media(prefers-reduced-motion:reduce){
     .ba-knob,.ba.dragging .ba-knob,.ba.hinting .ba-knob{transition:none;transform:translate(-50%,-50%)}
@@ -202,12 +225,12 @@
       <a href="/"><span class="brand-word">Detail Valley</span></a>
     </div>
     <nav class="crumbs" aria-label="Breadcrumb"><a href="/">Home</a> › Before &amp; after</nav>
-    <h1>The same car, <span class="accent">four hours apart.</span></h1>
-    <p class="lead">Every photo below is from one Interior Detail, shot before we started and again when we packed up. Nothing staged, nothing swapped out. Drag the handle across any photo to see it for yourself.</p>
+    <h1>The same car, <span class="accent">start and finish.</span></h1>
+    <p class="lead">Every photo below is from a real Interior Detail — shot before we started and again when we packed up. Nothing staged, nothing swapped out. Drag the handle across any photo to see it for yourself.</p>
     <a class="btn" href="/#packages">Book a detail</a>
     <div class="facts">
-      <span class="fact"><b>1</b>&nbsp; car</span>
-      <span class="fact"><b>10</b>&nbsp; angles</span>
+      <span class="fact"><b>2</b>&nbsp; vehicles</span>
+      <span class="fact"><b>20</b>&nbsp; angles</span>
       <span class="fact"><b>Interior Detail</b>&nbsp; package</span>
       <span class="fact">Done in the customer's driveway</span>
     </div>
@@ -219,21 +242,171 @@
     <div class="intro">
       <p class="kicker">Interior detail</p>
       <h2 class="section-title">Drag to compare</h2>
-      <p>This one is a Subaru Crosstrek that spends its life on Valley County gravel — pine needles in the mats, dust worked into every seam, and a cargo area that had clearly hauled its share of firewood. It's a completely normal amount of dirt for a car up here, and it all comes out.</p>
+      <p>Two vehicles, ten angles each. Both were shot the same day the work happened — once before we started, once when we packed up.</p>
       <p class="drag-hint">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 5 3 12l5 7M16 5l5 7-5 7M12 3v18"/></svg>
         Drag the handle left and right — or tap a photo and use your arrow keys.
       </p>
+      <nav class="jump" aria-label="Jump to a vehicle">
+        <a href="#car-4runner">Toyota 4Runner TRD Pro</a>
+        <a href="#car-crosstrek">Subaru Crosstrek</a>
+      </nav>
     </div>
 
-    <div class="ba-grid">
+    <div class="chapter" id="car-4runner">
+      <div class="chapter-head">
+        <h3>Toyota 4Runner TRD Pro</h3>
+        <p>A working truck that had clearly been up a forest road and back. Dried mud packed into the mats, trail dust on every hard surface, and recovery gear still in the back.</p>
+      </div>
+      <div class="ba-grid">
 
       <figure>
-        <div class="ba" role="slider" tabindex="0" aria-label="Driver floor mat, before and after detailing" aria-valuemin="0" aria-valuemax="100" aria-valuenow="50" aria-valuetext="Half before, half after">
-          <img src="gallery/driver-floor-mat-after.jpg" srcset="gallery/driver-floor-mat-after-sm.jpg 560w, gallery/driver-floor-mat-after.jpg 900w" sizes="(min-width:820px) 470px, 92vw" width="900" height="1199" alt="Driver floor mat after detailing — clean rubber, deep honeycomb texture visible" decoding="async">
+        <div class="ba" role="slider" tabindex="0" aria-label="Toyota 4Runner TRD Pro driver floor mat, before and after detailing" aria-valuemin="0" aria-valuemax="100" aria-valuenow="50" aria-valuetext="Half before, half after">
+          <img src="gallery/4runner/driver-floor-mat-after.jpg" srcset="gallery/4runner/driver-floor-mat-after-sm.jpg 560w, gallery/4runner/driver-floor-mat-after.jpg 900w" sizes="(min-width:1024px) 340px, (min-width:620px) 46vw, 92vw" width="900" height="1200" alt="Toyota 4Runner TRD Pro driver floor mat after detailing — clean black rubber with the TRD Pro lettering legible again" decoding="async">
           <span class="ba-tag ba-tag-after">After</span>
           <div class="ba-before">
-            <img src="gallery/driver-floor-mat-before.jpg" srcset="gallery/driver-floor-mat-before-sm.jpg 560w, gallery/driver-floor-mat-before.jpg 900w" sizes="(min-width:820px) 470px, 92vw" width="900" height="1199" alt="Driver floor mat before detailing — dried grass, pine needles and dust caked into the rubber" decoding="async">
+            <img src="gallery/4runner/driver-floor-mat-before.jpg" srcset="gallery/4runner/driver-floor-mat-before-sm.jpg 560w, gallery/4runner/driver-floor-mat-before.jpg 900w" sizes="(min-width:1024px) 340px, (min-width:620px) 46vw, 92vw" width="900" height="1200" alt="Toyota 4Runner TRD Pro driver floor mat before detailing — caked in dried mud, the tread pattern completely filled in" decoding="async">
+            <span class="ba-tag ba-tag-before">Before</span>
+          </div>
+          <div class="ba-divider"><div class="ba-knob"><svg viewBox="0 0 8 13" aria-hidden="true"><path d="M7 1 1.5 6.5 7 12" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg><svg viewBox="0 0 8 13" aria-hidden="true"><path d="m1 1 5.5 5.5L1 12" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div></div>
+        </div>
+        <figcaption><div class="name">Driver floor mat</div><div class="note">Dried mud packed into the tread, washed out until the TRD Pro lettering reads again.</div></figcaption>
+      </figure>
+
+      <figure>
+        <div class="ba" role="slider" tabindex="0" aria-label="Toyota 4Runner TRD Pro front cabin, before and after detailing" aria-valuemin="0" aria-valuemax="100" aria-valuenow="50" aria-valuetext="Half before, half after">
+          <img src="gallery/4runner/front-cabin-after.jpg" srcset="gallery/4runner/front-cabin-after-sm.jpg 560w, gallery/4runner/front-cabin-after.jpg 900w" sizes="(min-width:1024px) 340px, (min-width:620px) 46vw, 92vw" width="900" height="1200" alt="Toyota 4Runner TRD Pro front cabin after detailing — dash, vents and trim clean at an even low sheen" loading="lazy" decoding="async">
+          <span class="ba-tag ba-tag-after">After</span>
+          <div class="ba-before">
+            <img src="gallery/4runner/front-cabin-before.jpg" srcset="gallery/4runner/front-cabin-before-sm.jpg 560w, gallery/4runner/front-cabin-before.jpg 900w" sizes="(min-width:1024px) 340px, (min-width:620px) 46vw, 92vw" width="900" height="1200" alt="Toyota 4Runner TRD Pro front cabin before detailing — trail dust settled across the dash, vents and door card" loading="lazy" decoding="async">
+            <span class="ba-tag ba-tag-before">Before</span>
+          </div>
+          <div class="ba-divider"><div class="ba-knob"><svg viewBox="0 0 8 13" aria-hidden="true"><path d="M7 1 1.5 6.5 7 12" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg><svg viewBox="0 0 8 13" aria-hidden="true"><path d="m1 1 5.5 5.5L1 12" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div></div>
+        </div>
+        <figcaption><div class="name">Front cabin</div><div class="note">Trail dust off the dash, vents and center stack, then the door card and sill.</div></figcaption>
+      </figure>
+
+      <figure>
+        <div class="ba" role="slider" tabindex="0" aria-label="Toyota 4Runner TRD Pro rear footwells, before and after detailing" aria-valuemin="0" aria-valuemax="100" aria-valuenow="50" aria-valuetext="Half before, half after">
+          <img src="gallery/4runner/rear-footwells-after.jpg" srcset="gallery/4runner/rear-footwells-after-sm.jpg 560w, gallery/4runner/rear-footwells-after.jpg 900w" sizes="(min-width:1024px) 340px, (min-width:620px) 46vw, 92vw" width="900" height="1200" alt="Toyota 4Runner TRD Pro rear footwells after detailing — mats scrubbed clean and the carpet edges clear" loading="lazy" decoding="async">
+          <span class="ba-tag ba-tag-after">After</span>
+          <div class="ba-before">
+            <img src="gallery/4runner/rear-footwells-before.jpg" srcset="gallery/4runner/rear-footwells-before-sm.jpg 560w, gallery/4runner/rear-footwells-before.jpg 900w" sizes="(min-width:1024px) 340px, (min-width:620px) 46vw, 92vw" width="900" height="1200" alt="Toyota 4Runner TRD Pro rear footwells before detailing — a cap, a traction board and grit across the mats" loading="lazy" decoding="async">
+            <span class="ba-tag ba-tag-before">Before</span>
+          </div>
+          <div class="ba-divider"><div class="ba-knob"><svg viewBox="0 0 8 13" aria-hidden="true"><path d="M7 1 1.5 6.5 7 12" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg><svg viewBox="0 0 8 13" aria-hidden="true"><path d="m1 1 5.5 5.5L1 12" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div></div>
+        </div>
+        <figcaption><div class="name">Rear footwells</div><div class="note">Gear and grit cleared out, then the mats scrubbed and rinsed.</div></figcaption>
+      </figure>
+
+      <figure>
+        <div class="ba" role="slider" tabindex="0" aria-label="Toyota 4Runner TRD Pro cargo area, before and after detailing" aria-valuemin="0" aria-valuemax="100" aria-valuenow="50" aria-valuetext="Half before, half after">
+          <img src="gallery/4runner/cargo-area-after.jpg" srcset="gallery/4runner/cargo-area-after-sm.jpg 560w, gallery/4runner/cargo-area-after.jpg 900w" sizes="(min-width:1024px) 340px, (min-width:620px) 46vw, 92vw" width="900" height="1200" alt="Toyota 4Runner TRD Pro cargo area after detailing — liner washed clean from the seat backs to the tailgate lip" loading="lazy" decoding="async">
+          <span class="ba-tag ba-tag-after">After</span>
+          <div class="ba-before">
+            <img src="gallery/4runner/cargo-area-before.jpg" srcset="gallery/4runner/cargo-area-before-sm.jpg 560w, gallery/4runner/cargo-area-before.jpg 900w" sizes="(min-width:1024px) 340px, (min-width:620px) 46vw, 92vw" width="900" height="1200" alt="Toyota 4Runner TRD Pro cargo area before detailing — a tow strap and dirt across the cargo liner" loading="lazy" decoding="async">
+            <span class="ba-tag ba-tag-before">Before</span>
+          </div>
+          <div class="ba-divider"><div class="ba-knob"><svg viewBox="0 0 8 13" aria-hidden="true"><path d="M7 1 1.5 6.5 7 12" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg><svg viewBox="0 0 8 13" aria-hidden="true"><path d="m1 1 5.5 5.5L1 12" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div></div>
+        </div>
+        <figcaption><div class="name">Cargo area</div><div class="note">Recovery gear out, liner washed, and the tailgate lip cleaned off.</div></figcaption>
+      </figure>
+
+      <figure>
+        <div class="ba" role="slider" tabindex="0" aria-label="Toyota 4Runner TRD Pro rear seats, before and after detailing" aria-valuemin="0" aria-valuemax="100" aria-valuenow="50" aria-valuetext="Half before, half after">
+          <img src="gallery/4runner/rear-seats-after.jpg" srcset="gallery/4runner/rear-seats-after-sm.jpg 560w, gallery/4runner/rear-seats-after.jpg 900w" sizes="(min-width:1024px) 340px, (min-width:620px) 46vw, 92vw" width="900" height="1200" alt="Toyota 4Runner TRD Pro rear seats after detailing — seats and seat backs cleaned down" loading="lazy" decoding="async">
+          <span class="ba-tag ba-tag-after">After</span>
+          <div class="ba-before">
+            <img src="gallery/4runner/rear-seats-before.jpg" srcset="gallery/4runner/rear-seats-before-sm.jpg 560w, gallery/4runner/rear-seats-before.jpg 900w" sizes="(min-width:1024px) 340px, (min-width:620px) 46vw, 92vw" width="900" height="1200" alt="Toyota 4Runner TRD Pro rear seats before detailing — dust across the seat backs and debris in the footwell" loading="lazy" decoding="async">
+            <span class="ba-tag ba-tag-before">Before</span>
+          </div>
+          <div class="ba-divider"><div class="ba-knob"><svg viewBox="0 0 8 13" aria-hidden="true"><path d="M7 1 1.5 6.5 7 12" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg><svg viewBox="0 0 8 13" aria-hidden="true"><path d="m1 1 5.5 5.5L1 12" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div></div>
+        </div>
+        <figcaption><div class="name">Rear seats</div><div class="note">Dust and debris cleared from the seats, backs and map pockets.</div></figcaption>
+      </figure>
+
+      <figure>
+        <div class="ba" role="slider" tabindex="0" aria-label="Toyota 4Runner TRD Pro rear bench, before and after detailing" aria-valuemin="0" aria-valuemax="100" aria-valuenow="50" aria-valuetext="Half before, half after">
+          <img src="gallery/4runner/rear-bench-after.jpg" srcset="gallery/4runner/rear-bench-after-sm.jpg 560w, gallery/4runner/rear-bench-after.jpg 900w" sizes="(min-width:1024px) 340px, (min-width:620px) 46vw, 92vw" width="900" height="1200" alt="Toyota 4Runner TRD Pro rear bench after detailing — bench cleaned with the stitching sharp again" loading="lazy" decoding="async">
+          <span class="ba-tag ba-tag-after">After</span>
+          <div class="ba-before">
+            <img src="gallery/4runner/rear-bench-before.jpg" srcset="gallery/4runner/rear-bench-before-sm.jpg 560w, gallery/4runner/rear-bench-before.jpg 900w" sizes="(min-width:1024px) 340px, (min-width:620px) 46vw, 92vw" width="900" height="1200" alt="Toyota 4Runner TRD Pro rear bench before detailing — dust and grit worked into the seams and stitching" loading="lazy" decoding="async">
+            <span class="ba-tag ba-tag-before">Before</span>
+          </div>
+          <div class="ba-divider"><div class="ba-knob"><svg viewBox="0 0 8 13" aria-hidden="true"><path d="M7 1 1.5 6.5 7 12" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg><svg viewBox="0 0 8 13" aria-hidden="true"><path d="m1 1 5.5 5.5L1 12" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div></div>
+        </div>
+        <figcaption><div class="name">Rear bench</div><div class="note">Grit lifted out of the seams and stitching right across the bench.</div></figcaption>
+      </figure>
+
+      <figure>
+        <div class="ba" role="slider" tabindex="0" aria-label="Toyota 4Runner TRD Pro driver's side, before and after detailing" aria-valuemin="0" aria-valuemax="100" aria-valuenow="50" aria-valuetext="Half before, half after">
+          <img src="gallery/4runner/drivers-side-after.jpg" srcset="gallery/4runner/drivers-side-after-sm.jpg 560w, gallery/4runner/drivers-side-after.jpg 900w" sizes="(min-width:1024px) 340px, (min-width:620px) 46vw, 92vw" width="900" height="1200" alt="Toyota 4Runner TRD Pro driver's side after detailing — sill, seat base and kick panel wiped clean" loading="lazy" decoding="async">
+          <span class="ba-tag ba-tag-after">After</span>
+          <div class="ba-before">
+            <img src="gallery/4runner/drivers-side-before.jpg" srcset="gallery/4runner/drivers-side-before-sm.jpg 560w, gallery/4runner/drivers-side-before.jpg 900w" sizes="(min-width:1024px) 340px, (min-width:620px) 46vw, 92vw" width="900" height="1200" alt="Toyota 4Runner TRD Pro driver's side before detailing — mud tracked over the sill and kick panel" loading="lazy" decoding="async">
+            <span class="ba-tag ba-tag-before">Before</span>
+          </div>
+          <div class="ba-divider"><div class="ba-knob"><svg viewBox="0 0 8 13" aria-hidden="true"><path d="M7 1 1.5 6.5 7 12" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg><svg viewBox="0 0 8 13" aria-hidden="true"><path d="m1 1 5.5 5.5L1 12" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div></div>
+        </div>
+        <figcaption><div class="name">Driver's side</div><div class="note">Sill, seat base and kick panel — the first thing muddy boots hit.</div></figcaption>
+      </figure>
+
+      <figure>
+        <div class="ba" role="slider" tabindex="0" aria-label="Toyota 4Runner TRD Pro center console, before and after detailing" aria-valuemin="0" aria-valuemax="100" aria-valuenow="50" aria-valuetext="Half before, half after">
+          <img src="gallery/4runner/center-console-after.jpg" srcset="gallery/4runner/center-console-after-sm.jpg 560w, gallery/4runner/center-console-after.jpg 900w" sizes="(min-width:1024px) 340px, (min-width:620px) 46vw, 92vw" width="900" height="1200" alt="Toyota 4Runner TRD Pro center console after detailing — cup holders and switchgear clean" loading="lazy" decoding="async">
+          <span class="ba-tag ba-tag-after">After</span>
+          <div class="ba-before">
+            <img src="gallery/4runner/center-console-before.jpg" srcset="gallery/4runner/center-console-before-sm.jpg 560w, gallery/4runner/center-console-before.jpg 900w" sizes="(min-width:1024px) 340px, (min-width:620px) 46vw, 92vw" width="900" height="1200" alt="Toyota 4Runner TRD Pro center console before detailing — dust and grime around the shifter and cup holders" loading="lazy" decoding="async">
+            <span class="ba-tag ba-tag-before">Before</span>
+          </div>
+          <div class="ba-divider"><div class="ba-knob"><svg viewBox="0 0 8 13" aria-hidden="true"><path d="M7 1 1.5 6.5 7 12" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg><svg viewBox="0 0 8 13" aria-hidden="true"><path d="m1 1 5.5 5.5L1 12" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div></div>
+        </div>
+        <figcaption><div class="name">Center console</div><div class="note">Cup holders, shifter surround and switchgear cleaned out by hand.</div></figcaption>
+      </figure>
+
+      <figure>
+        <div class="ba" role="slider" tabindex="0" aria-label="Toyota 4Runner TRD Pro infotainment, before and after detailing" aria-valuemin="0" aria-valuemax="100" aria-valuenow="50" aria-valuetext="Half before, half after">
+          <img src="gallery/4runner/infotainment-after.jpg" srcset="gallery/4runner/infotainment-after-sm.jpg 560w, gallery/4runner/infotainment-after.jpg 900w" sizes="(min-width:1024px) 340px, (min-width:620px) 46vw, 92vw" width="900" height="1200" alt="Toyota 4Runner TRD Pro infotainment after detailing — screen and surround clear and streak-free" loading="lazy" decoding="async">
+          <span class="ba-tag ba-tag-after">After</span>
+          <div class="ba-before">
+            <img src="gallery/4runner/infotainment-before.jpg" srcset="gallery/4runner/infotainment-before-sm.jpg 560w, gallery/4runner/infotainment-before.jpg 900w" sizes="(min-width:1024px) 340px, (min-width:620px) 46vw, 92vw" width="900" height="1200" alt="Toyota 4Runner TRD Pro infotainment before detailing — dust and fingerprints across the screen" loading="lazy" decoding="async">
+            <span class="ba-tag ba-tag-before">Before</span>
+          </div>
+          <div class="ba-divider"><div class="ba-knob"><svg viewBox="0 0 8 13" aria-hidden="true"><path d="M7 1 1.5 6.5 7 12" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg><svg viewBox="0 0 8 13" aria-hidden="true"><path d="m1 1 5.5 5.5L1 12" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div></div>
+        </div>
+        <figcaption><div class="name">Infotainment</div><div class="note">Screen and surround cleared of dust and fingerprints.</div></figcaption>
+      </figure>
+
+      <figure>
+        <div class="ba" role="slider" tabindex="0" aria-label="Toyota 4Runner TRD Pro steering wheel, before and after detailing" aria-valuemin="0" aria-valuemax="100" aria-valuenow="50" aria-valuetext="Half before, half after">
+          <img src="gallery/4runner/steering-wheel-after.jpg" srcset="gallery/4runner/steering-wheel-after-sm.jpg 560w, gallery/4runner/steering-wheel-after.jpg 900w" sizes="(min-width:1024px) 340px, (min-width:620px) 46vw, 92vw" width="900" height="1200" alt="Toyota 4Runner TRD Pro steering wheel after detailing — wheel and badge clean into the grain" loading="lazy" decoding="async">
+          <span class="ba-tag ba-tag-after">After</span>
+          <div class="ba-before">
+            <img src="gallery/4runner/steering-wheel-before.jpg" srcset="gallery/4runner/steering-wheel-before-sm.jpg 560w, gallery/4runner/steering-wheel-before.jpg 900w" sizes="(min-width:1024px) 340px, (min-width:620px) 46vw, 92vw" width="900" height="1200" alt="Toyota 4Runner TRD Pro steering wheel before detailing — dust settled into the wheel grain and badge" loading="lazy" decoding="async">
+            <span class="ba-tag ba-tag-before">Before</span>
+          </div>
+          <div class="ba-divider"><div class="ba-knob"><svg viewBox="0 0 8 13" aria-hidden="true"><path d="M7 1 1.5 6.5 7 12" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg><svg viewBox="0 0 8 13" aria-hidden="true"><path d="m1 1 5.5 5.5L1 12" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div></div>
+        </div>
+        <figcaption><div class="name">Steering wheel</div><div class="note">Wheel, badge and column detailed around the grain and the stitching.</div></figcaption>
+      </figure>
+
+
+      </div>
+    </div>
+
+    <div class="chapter" id="car-crosstrek">
+      <div class="chapter-head">
+        <h3>Subaru Crosstrek</h3>
+        <p>A daily driver that lives on Valley County gravel — pine needles in the mats, dust worked into every seam, and a cargo area that had hauled its share of firewood.</p>
+      </div>
+      <div class="ba-grid">
+
+      <figure>
+        <div class="ba" role="slider" tabindex="0" aria-label="Subaru Crosstrek driver floor mat, before and after detailing" aria-valuemin="0" aria-valuemax="100" aria-valuenow="50" aria-valuetext="Half before, half after">
+          <img src="gallery/crosstrek/driver-floor-mat-after.jpg" srcset="gallery/crosstrek/driver-floor-mat-after-sm.jpg 560w, gallery/crosstrek/driver-floor-mat-after.jpg 900w" sizes="(min-width:1024px) 340px, (min-width:620px) 46vw, 92vw" width="900" height="1200" alt="Subaru Crosstrek driver floor mat after detailing — clean rubber with the honeycomb texture visible again" loading="lazy" decoding="async">
+          <span class="ba-tag ba-tag-after">After</span>
+          <div class="ba-before">
+            <img src="gallery/crosstrek/driver-floor-mat-before.jpg" srcset="gallery/crosstrek/driver-floor-mat-before-sm.jpg 560w, gallery/crosstrek/driver-floor-mat-before.jpg 900w" sizes="(min-width:1024px) 340px, (min-width:620px) 46vw, 92vw" width="900" height="1200" alt="Subaru Crosstrek driver floor mat before detailing — dried grass, pine needles and dust caked into the rubber" loading="lazy" decoding="async">
             <span class="ba-tag ba-tag-before">Before</span>
           </div>
           <div class="ba-divider"><div class="ba-knob"><svg viewBox="0 0 8 13" aria-hidden="true"><path d="M7 1 1.5 6.5 7 12" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg><svg viewBox="0 0 8 13" aria-hidden="true"><path d="m1 1 5.5 5.5L1 12" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div></div>
@@ -242,11 +415,11 @@
       </figure>
 
       <figure>
-        <div class="ba" role="slider" tabindex="0" aria-label="Rear footwells, before and after detailing" aria-valuemin="0" aria-valuemax="100" aria-valuenow="50" aria-valuetext="Half before, half after">
-          <img src="gallery/rear-footwells-after.jpg" srcset="gallery/rear-footwells-after-sm.jpg 560w, gallery/rear-footwells-after.jpg 900w" sizes="(min-width:820px) 470px, 92vw" width="900" height="1201" alt="Rear footwells after detailing — mats and carpet edges an even, clean black" loading="lazy" decoding="async">
+        <div class="ba" role="slider" tabindex="0" aria-label="Subaru Crosstrek rear footwells, before and after detailing" aria-valuemin="0" aria-valuemax="100" aria-valuenow="50" aria-valuetext="Half before, half after">
+          <img src="gallery/crosstrek/rear-footwells-after.jpg" srcset="gallery/crosstrek/rear-footwells-after-sm.jpg 560w, gallery/crosstrek/rear-footwells-after.jpg 900w" sizes="(min-width:1024px) 340px, (min-width:620px) 46vw, 92vw" width="900" height="1200" alt="Subaru Crosstrek rear footwells after detailing — mats and carpet edges an even, clean black" loading="lazy" decoding="async">
           <span class="ba-tag ba-tag-after">After</span>
           <div class="ba-before">
-            <img src="gallery/rear-footwells-before.jpg" srcset="gallery/rear-footwells-before-sm.jpg 560w, gallery/rear-footwells-before.jpg 900w" sizes="(min-width:820px) 470px, 92vw" width="900" height="1201" alt="Rear footwells before detailing — leaf litter and debris scattered across the mat" loading="lazy" decoding="async">
+            <img src="gallery/crosstrek/rear-footwells-before.jpg" srcset="gallery/crosstrek/rear-footwells-before-sm.jpg 560w, gallery/crosstrek/rear-footwells-before.jpg 900w" sizes="(min-width:1024px) 340px, (min-width:620px) 46vw, 92vw" width="900" height="1200" alt="Subaru Crosstrek rear footwells before detailing — leaf litter and debris scattered across the mat" loading="lazy" decoding="async">
             <span class="ba-tag ba-tag-before">Before</span>
           </div>
           <div class="ba-divider"><div class="ba-knob"><svg viewBox="0 0 8 13" aria-hidden="true"><path d="M7 1 1.5 6.5 7 12" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg><svg viewBox="0 0 8 13" aria-hidden="true"><path d="m1 1 5.5 5.5L1 12" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div></div>
@@ -255,11 +428,11 @@
       </figure>
 
       <figure>
-        <div class="ba" role="slider" tabindex="0" aria-label="Rear seats, before and after detailing" aria-valuemin="0" aria-valuemax="100" aria-valuenow="50" aria-valuetext="Half before, half after">
-          <img src="gallery/rear-seats-after.jpg" srcset="gallery/rear-seats-after-sm.jpg 560w, gallery/rear-seats-after.jpg 900w" sizes="(min-width:820px) 470px, 92vw" width="900" height="1201" alt="Rear seats after detailing — clean upholstery and seat backs" loading="lazy" decoding="async">
+        <div class="ba" role="slider" tabindex="0" aria-label="Subaru Crosstrek rear seats, before and after detailing" aria-valuemin="0" aria-valuemax="100" aria-valuenow="50" aria-valuetext="Half before, half after">
+          <img src="gallery/crosstrek/rear-seats-after.jpg" srcset="gallery/crosstrek/rear-seats-after-sm.jpg 560w, gallery/crosstrek/rear-seats-after.jpg 900w" sizes="(min-width:1024px) 340px, (min-width:620px) 46vw, 92vw" width="900" height="1200" alt="Subaru Crosstrek rear seats after detailing — clean upholstery and seat backs" loading="lazy" decoding="async">
           <span class="ba-tag ba-tag-after">After</span>
           <div class="ba-before">
-            <img src="gallery/rear-seats-before.jpg" srcset="gallery/rear-seats-before-sm.jpg 560w, gallery/rear-seats-before.jpg 900w" sizes="(min-width:820px) 470px, 92vw" width="900" height="1201" alt="Rear seats before detailing — debris in the seat pocket and across the floor" loading="lazy" decoding="async">
+            <img src="gallery/crosstrek/rear-seats-before.jpg" srcset="gallery/crosstrek/rear-seats-before-sm.jpg 560w, gallery/crosstrek/rear-seats-before.jpg 900w" sizes="(min-width:1024px) 340px, (min-width:620px) 46vw, 92vw" width="900" height="1200" alt="Subaru Crosstrek rear seats before detailing — debris in the seat pocket and across the floor" loading="lazy" decoding="async">
             <span class="ba-tag ba-tag-before">Before</span>
           </div>
           <div class="ba-divider"><div class="ba-knob"><svg viewBox="0 0 8 13" aria-hidden="true"><path d="M7 1 1.5 6.5 7 12" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg><svg viewBox="0 0 8 13" aria-hidden="true"><path d="m1 1 5.5 5.5L1 12" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div></div>
@@ -268,24 +441,24 @@
       </figure>
 
       <figure>
-        <div class="ba" role="slider" tabindex="0" aria-label="Rear bench, before and after detailing" aria-valuemin="0" aria-valuemax="100" aria-valuenow="50" aria-valuetext="Half before, half after">
-          <img src="gallery/rear-bench-after.jpg" srcset="gallery/rear-bench-after-sm.jpg 560w, gallery/rear-bench-after.jpg 900w" sizes="(min-width:820px) 470px, 92vw" width="900" height="1201" alt="Rear bench after detailing — two-tone fabric weave reading clean and even" loading="lazy" decoding="async">
+        <div class="ba" role="slider" tabindex="0" aria-label="Subaru Crosstrek rear bench, before and after detailing" aria-valuemin="0" aria-valuemax="100" aria-valuenow="50" aria-valuetext="Half before, half after">
+          <img src="gallery/crosstrek/rear-bench-after.jpg" srcset="gallery/crosstrek/rear-bench-after-sm.jpg 560w, gallery/crosstrek/rear-bench-after.jpg 900w" sizes="(min-width:1024px) 340px, (min-width:620px) 46vw, 92vw" width="900" height="1200" alt="Subaru Crosstrek rear bench after detailing — two-tone fabric weave reading clean and even" loading="lazy" decoding="async">
           <span class="ba-tag ba-tag-after">After</span>
           <div class="ba-before">
-            <img src="gallery/rear-bench-before.jpg" srcset="gallery/rear-bench-before-sm.jpg 560w, gallery/rear-bench-before.jpg 900w" sizes="(min-width:820px) 470px, 92vw" width="900" height="1201" alt="Rear bench before detailing — crumbs and grit worked into the seams" loading="lazy" decoding="async">
+            <img src="gallery/crosstrek/rear-bench-before.jpg" srcset="gallery/crosstrek/rear-bench-before-sm.jpg 560w, gallery/crosstrek/rear-bench-before.jpg 900w" sizes="(min-width:1024px) 340px, (min-width:620px) 46vw, 92vw" width="900" height="1200" alt="Subaru Crosstrek rear bench before detailing — crumbs and grit worked into the seams" loading="lazy" decoding="async">
             <span class="ba-tag ba-tag-before">Before</span>
           </div>
           <div class="ba-divider"><div class="ba-knob"><svg viewBox="0 0 8 13" aria-hidden="true"><path d="M7 1 1.5 6.5 7 12" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg><svg viewBox="0 0 8 13" aria-hidden="true"><path d="m1 1 5.5 5.5L1 12" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div></div>
         </div>
-        <figcaption><div class="name">Rear bench</div><div class="note">Fabric agitated and extracted so the weave reads clean right into the seams.</div></figcaption>
+        <figcaption><div class="name">Rear bench</div><div class="note">Grit lifted out of the seams so the two-tone weave reads clean again.</div></figcaption>
       </figure>
 
       <figure>
-        <div class="ba" role="slider" tabindex="0" aria-label="Driver's side, before and after detailing" aria-valuemin="0" aria-valuemax="100" aria-valuenow="50" aria-valuetext="Half before, half after">
-          <img src="gallery/drivers-side-after.jpg" srcset="gallery/drivers-side-after-sm.jpg 560w, gallery/drivers-side-after.jpg 900w" sizes="(min-width:820px) 470px, 92vw" width="900" height="1201" alt="Driver's side after detailing — sill, seat base and carpet edge cleaned" loading="lazy" decoding="async">
+        <div class="ba" role="slider" tabindex="0" aria-label="Subaru Crosstrek driver's side, before and after detailing" aria-valuemin="0" aria-valuemax="100" aria-valuenow="50" aria-valuetext="Half before, half after">
+          <img src="gallery/crosstrek/drivers-side-after.jpg" srcset="gallery/crosstrek/drivers-side-after-sm.jpg 560w, gallery/crosstrek/drivers-side-after.jpg 900w" sizes="(min-width:1024px) 340px, (min-width:620px) 46vw, 92vw" width="900" height="1200" alt="Subaru Crosstrek driver's side after detailing — sill, seat base and carpet edge cleaned" loading="lazy" decoding="async">
           <span class="ba-tag ba-tag-after">After</span>
           <div class="ba-before">
-            <img src="gallery/drivers-side-before.jpg" srcset="gallery/drivers-side-before-sm.jpg 560w, gallery/drivers-side-before.jpg 900w" sizes="(min-width:820px) 470px, 92vw" width="900" height="1201" alt="Driver's side before detailing — dirt tracked along the sill and carpet edge" loading="lazy" decoding="async">
+            <img src="gallery/crosstrek/drivers-side-before.jpg" srcset="gallery/crosstrek/drivers-side-before-sm.jpg 560w, gallery/crosstrek/drivers-side-before.jpg 900w" sizes="(min-width:1024px) 340px, (min-width:620px) 46vw, 92vw" width="900" height="1200" alt="Subaru Crosstrek driver's side before detailing — dirt tracked along the sill and carpet edge" loading="lazy" decoding="async">
             <span class="ba-tag ba-tag-before">Before</span>
           </div>
           <div class="ba-divider"><div class="ba-knob"><svg viewBox="0 0 8 13" aria-hidden="true"><path d="M7 1 1.5 6.5 7 12" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg><svg viewBox="0 0 8 13" aria-hidden="true"><path d="m1 1 5.5 5.5L1 12" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div></div>
@@ -294,11 +467,11 @@
       </figure>
 
       <figure>
-        <div class="ba" role="slider" tabindex="0" aria-label="Front cabin, before and after detailing" aria-valuemin="0" aria-valuemax="100" aria-valuenow="50" aria-valuetext="Half before, half after">
-          <img src="gallery/front-cabin-after.jpg" srcset="gallery/front-cabin-after-sm.jpg 560w, gallery/front-cabin-after.jpg 900w" sizes="(min-width:820px) 470px, 92vw" width="900" height="1199" alt="Front cabin after detailing — dash, vents and trim at an even low sheen" loading="lazy" decoding="async">
+        <div class="ba" role="slider" tabindex="0" aria-label="Subaru Crosstrek front cabin, before and after detailing" aria-valuemin="0" aria-valuemax="100" aria-valuenow="50" aria-valuetext="Half before, half after">
+          <img src="gallery/crosstrek/front-cabin-after.jpg" srcset="gallery/crosstrek/front-cabin-after-sm.jpg 560w, gallery/crosstrek/front-cabin-after.jpg 900w" sizes="(min-width:1024px) 340px, (min-width:620px) 46vw, 92vw" width="900" height="1200" alt="Subaru Crosstrek front cabin after detailing — dash, vents and trim at an even low sheen" loading="lazy" decoding="async">
           <span class="ba-tag ba-tag-after">After</span>
           <div class="ba-before">
-            <img src="gallery/front-cabin-before.jpg" srcset="gallery/front-cabin-before-sm.jpg 560w, gallery/front-cabin-before.jpg 900w" sizes="(min-width:820px) 470px, 92vw" width="900" height="1199" alt="Front cabin before detailing — dust settled across the dash and vents" loading="lazy" decoding="async">
+            <img src="gallery/crosstrek/front-cabin-before.jpg" srcset="gallery/crosstrek/front-cabin-before-sm.jpg 560w, gallery/crosstrek/front-cabin-before.jpg 900w" sizes="(min-width:1024px) 340px, (min-width:620px) 46vw, 92vw" width="900" height="1200" alt="Subaru Crosstrek front cabin before detailing — dust settled across the dash and vents" loading="lazy" decoding="async">
             <span class="ba-tag ba-tag-before">Before</span>
           </div>
           <div class="ba-divider"><div class="ba-knob"><svg viewBox="0 0 8 13" aria-hidden="true"><path d="M7 1 1.5 6.5 7 12" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg><svg viewBox="0 0 8 13" aria-hidden="true"><path d="m1 1 5.5 5.5L1 12" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div></div>
@@ -307,11 +480,11 @@
       </figure>
 
       <figure>
-        <div class="ba" role="slider" tabindex="0" aria-label="Cargo area, before and after detailing" aria-valuemin="0" aria-valuemax="100" aria-valuenow="50" aria-valuetext="Half before, half after">
-          <img src="gallery/cargo-area-after.jpg" srcset="gallery/cargo-area-after-sm.jpg 560w, gallery/cargo-area-after.jpg 900w" sizes="(min-width:820px) 470px, 92vw" width="900" height="1199" alt="Cargo area after detailing — liner and seat backs cleaned corner to corner" loading="lazy" decoding="async">
+        <div class="ba" role="slider" tabindex="0" aria-label="Subaru Crosstrek cargo area, before and after detailing" aria-valuemin="0" aria-valuemax="100" aria-valuenow="50" aria-valuetext="Half before, half after">
+          <img src="gallery/crosstrek/cargo-area-after.jpg" srcset="gallery/crosstrek/cargo-area-after-sm.jpg 560w, gallery/crosstrek/cargo-area-after.jpg 900w" sizes="(min-width:1024px) 340px, (min-width:620px) 46vw, 92vw" width="900" height="1200" alt="Subaru Crosstrek cargo area after detailing — liner and seat backs cleaned corner to corner" loading="lazy" decoding="async">
           <span class="ba-tag ba-tag-after">After</span>
           <div class="ba-before">
-            <img src="gallery/cargo-area-before.jpg" srcset="gallery/cargo-area-before-sm.jpg 560w, gallery/cargo-area-before.jpg 900w" sizes="(min-width:820px) 470px, 92vw" width="900" height="1199" alt="Cargo area before detailing — dust and debris across the rubber liner" loading="lazy" decoding="async">
+            <img src="gallery/crosstrek/cargo-area-before.jpg" srcset="gallery/crosstrek/cargo-area-before-sm.jpg 560w, gallery/crosstrek/cargo-area-before.jpg 900w" sizes="(min-width:1024px) 340px, (min-width:620px) 46vw, 92vw" width="900" height="1200" alt="Subaru Crosstrek cargo area before detailing — dust and debris across the rubber liner" loading="lazy" decoding="async">
             <span class="ba-tag ba-tag-before">Before</span>
           </div>
           <div class="ba-divider"><div class="ba-knob"><svg viewBox="0 0 8 13" aria-hidden="true"><path d="M7 1 1.5 6.5 7 12" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg><svg viewBox="0 0 8 13" aria-hidden="true"><path d="m1 1 5.5 5.5L1 12" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div></div>
@@ -320,11 +493,11 @@
       </figure>
 
       <figure>
-        <div class="ba" role="slider" tabindex="0" aria-label="Center console, before and after detailing" aria-valuemin="0" aria-valuemax="100" aria-valuenow="50" aria-valuetext="Half before, half after">
-          <img src="gallery/center-console-after.jpg" srcset="gallery/center-console-after-sm.jpg 560w, gallery/center-console-after.jpg 900w" sizes="(min-width:820px) 470px, 92vw" width="900" height="1201" alt="Center console after detailing — cup holders and shifter surround clean" loading="lazy" decoding="async">
+        <div class="ba" role="slider" tabindex="0" aria-label="Subaru Crosstrek center console, before and after detailing" aria-valuemin="0" aria-valuemax="100" aria-valuenow="50" aria-valuetext="Half before, half after">
+          <img src="gallery/crosstrek/center-console-after.jpg" srcset="gallery/crosstrek/center-console-after-sm.jpg 560w, gallery/crosstrek/center-console-after.jpg 900w" sizes="(min-width:1024px) 340px, (min-width:620px) 46vw, 92vw" width="900" height="1200" alt="Subaru Crosstrek center console after detailing — cup holders and shifter surround clean" loading="lazy" decoding="async">
           <span class="ba-tag ba-tag-after">After</span>
           <div class="ba-before">
-            <img src="gallery/center-console-before.jpg" srcset="gallery/center-console-before-sm.jpg 560w, gallery/center-console-before.jpg 900w" sizes="(min-width:820px) 470px, 92vw" width="900" height="1201" alt="Center console before detailing — grime in the cup holders and around the shifter" loading="lazy" decoding="async">
+            <img src="gallery/crosstrek/center-console-before.jpg" srcset="gallery/crosstrek/center-console-before-sm.jpg 560w, gallery/crosstrek/center-console-before.jpg 900w" sizes="(min-width:1024px) 340px, (min-width:620px) 46vw, 92vw" width="900" height="1200" alt="Subaru Crosstrek center console before detailing — grime in the cup holders and around the shifter" loading="lazy" decoding="async">
             <span class="ba-tag ba-tag-before">Before</span>
           </div>
           <div class="ba-divider"><div class="ba-knob"><svg viewBox="0 0 8 13" aria-hidden="true"><path d="M7 1 1.5 6.5 7 12" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg><svg viewBox="0 0 8 13" aria-hidden="true"><path d="m1 1 5.5 5.5L1 12" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div></div>
@@ -333,11 +506,11 @@
       </figure>
 
       <figure>
-        <div class="ba" role="slider" tabindex="0" aria-label="Infotainment screen, before and after detailing" aria-valuemin="0" aria-valuemax="100" aria-valuenow="50" aria-valuetext="Half before, half after">
-          <img src="gallery/infotainment-after.jpg" srcset="gallery/infotainment-after-sm.jpg 560w, gallery/infotainment-after.jpg 900w" sizes="(min-width:820px) 470px, 92vw" width="900" height="1201" alt="Infotainment screen after detailing — clear and streak-free" loading="lazy" decoding="async">
+        <div class="ba" role="slider" tabindex="0" aria-label="Subaru Crosstrek infotainment, before and after detailing" aria-valuemin="0" aria-valuemax="100" aria-valuenow="50" aria-valuetext="Half before, half after">
+          <img src="gallery/crosstrek/infotainment-after.jpg" srcset="gallery/crosstrek/infotainment-after-sm.jpg 560w, gallery/crosstrek/infotainment-after.jpg 900w" sizes="(min-width:1024px) 340px, (min-width:620px) 46vw, 92vw" width="900" height="1200" alt="Subaru Crosstrek infotainment after detailing — clear and streak-free" loading="lazy" decoding="async">
           <span class="ba-tag ba-tag-after">After</span>
           <div class="ba-before">
-            <img src="gallery/infotainment-before.jpg" srcset="gallery/infotainment-before-sm.jpg 560w, gallery/infotainment-before.jpg 900w" sizes="(min-width:820px) 470px, 92vw" width="900" height="1201" alt="Infotainment screen before detailing — dust and fingerprints across the glass" loading="lazy" decoding="async">
+            <img src="gallery/crosstrek/infotainment-before.jpg" srcset="gallery/crosstrek/infotainment-before-sm.jpg 560w, gallery/crosstrek/infotainment-before.jpg 900w" sizes="(min-width:1024px) 340px, (min-width:620px) 46vw, 92vw" width="900" height="1200" alt="Subaru Crosstrek infotainment before detailing — dust and fingerprints across the glass" loading="lazy" decoding="async">
             <span class="ba-tag ba-tag-before">Before</span>
           </div>
           <div class="ba-divider"><div class="ba-knob"><svg viewBox="0 0 8 13" aria-hidden="true"><path d="M7 1 1.5 6.5 7 12" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg><svg viewBox="0 0 8 13" aria-hidden="true"><path d="m1 1 5.5 5.5L1 12" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div></div>
@@ -346,11 +519,11 @@
       </figure>
 
       <figure>
-        <div class="ba" role="slider" tabindex="0" aria-label="Steering wheel hub, before and after detailing" aria-valuemin="0" aria-valuemax="100" aria-valuenow="50" aria-valuetext="Half before, half after">
-          <img src="gallery/steering-wheel-after.jpg" srcset="gallery/steering-wheel-after-sm.jpg 560w, gallery/steering-wheel-after.jpg 900w" sizes="(min-width:820px) 470px, 92vw" width="900" height="1199" alt="Steering wheel hub after detailing — badge and textured trim clean" loading="lazy" decoding="async">
+        <div class="ba" role="slider" tabindex="0" aria-label="Subaru Crosstrek steering wheel, before and after detailing" aria-valuemin="0" aria-valuemax="100" aria-valuenow="50" aria-valuetext="Half before, half after">
+          <img src="gallery/crosstrek/steering-wheel-after.jpg" srcset="gallery/crosstrek/steering-wheel-after-sm.jpg 560w, gallery/crosstrek/steering-wheel-after.jpg 900w" sizes="(min-width:1024px) 340px, (min-width:620px) 46vw, 92vw" width="900" height="1200" alt="Subaru Crosstrek steering wheel after detailing — badge and textured trim clean" loading="lazy" decoding="async">
           <span class="ba-tag ba-tag-after">After</span>
           <div class="ba-before">
-            <img src="gallery/steering-wheel-before.jpg" srcset="gallery/steering-wheel-before-sm.jpg 560w, gallery/steering-wheel-before.jpg 900w" sizes="(min-width:820px) 470px, 92vw" width="900" height="1199" alt="Steering wheel hub before detailing — dust settled in the grain and lettering" loading="lazy" decoding="async">
+            <img src="gallery/crosstrek/steering-wheel-before.jpg" srcset="gallery/crosstrek/steering-wheel-before-sm.jpg 560w, gallery/crosstrek/steering-wheel-before.jpg 900w" sizes="(min-width:1024px) 340px, (min-width:620px) 46vw, 92vw" width="900" height="1200" alt="Subaru Crosstrek steering wheel before detailing — dust settled in the grain and lettering" loading="lazy" decoding="async">
             <span class="ba-tag ba-tag-before">Before</span>
           </div>
           <div class="ba-divider"><div class="ba-knob"><svg viewBox="0 0 8 13" aria-hidden="true"><path d="M7 1 1.5 6.5 7 12" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg><svg viewBox="0 0 8 13" aria-hidden="true"><path d="m1 1 5.5 5.5L1 12" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div></div>
@@ -358,9 +531,11 @@
         <figcaption><div class="name">Steering wheel</div><div class="note">Right down to the badge — dust lifted out of the grain and the lettering.</div></figcaption>
       </figure>
 
+
+      </div>
     </div>
 
-    <p class="disclosure">Photos are straight off the phone — same car, same day, same light where we could manage it. We don't retouch results. If your car looks worse than this one, don't worry: we've seen worse, and it's still a normal booking.</p>
+    <p class="disclosure">Photos are straight off the phone — same vehicle, same day, same light where we could manage it. We don't retouch results. If your car looks worse than either of these, don't worry: we've seen worse, and it's still a normal booking.</p>
   </div>
 </section>
 

@@ -51,9 +51,9 @@ command and no publish directory beyond the root are needed.
 |------|---------|
 | `index.html` | The live Detail Valley site (final, professional design). |
 | `admin.html` | Private **owner job board** — sign in to manage bookings on your phone. See [Owner dashboard](#owner-dashboard-adminhtml). |
-| `before-after.html` | Before &amp; after gallery — 10 drag-to-compare sliders from one Interior Detail. See [Before &amp; after](#before--after-photos). |
-| `dv-compare.js` | Drag / tap / keyboard behaviour for the compare sliders. Shared by the homepage and the gallery page. |
-| `gallery/` | The before &amp; after photos, two widths each (`-sm` = 560px, plain = 900px) for `srcset`. |
+| `before-after.html` | Before &amp; after gallery — one chapter per vehicle, 10 drag-to-compare sliders each. See [Before &amp; after](#before--after-photos). |
+| `dv-compare.js` | Drag / tap / keyboard behavior for the compare sliders. Shared by the homepage and the gallery page. |
+| `gallery/<vehicle>/` | The before &amp; after photos, one folder per vehicle, two widths each (`-sm` = 560px, plain = 900px) for `srcset`. |
 | `CNAME` | Custom domain for GitHub Pages (`detailvalley.com`). |
 | `logo.svg` | The logo, as vector — used on the site (hero, footer, favicon). Scales crisply at any size. |
 | `logo.png` | Raster version of the logo — social profile picture / raster fallback. |
@@ -61,20 +61,30 @@ command and no publish directory beyond the root are needed.
 
 ## Before &amp; after photos
 
-`before-after.html` (live at `/before-after`) is the proof page: ten
-drag-to-compare sliders from a single Interior Detail, plus a three-slider
-teaser in the `#results` section of the homepage that links through to it.
+`before-after.html` (live at `/before-after`) is the proof page. It's split
+into one **chapter per vehicle** — a heading, a line of context, then that
+vehicle's ten drag-to-compare sliders — with jump links at the top so the page
+never reads as one long wall. The homepage `#results` section carries a
+three-slider teaser that links through to it.
+
+Deliberately, the homepage teaser stays at **three** sliders no matter how many
+cars end up on the gallery page. That's what keeps it from crowding the rest of
+the page.
 
 **Adding a new car.** Shoot each angle twice — same spot, same framing, before
 and after — then:
 
-1. Save the pair into `gallery/` as `<slug>-before.jpg` and `<slug>-after.jpg`,
-   resized to **900px** on the long edge. Save a second copy of each at
-   **560px** named `<slug>-before-sm.jpg` / `<slug>-after-sm.jpg`; the pages use
-   both through `srcset` so phones don't download the big ones.
-2. Copy any existing `<figure>` block in `before-after.html`, swap the four
-   filenames, and rewrite the `alt` text and the `<figcaption>`.
-3. Photos are shot portrait and cropped to `aspect-ratio: 3/4`. Anything close
+1. Make a folder `gallery/<vehicle>/` and save each pair as `<slug>-before.jpg`
+   and `<slug>-after.jpg`, resized to **900px** on the long edge. Save a second
+   copy of each at **560px** named `<slug>-before-sm.jpg` /
+   `<slug>-after-sm.jpg`; the pages use both through `srcset` so phones don't
+   download the big ones.
+2. Copy an existing `.chapter` block in `before-after.html`, change the heading,
+   the context line and the folder name in the image paths, then rewrite each
+   `alt` and `<figcaption>`. Add the vehicle to the `.jump` nav at the top.
+3. Give the first slider on the page eager loading and leave every other image
+   on `loading="lazy"` — otherwise a third car doubles what phones download.
+4. Photos are shot portrait and cropped to `aspect-ratio: 3/4`. Anything close
    to that ratio drops straight in; anything wildly different will get cropped.
 
 The slider markup is plain HTML — both photos are real `<img>` tags, so they

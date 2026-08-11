@@ -964,6 +964,13 @@ const HOURS = {
   4:['08:00','18:00'], 5:['08:00','18:00'],
   6:['09:00','16:00']
 };
+// Individual days off (MT, 'YYYY-MM-DD') — already booked up, out of town, holiday.
+// A day listed here is closed no matter what HOURS says. Past dates are harmless
+// (they fall outside the booking window), but tidy them up when you think of it.
+const BLOCKED_DAYS = [
+  '2026-08-14',   // Fri — booked
+  '2026-08-15'    // Sat — booked
+];
 const START_TIMES = ['08:00','09:00','10:00']; // only arrival times offered
 const BUFFER_MIN = 45;          // travel / cleanup gap kept between jobs
 const MAX_JOBS_PER_DAY = 1;     // never offer more than this many jobs in one day
@@ -993,6 +1000,8 @@ function mtDateParts(date){
   const p = {}; for(const part of dtf.formatToParts(date)) p[part.type]=part.value;
   return {y:+p.year,m:+p.month,d:+p.day,dow:DOW.indexOf(p.weekday)};
 }
+/* 'YYYY-MM-DD' for a Mountain-Time date — the form BLOCKED_DAYS is written in. */
+function mtDayISO({y,m,d}){ return `${y}-${String(m).padStart(2,'0')}-${String(d).padStart(2,'0')}`; }
 function fmtDay(i){ return i.toLocaleDateString('en-US',{timeZone:SLOT_TZ,weekday:'short',month:'short',day:'numeric'}); }
 function fmtTime(i){ return i.toLocaleTimeString('en-US',{timeZone:SLOT_TZ,hour:'numeric',minute:'2-digit'}); }
 
@@ -1017,7 +1026,7 @@ function jobMinutes(){
 
 /* Every allowed start time (START_TIMES) that fits a jobMin-minute job inside
    working hours, within the booking window, at/after the earliest bookable
-   instant. */
+   instant, skipping any day listed in BLOCKED_DAYS. */
 function candidateStarts(jobMin){
   const out = [], now = new Date(), earliest = earliestBookable(now);
   const startDay = Math.floor((earliest - now.getTime())/86400000);
@@ -1025,6 +1034,7 @@ function candidateStarts(jobMin){
     const {y,m,d,dow} = mtDateParts(new Date(now.getTime()+i*86400000));
     const hrs = HOURS[dow];
     if(!hrs) continue;
+    if(BLOCKED_DAYS.includes(mtDayISO({y,m,d}))) continue;   // day off — nothing offered
     const [oH,oM] = hrs[0].split(':').map(Number);
     const [cH,cM] = hrs[1].split(':').map(Number);
     const openMin = oH*60 + oM, closeMin = cH*60 + cM;

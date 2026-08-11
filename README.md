@@ -130,6 +130,9 @@ slot back up, or `confirmed` / `completed` to track it.
   that day's available start times (each labelled with roughly when it finishes).
 - Knobs near the top of the `<script>` in `index.html`:
   - `HOURS` — working hours per weekday (omit a day to close it; Sunday is closed)
+  - `BLOCKED_DAYS` — one-off days off, as `'YYYY-MM-DD'` strings. A listed day is
+    closed regardless of `HOURS` — use it when you're already booked up, out of
+    town, or taking a holiday. Add or remove dates any time; past ones do nothing.
   - `START_TIMES` — the only arrival times offered (currently 8, 9, 10am)
   - `BUFFER_MIN` — travel/cleanup gap kept between jobs (default 45 min)
   - `MAX_JOBS_PER_DAY` — daily job cap (currently **1** — one booking per day)

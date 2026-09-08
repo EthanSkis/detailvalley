@@ -964,12 +964,29 @@ const HOURS = {
   4:['08:00','18:00'], 5:['08:00','18:00'],
   6:['09:00','16:00']
 };
+// School's back in session — on/after this date (MT) only Saturday (normal
+// hours) and Sunday (noon-only arrival) are offered; weekdays close.
+const SCHOOL_START = '2026-09-02';
+const SCHOOL_HOURS = {
+  6:['09:00','16:00'],
+  0:['12:00','20:00']
+};
+const SCHOOL_START_TIMES = { 0:['12:00'] }; // Sunday: noon arrival only, once SCHOOL_START hits
 // Individual days off (MT, 'YYYY-MM-DD') — already booked up, out of town, holiday.
 // A day listed here is closed no matter what HOURS says. Past dates are harmless
 // (they fall outside the booking window), but tidy them up when you think of it.
 const BLOCKED_DAYS = [
   '2026-08-14',   // Fri — booked
-  '2026-08-15'    // Sat — booked
+  '2026-08-15',   // Sat — booked
+  '2026-08-28',   // Fri — Weiser Invite (XC meet)
+  '2026-09-03',   // Thu — 24th Caldwell Twilight (XC meet)
+  '2026-09-10',   // Thu — SRV Conference meet, hosted by Emmett (XC meet)
+  '2026-09-12',   // Sat — Timberlake Invitational (XC meet)
+  '2026-09-23',   // Wed — Payette Open (XC meet)
+  '2026-10-02',   // Fri — Cascade Lake Run (XC meet)
+  '2026-10-10',   // Sat — 2026 Inland Empire XC Challenge (XC meet)
+  '2026-10-20',   // Tue — SRV 4A District Championship, Eagle Island (XC meet)
+  '2026-10-31'    // Sat — IHSAA 5A State Championships (XC meet)
 ];
 const START_TIMES = ['08:00','09:00','10:00']; // only arrival times offered
 const BUFFER_MIN = 45;          // travel / cleanup gap kept between jobs
@@ -1032,13 +1049,16 @@ function candidateStarts(jobMin){
   const startDay = Math.floor((earliest - now.getTime())/86400000);
   for(let i=startDay;i<=startDay+DAYS_AHEAD;i++){
     const {y,m,d,dow} = mtDateParts(new Date(now.getTime()+i*86400000));
-    const hrs = HOURS[dow];
+    const dayISO = mtDayISO({y,m,d});
+    const inSchool = dayISO >= SCHOOL_START;
+    const hrs = (inSchool ? SCHOOL_HOURS : HOURS)[dow];
     if(!hrs) continue;
-    if(BLOCKED_DAYS.includes(mtDayISO({y,m,d}))) continue;   // day off — nothing offered
+    if(BLOCKED_DAYS.includes(dayISO)) continue;   // day off — nothing offered
     const [oH,oM] = hrs[0].split(':').map(Number);
     const [cH,cM] = hrs[1].split(':').map(Number);
     const openMin = oH*60 + oM, closeMin = cH*60 + cM;
-    for(const st of START_TIMES){
+    const starts = (inSchool && SCHOOL_START_TIMES[dow]) || START_TIMES;
+    for(const st of starts){
       const [sH,sM] = st.split(':').map(Number);
       const t = sH*60 + sM;
       if(t < openMin || t + jobMin > closeMin) continue;

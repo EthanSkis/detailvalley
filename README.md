@@ -51,6 +51,7 @@ command and no publish directory beyond the root are needed.
 |------|---------|
 | `index.html` | The live Detail Valley site (final, professional design). |
 | `admin.html` | Private **owner job board** — sign in to manage bookings on your phone. See [Owner dashboard](#owner-dashboard-adminhtml). |
+| `quote.html` | Private **quoting tool** — pick a make &amp; model, get the price, the plans and what the job actually pays. See [Quoting tool](#quoting-tool-quotehtml). |
 | `before-after.html` | Before &amp; after gallery — one chapter per vehicle, 10 drag-to-compare sliders each. See [Before &amp; after](#before--after-photos). |
 | `dv-compare.js` | Drag / tap / keyboard behavior for the compare sliders. Shared by the homepage and the gallery page. |
 | `gallery/<vehicle>/` | The before &amp; after photos, one folder per vehicle, two widths each (`-sm` = 560px, plain = 900px) for `srcset`. |
@@ -202,3 +203,58 @@ once in Supabase → **Authentication → URL Configuration**: set **Site URL** 
   ```sql
   insert into public.admins (user_id) values ('THEIR-AUTH-USER-UUID');
   ```
+
+## Quoting tool (`quote.html`)
+
+`quote.html` is a private calculator for quoting a job on the spot — someone
+texts you a photo of their truck, you pick the make and model, and it tells you
+the price, every package option, and **what the job actually pays you per hour**
+once the drive, the supplies and the fuel come out.
+
+It's the same static-file-plus-vanilla-JS deal as the rest of the site. No
+build step, no sign-in, no Supabase — everything stays on the device, so it
+works in a driveway with one bar of service.
+
+**How it works**
+1. **Vehicle** — search 440 models across 37 makes ("tahoe", "subaru out",
+   "f-150"), or browse by make. Picking one sets the size class automatically:
+   *standard* (sedan/coupe), *midsize* (crossover, 2-row SUV, midsize truck) or
+   *oversize* (full-size truck, 3-row SUV, van) — the same three tiers customers
+   see when they book. Tap a size chip to override it, or enter an odd vehicle
+   by hand.
+2. **Condition** — *just detailed* through *trashed*. This stretches the time,
+   not just the price, which is the part that actually costs you. Each package
+   carries a `condWeight`, so a wrecked interior barely touches an exterior-only
+   Maintenance Wash but doubles a Full Detail.
+3. **Add-ons and town** — the same add-ons as the booking flow, and the town
+   sets round-trip miles and drive minutes.
+4. **Plans** — all four packages priced for that exact rig, each showing time on
+   site, net $/hr and net dollars. Two badges, because they usually disagree:
+   **Best $/hr** and **Most for the day** (the site books one job a day, so the
+   plan that fills the day for the most money often beats the higher hourly).
+5. **The quote** — full breakdown, door-to-door hours, what lands in your
+   pocket, and what you'd have to charge to hit your target rate. **Copy quote
+   to text** puts a customer-ready version on the clipboard. **Save** keeps it
+   in a local list you can reload later.
+
+**Adding a vehicle.** The list lives in the `VEHICLES` object near the top of
+the `<script>`, grouped by make and then by size class (`s` / `m` / `o`). Drop
+the model name into the right array — that's the whole job. Anything not in the
+list still quotes fine through *"Not listed — enter it by hand."*
+
+**Tune it under the Rates tab.** Target $/hr, supplies (per job and per hour),
+vehicle cost per mile, every package price and duration, size surcharges,
+add-ons, condition multipliers, and per-town miles/minutes. It all saves to that
+device's `localStorage`.
+
+> Two things worth knowing. **The Rates tab does not change the public site** —
+> it's a private what-if. To change what customers actually pay, edit `PACKAGES`,
+> `ADDONS` and `SIZES` in `index.html` (and `PKG_MIN` / `SIZE_MIN` / `ADDON_MIN`
+> so the calendar blocks off the right amount of time). And the **town drive
+> times start as guesses** — drive each one, watch the odometer, and put the real
+> numbers in, because they're what decides whether a Cascade job is worth taking.
+
+**What it'll tell you.** At the current price list, a job nets roughly **$18–47
+an hour** door to door. The Maintenance Wash is the weak spot: on a sedan out in
+Cascade it's about **$18/hr** after the drive and supplies. That's the tool
+doing its job, not a bug — the numbers are there so you can decide what to raise.

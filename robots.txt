@@ -1,6 +1,7 @@
 User-agent: *
 Allow: /
 Disallow: /admin
+Disallow: /quote
 Disallow: /text
 
 Sitemap: https://detailvalley.com/sitemap.xml

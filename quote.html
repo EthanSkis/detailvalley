@@ -1,0 +1,998 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<meta name="theme-color" content="#000000">
+<meta name="color-scheme" content="dark">
+<title>Detail Valley — Quote Tool</title>
+<link rel="icon" type="image/svg+xml" href="logo.svg">
+<link rel="alternate icon" href="logo.png">
+<style>
+  /* Same Apple dark palette as the job board (admin.html) so the two feel like one app. */
+  :root{
+    --bg:#000; --card:#1c1c1e; --card-2:#2c2c2e; --fill:#3a3a3c;
+    --text:#fff; --text-2:rgba(235,235,245,.6); --text-3:rgba(235,235,245,.3);
+    --sep:rgba(84,84,88,.65); --grid:rgba(84,84,88,.45);
+    --blue:#0a84ff; --green:#30d158; --orange:#ff9f0a; --red:#ff453a; --gray:#8e8e93;
+    --purple:#bf5af2;
+    --blue-tint:rgba(10,132,255,.16); --green-tint:rgba(48,209,88,.16);
+    --orange-tint:rgba(255,159,10,.16); --red-tint:rgba(255,69,58,.16);
+    --purple-tint:rgba(191,90,242,.16); --gray-tint:rgba(120,120,128,.24);
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  [hidden]{display:none!important}
+  body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text','SF Pro Display','Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;
+    color:var(--text);background:var(--bg);line-height:1.5;-webkit-font-smoothing:antialiased}
+  h1,h2,h3{font-weight:700;letter-spacing:-.02em}
+  a{color:var(--blue);text-decoration:none}
+  .wrap{max-width:680px;margin:0 auto;padding:0 16px}
+
+  header{background:rgba(28,28,30,.9);backdrop-filter:blur(20px) saturate(1.6);
+    -webkit-backdrop-filter:blur(20px) saturate(1.6);padding:13px 0;
+    border-bottom:.5px solid var(--sep);position:sticky;top:0;z-index:30}
+  .head-row{display:flex;align-items:center;gap:12px}
+  .brand{display:flex;align-items:center;gap:10px;flex:1;min-width:0}
+  .brand img{width:36px;height:36px;border-radius:50%;display:block}
+  .brand b{font-weight:700;font-size:1.02rem;letter-spacing:-.01em;display:block}
+  .brand span{display:block;font-size:.72rem;color:var(--text-2);font-weight:500}
+  .ghost{background:var(--gray-tint);border:none;color:var(--text);
+    padding:7px 14px;border-radius:999px;font:inherit;font-size:.82rem;font-weight:600;cursor:pointer}
+  .ghost:hover{background:var(--fill)}
+  .ghost.on{background:var(--blue);color:#fff}
+
+  main{padding:16px 0 70px}
+  .card{background:var(--card);border-radius:16px;padding:16px;margin-bottom:14px}
+  .card > h2{font-size:.74rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;
+    color:var(--text-2);margin-bottom:12px}
+  .card > h2 .hint{float:right;text-transform:none;letter-spacing:0;font-weight:600;color:var(--text-3)}
+
+  label{display:block;font-size:.78rem;font-weight:600;color:var(--text-2);margin:12px 0 6px}
+  label:first-child{margin-top:0}
+  input,select,textarea{width:100%;padding:12px 13px;border:1px solid transparent;border-radius:10px;
+    font:inherit;font-size:1rem;color:var(--text);background:var(--card-2);appearance:none}
+  input::placeholder{color:var(--text-3)}
+  input:focus,select:focus,textarea:focus{outline:none;border-color:var(--blue)}
+  select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 8' fill='none' stroke='%238e8e93' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M1 1.5 6 6.5 11 1.5'/%3E%3C/svg%3E");
+    background-repeat:no-repeat;background-position:right 13px center;background-size:12px;padding-right:34px}
+  textarea{resize:vertical;min-height:64px;font-size:.9rem;line-height:1.5}
+
+  /* Vehicle search */
+  .vsearch{position:relative}
+  .results{position:absolute;left:0;right:0;top:calc(100% + 6px);z-index:20;background:var(--card-2);
+    border-radius:12px;box-shadow:0 14px 40px rgba(0,0,0,.6);max-height:300px;overflow-y:auto;padding:5px}
+  .res{display:flex;align-items:center;gap:10px;width:100%;padding:10px 11px;border:none;background:transparent;
+    border-radius:8px;font:inherit;color:var(--text);text-align:left;cursor:pointer}
+  .res:hover,.res.cursor{background:var(--fill)}
+  .res b{font-weight:600;font-size:.94rem;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .res .mk{color:var(--text-2);font-weight:500}
+  .res-empty{padding:12px;font-size:.88rem;color:var(--text-2);text-align:center}
+
+  .tag{flex:0 0 auto;font-size:.66rem;font-weight:700;text-transform:uppercase;letter-spacing:.04em;
+    padding:3px 8px;border-radius:999px}
+  .t-standard{background:var(--gray-tint);color:var(--text-2)}
+  .t-midsize{background:var(--blue-tint);color:var(--blue)}
+  .t-oversize{background:var(--purple-tint);color:var(--purple)}
+
+  /* Chip rows */
+  .chips{display:flex;flex-wrap:wrap;gap:8px}
+  .chip{background:var(--card-2);border:1.5px solid transparent;color:var(--text);
+    padding:9px 13px;border-radius:999px;font:inherit;font-size:.86rem;font-weight:600;cursor:pointer;
+    display:inline-flex;align-items:center;gap:7px}
+  .chip:hover{background:var(--fill)}
+  .chip.on{border-color:var(--blue);background:var(--blue-tint);color:var(--blue)}
+  .chip small{font-weight:600;opacity:.7;font-size:.78rem}
+  .chip.on small{opacity:.85}
+
+  /* The picked vehicle */
+  .picked{display:flex;align-items:center;gap:12px;background:var(--card-2);border-radius:12px;padding:13px 14px}
+  .picked .pv{flex:1;min-width:0}
+  .picked .pv b{display:block;font-size:1.02rem;font-weight:700;letter-spacing:-.01em}
+  .picked .pv span{display:block;font-size:.78rem;color:var(--text-2);font-weight:500}
+  .picked .x{flex:0 0 auto;width:30px;height:30px;border:none;border-radius:50%;background:var(--fill);
+    color:var(--text-2);font-size:1rem;line-height:1;cursor:pointer}
+
+  /* Plan cards */
+  .plans{display:grid;gap:10px;padding-top:8px}
+  .plan{text-align:left;width:100%;background:var(--card-2);border:1.5px solid transparent;border-radius:14px;
+    padding:13px 14px;font:inherit;color:var(--text);cursor:pointer;position:relative}
+  .plan:hover{background:var(--fill)}
+  .plan.on{border-color:var(--blue);background:var(--blue-tint)}
+  .plan-top{display:flex;align-items:baseline;gap:10px}
+  .plan-top b{flex:1;min-width:0;font-size:1rem;font-weight:700;letter-spacing:-.01em}
+  .plan-top .amt{font-size:1.28rem;font-weight:700;letter-spacing:-.02em}
+  .plan-meta{display:flex;flex-wrap:wrap;gap:6px 14px;margin-top:6px;font-size:.78rem;
+    color:var(--text-2);font-weight:600}
+  .plan-meta .rate{font-weight:700}
+  .r-good{color:var(--green)} .r-ok{color:var(--orange)} .r-bad{color:var(--red)}
+  .best{position:absolute;top:-8px;right:12px;font-size:.62rem;font-weight:700;text-transform:uppercase;
+    letter-spacing:.05em;background:var(--green);color:#000;padding:2px 8px;border-radius:999px;
+    white-space:nowrap}
+
+  /* Quote breakdown */
+  .line{display:flex;justify-content:space-between;gap:12px;padding:9px 0;border-bottom:.5px solid var(--sep);
+    font-size:.92rem}
+  .line:last-of-type{border-bottom:none}
+  .line span:first-child{color:var(--text-2);font-weight:500}
+  .line span:last-child{font-weight:600;flex:0 0 auto}
+  .line.inc span:last-child{color:var(--green);font-weight:600}
+  .line.total{border-top:1px solid var(--sep);border-bottom:none;margin-top:4px;padding-top:13px;font-size:1.05rem}
+  .line.total span{color:var(--text)!important;font-weight:700}
+  .line.total span:last-child{font-size:1.5rem;letter-spacing:-.02em}
+
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
+  .stat{background:var(--card-2);border-radius:12px;padding:12px;text-align:center}
+  .stat b{display:block;font-size:1.32rem;font-weight:700;letter-spacing:-.02em;line-height:1.2}
+  .stat span{display:block;font-size:.68rem;color:var(--text-2);font-weight:700;text-transform:uppercase;
+    letter-spacing:.05em;margin-top:2px}
+
+  .verdict{margin-top:12px;border-radius:12px;padding:12px 13px;font-size:.88rem;font-weight:600;line-height:1.45}
+  .v-good{background:var(--green-tint);color:var(--green)}
+  .v-ok{background:var(--orange-tint);color:var(--orange)}
+  .v-bad{background:var(--red-tint);color:var(--red)}
+
+  .btn{display:block;width:100%;margin-top:12px;padding:14px;border:none;border-radius:12px;
+    background:var(--blue);color:#fff;font:inherit;font-size:1rem;font-weight:600;cursor:pointer}
+  .btn:hover{filter:brightness(1.1)}
+  .btn.alt{background:var(--gray-tint);color:var(--text)}
+  .btn.alt:hover{background:var(--fill);filter:none}
+  .btn-row{display:flex;gap:10px}
+  .btn-row .btn{flex:1}
+
+  .empty{text-align:center;color:var(--text-2);font-size:.92rem;padding:22px 10px}
+
+  /* Saved quotes */
+  .saved{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:.5px solid var(--sep)}
+  .saved:last-child{border-bottom:none}
+  .saved .sv{flex:1;min-width:0}
+  .saved .sv b{display:block;font-size:.94rem;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .saved .sv span{display:block;font-size:.76rem;color:var(--text-2);font-weight:500}
+  .saved .amt{flex:0 0 auto;font-weight:700;font-size:1.02rem}
+  .saved .x{flex:0 0 auto;width:28px;height:28px;border:none;border-radius:50%;background:var(--fill);
+    color:var(--text-2);font-size:.95rem;line-height:1;cursor:pointer}
+
+  /* Settings */
+  .set-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px 12px}
+  .set-grid label{margin:0 0 5px}
+  .set-grid input{padding:10px 11px;font-size:.94rem}
+  .subhead{font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;
+    color:var(--text-3);margin:18px 0 10px;padding-top:14px;border-top:.5px solid var(--sep)}
+  .subhead:first-of-type{border-top:none;padding-top:0;margin-top:0}
+  .row4{display:grid;grid-template-columns:1.4fr 1fr 1fr;gap:8px;align-items:center;margin-bottom:8px}
+  .row4 .rl{font-size:.86rem;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .row4 input{padding:9px 10px;font-size:.9rem;text-align:right}
+  .row-head{display:grid;grid-template-columns:1.4fr 1fr 1fr;gap:8px;font-size:.66rem;font-weight:700;
+    text-transform:uppercase;letter-spacing:.05em;color:var(--text-3);margin-bottom:6px}
+  .row-head span:not(:first-child){text-align:right}
+
+  .toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(20px);opacity:0;
+    background:var(--card-2);color:var(--text);padding:12px 20px;border-radius:999px;font-size:.9rem;
+    font-weight:600;box-shadow:0 10px 34px rgba(0,0,0,.6);pointer-events:none;transition:.22s;z-index:60}
+  .toast.show{transform:translateX(-50%) translateY(0);opacity:1}
+
+  .foot{text-align:center;font-size:.78rem;color:var(--text-3);padding:8px 0 0}
+  .foot a{color:var(--text-2)}
+
+  @media(min-width:560px){ .plans{grid-template-columns:1fr 1fr} }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap head-row">
+    <div class="brand">
+      <img src="logo.svg" alt="" onerror="this.src='logo.png'">
+      <div>
+        <b>Quote Tool</b>
+        <span>Internal · not customer facing</span>
+      </div>
+    </div>
+    <button class="ghost" id="tab-quote" onclick="showTab('quote')">Quote</button>
+    <button class="ghost" id="tab-set" onclick="showTab('set')">Rates</button>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <!-- ============ QUOTE ============ -->
+  <div id="view-quote">
+
+    <div class="card">
+      <h2>Vehicle <span class="hint" id="v-count"></span></h2>
+      <div id="vehicle-box"></div>
+    </div>
+
+    <div class="card">
+      <h2>Condition <span class="hint">drives time, not just price</span></h2>
+      <div class="chips" id="cond-chips"></div>
+    </div>
+
+    <div class="card">
+      <h2>Add-ons</h2>
+      <div class="chips" id="addon-chips"></div>
+    </div>
+
+    <div class="card">
+      <h2>Where</h2>
+      <label for="town">Town</label>
+      <select id="town" onchange="setTown(this.value)"></select>
+      <div class="grid2" id="trip-stats"></div>
+    </div>
+
+    <div class="card">
+      <h2>Plans for this rig <span class="hint" id="plans-hint"></span></h2>
+      <div class="plans" id="plans"></div>
+    </div>
+
+    <div class="card" id="detail-card"></div>
+
+    <div class="card" id="saved-card"></div>
+
+  </div>
+
+  <!-- ============ SETTINGS ============ -->
+  <div id="view-set" hidden>
+    <div class="card">
+      <h2>Your numbers</h2>
+      <p style="font-size:.86rem;color:var(--text-2);margin-bottom:14px">
+        Everything here is saved on this device only. Changing a price here does
+        <b>not</b> change the public site — update <code>index.html</code> for that.
+      </p>
+      <div class="set-grid">
+        <div>
+          <label for="s-target">Target $/hr</label>
+          <input id="s-target" type="number" inputmode="decimal" step="5">
+        </div>
+        <div>
+          <label for="s-supjob">Supplies per job $</label>
+          <input id="s-supjob" type="number" inputmode="decimal" step="1">
+        </div>
+        <div>
+          <label for="s-suphr">Supplies per hr $</label>
+          <input id="s-suphr" type="number" inputmode="decimal" step="0.5">
+        </div>
+        <div>
+          <label for="s-mile">Vehicle cost $/mi</label>
+          <input id="s-mile" type="number" inputmode="decimal" step="0.05">
+        </div>
+      </div>
+
+      <div class="subhead">Packages — price &amp; base minutes</div>
+      <div class="row-head"><span>Package</span><span>Price $</span><span>Minutes</span></div>
+      <div id="s-pkgs"></div>
+
+      <div class="subhead">Vehicle size — surcharge &amp; extra minutes</div>
+      <div class="row-head"><span>Size class</span><span>Extra $</span><span>Extra min</span></div>
+      <div id="s-sizes"></div>
+
+      <div class="subhead">Add-ons</div>
+      <div class="row-head"><span>Add-on</span><span>Price $</span><span>Minutes</span></div>
+      <div id="s-addons"></div>
+
+      <div class="subhead">Condition — time multiplier &amp; surcharge</div>
+      <div class="row-head"><span>Condition</span><span>× time</span><span>Extra $</span></div>
+      <div id="s-cond"></div>
+
+      <div class="subhead">Towns — round trip from your base</div>
+      <div class="row-head"><span>Town</span><span>RT miles</span><span>RT minutes</span></div>
+      <div id="s-towns"></div>
+      <p style="font-size:.8rem;color:var(--text-3);margin-top:8px">
+        These start as rough guesses. Drive each one once, check the odometer, and put the real numbers in.
+      </p>
+
+      <div class="btn-row">
+        <button class="btn alt" onclick="resetCfg()">Reset to site defaults</button>
+      </div>
+    </div>
+  </div>
+
+  <p class="foot">
+    <a href="index.html">Site</a> · <a href="admin.html">Job board</a>
+  </p>
+</main>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* =========================================================================
+   Detail Valley — internal quoting tool.
+
+   Pick a make + model, it resolves the vehicle's size class, then prices every
+   package for that exact rig and shows what each one actually pays per hour
+   once drive time, supplies and fuel come out. Nothing here is customer-facing
+   and nothing talks to Supabase — it's a calculator, on your phone, in a driveway.
+
+   The defaults mirror index.html. If you change prices on the site, change
+   them here too (or just tap "Reset to site defaults" after editing DEFAULTS).
+   ========================================================================= */
+
+/* ---------- Vehicle database ----------
+   Grouped by make, then by size class, so it stays readable and easy to extend.
+     s = standard  (sedan / coupe / hatch — no surcharge)
+     m = midsize   (crossover, 2-row SUV, midsize truck — +$30)
+     o = oversize  (full-size truck, 3-row SUV, van — +$60)
+   Names cover multiple model years; trims are deliberately left out. Anything
+   missing falls back to picking the class by hand. */
+const VEHICLES = {
+  'Acura':        {s:['ILX','Integra','RLX','RSX','TL','TLX','TSX','NSX'], m:['ADX','RDX','ZDX'], o:['MDX']},
+  'Alfa Romeo':   {s:['4C','Giulia'], m:['Stelvio','Tonale'], o:[]},
+  'Audi':         {s:['A3','A4','A5','A6','A7','A8','R8','RS3','RS5','S3','S4','S5','S6','TT','e-tron GT'],
+                   m:['A4 allroad','A6 allroad','Q3','Q4 e-tron','Q5','e-tron','SQ5'], o:['Q7','Q8','SQ7','SQ8']},
+  'BMW':          {s:['2 Series','3 Series','4 Series','5 Series','6 Series','7 Series','8 Series','M2','M3','M4','M5','Z4','i3','i4','i5','i7','i8'],
+                   m:['X1','X2','X3','X4','X5','X6','iX'], o:['X7','XM']},
+  'Buick':        {s:['LaCrosse','Regal','Verano'], m:['Encore','Encore GX','Envision','Envista'], o:['Enclave']},
+  'Cadillac':     {s:['ATS','CT4','CT5','CT6','CTS','XTS'], m:['Lyriq','SRX','XT4','XT5'], o:['Escalade','Escalade ESV','Escalade IQ','XT6']},
+  'Chevrolet':    {s:['Bolt EV','Bolt EUV','Camaro','Corvette','Cruze','Impala','Malibu','Sonic','Spark','Volt'],
+                   m:['Blazer','Blazer EV','Colorado','Equinox','Equinox EV','S-10','Trailblazer','Trax'],
+                   o:['Avalanche','Express','Silverado 1500','Silverado 2500HD','Silverado 3500HD','Silverado EV','Suburban','Tahoe','Traverse']},
+  'Chrysler':     {s:['200','300'], m:[], o:['Pacifica','Town & Country','Voyager']},
+  'Dodge':        {s:['Challenger','Charger','Dart'], m:['Hornet','Journey'], o:['Durango','Grand Caravan']},
+  'Fiat':         {s:['500','500e'], m:['500X'], o:[]},
+  'Ford':         {s:['C-Max','Fiesta','Focus','Fusion','Mustang','Taurus'],
+                   m:['Bronco','Bronco Sport','EcoSport','Edge','Escape','Maverick','Mustang Mach-E','Ranger','Transit Connect'],
+                   o:['E-Series','Excursion','Expedition','Expedition MAX','Explorer','F-150','F-150 Lightning','F-250','F-350','F-450','Flex','Transit']},
+  'GMC':          {s:[], m:['Canyon','Terrain'],
+                   o:['Acadia','Hummer EV','Savana','Sierra 1500','Sierra 2500HD','Sierra 3500HD','Yukon','Yukon XL']},
+  'Genesis':      {s:['G70','G80','G90'], m:['GV60','GV70'], o:['GV80']},
+  'Honda':        {s:['Accord','Civic','CR-Z','Fit','Insight','S2000'],
+                   m:['CR-V','Element','HR-V','Passport','Prologue','Ridgeline'], o:['Odyssey','Pilot']},
+  'Hyundai':      {s:['Accent','Elantra','Genesis Coupe','Ioniq','Ioniq 6','Sonata','Veloster'],
+                   m:['Ioniq 5','Kona','Santa Cruz','Santa Fe','Tucson','Venue'], o:['Ioniq 9','Palisade','Santa Fe XL']},
+  'Infiniti':     {s:['G35','G37','Q50','Q60','Q70'], m:['EX35','QX50','QX55'], o:['QX56','QX60','QX80']},
+  'Jaguar':       {s:['F-Type','XE','XF','XJ'], m:['E-Pace','F-Pace','I-Pace'], o:[]},
+  'Jeep':         {s:[], m:['Cherokee','Compass','Grand Cherokee','Liberty','Patriot','Renegade','Wrangler','Wrangler Unlimited'],
+                   o:['Commander','Gladiator','Grand Cherokee L','Grand Wagoneer','Wagoneer']},
+  'Kia':          {s:['Forte','K5','Optima','Rio','Stinger'],
+                   m:['EV6','Niro','Seltos','Soul','Sportage'], o:['Carnival','EV9','Sedona','Sorento','Telluride']},
+  'Land Rover':   {s:[], m:['Defender 90','Discovery Sport','Range Rover Evoque','Range Rover Velar'],
+                   o:['Defender 110','Discovery','LR3','LR4','Range Rover','Range Rover Sport']},
+  'Lexus':        {s:['CT','ES','GS','IS','LC','LS','RC','SC'], m:['NX','RX','RZ','UX'], o:['GX','LX','TX']},
+  'Lincoln':      {s:['Continental','MKS','MKZ'], m:['Corsair','MKC','MKX','Nautilus'], o:['Aviator','MKT','Navigator','Navigator L']},
+  'Lucid':        {s:['Air'], m:[], o:['Gravity']},
+  'Mazda':        {s:['Mazda2','Mazda3','Mazda6','MX-5 Miata','RX-8'],
+                   m:['CX-3','CX-30','CX-5','CX-50','CX-70','MX-30'], o:['CX-9','CX-90']},
+  'Mercedes-Benz':{s:['A-Class','C-Class','CLA','CLS','E-Class','S-Class','SL','SLC','SLK','EQE','EQS'],
+                   m:['GLA','GLB','GLC','EQB'], o:['G-Class','GLE','GLS','Metris','Sprinter']},
+  'Mini':         {s:['Clubman','Convertible','Cooper','Hardtop'], m:['Countryman'], o:[]},
+  'Mitsubishi':   {s:['Lancer','Mirage'], m:['Eclipse Cross','Outlander Sport'], o:['Outlander']},
+  'Nissan':       {s:['370Z','Altima','GT-R','Juke','Leaf','Maxima','Sentra','Versa','Z'],
+                   m:['Ariya','Frontier','Kicks','Murano','NV200','Rogue','Rogue Sport','Xterra'],
+                   o:['Armada','NV Cargo','Pathfinder','Titan','Titan XD']},
+  'Polestar':     {s:['Polestar 2'], m:['Polestar 3','Polestar 4'], o:[]},
+  'Porsche':      {s:['718 Boxster','718 Cayman','911','Panamera','Taycan'], m:['Cayenne','Macan'], o:[]},
+  'Ram':          {s:[], m:['ProMaster City'], o:['1500','2500','3500','ProMaster']},
+  'Rivian':       {s:[], m:['R2'], o:['R1S','R1T']},
+  'Subaru':       {s:['BRZ','Impreza','Legacy','WRX'],
+                   m:['Baja','Crosstrek','Forester','Outback','Solterra'], o:['Ascent','Tribeca']},
+  'Tesla':        {s:['Model 3','Model S'], m:['Model Y'], o:['Cybertruck','Model X']},
+  'Toyota':       {s:['86','Avalon','C-HR','Camry','Corolla','Crown','GR86','GR Corolla','GR Supra','Mirai','Prius','Yaris'],
+                   m:['4Runner','Corolla Cross','FJ Cruiser','RAV4','Tacoma','Venza','bZ4X'],
+                   o:['Grand Highlander','Highlander','Land Cruiser','Sequoia','Sienna','Tundra']},
+  'Volkswagen':   {s:['Arteon','Beetle','CC','Eos','GTI','Golf','Golf R','ID.7','Jetta','Passat'],
+                   m:['ID.4','Taos','Tiguan','Touareg'], o:['Atlas','Atlas Cross Sport','Routan']},
+  'Volvo':        {s:['S60','S90'], m:['C40','EX30','V60','V90','XC40','XC60'], o:['EX90','XC90']}
+};
+
+/* ---------- Defaults, straight from index.html ---------- */
+const DEFAULTS = {
+  /* What you want to clear per hour, door to door — not just while you're
+     scrubbing. Starts at 45 because the current price list only ever lands
+     between about $18 and $47/hr net, so this is the line that actually
+     separates the jobs worth taking from the ones that aren't. It's a low bar
+     for a solo detailer — raise it as you raise prices. */
+  targetHourly: 45,
+  supplyPerJob: 6,        // towels, bags, the stuff you burn every job regardless
+  supplyPerHr:  2.5,      // chemicals, pads, water
+  costPerMile:  0.60,     // gas + wear on the rig
+  /* condWeight = how much a filthy vehicle drags THIS package out. The condition
+     tiers below describe the inside of the car, so an exterior-only wash only
+     feels a fraction of it (a mud-caked truck is slower to wash, but a wrecked
+     interior costs you nothing if you're never opening the door). */
+  pkgs: [
+    {id:'maintenance', name:'Maintenance Wash', price:85,  min:105, condWeight:0.4,
+     blurb:'Exterior wash, wheels, tires, glass', excludes:['pet']},
+    {id:'interior',    name:'Interior Detail',  price:185, min:225, condWeight:1,
+     blurb:'Inside only — vacuum, shampoo, surfaces & glass',
+     includes:['intglass'], excludes:['wax']},
+    {id:'full',        name:'Full Detail',      price:295, min:360, condWeight:1,
+     blurb:'Adds full interior clean & shampoo', includes:['intglass']},
+    {id:'showroom',    name:'Showroom',         price:360, min:420, condWeight:1,
+     blurb:'Adds clay bar & wax protection', includes:['intglass']}
+  ],
+  sizes: [
+    {id:'standard', name:'Sedan / coupe',                    short:'Standard', price:0,  min:0},
+    {id:'midsize',  name:'SUV / crossover / small truck',    short:'Midsize',  price:30, min:30},
+    {id:'oversize', name:'Large truck / 3-row SUV / van',    short:'Oversize', price:60, min:60}
+  ],
+  addons: [
+    {id:'pet',      name:'Pet hair',        price:40, min:30},
+    {id:'dirt',     name:'Heavy dirt / mud', price:30, min:30},
+    {id:'engine',   name:'Engine bay',      price:25, min:20},
+    {id:'intglass', name:'Interior glass',  price:15, min:10},
+    {id:'wax',      name:'Extra wax coat',  price:30, min:20}
+  ],
+  cond: [
+    {id:'clean',   name:'Just detailed',   mult:0.85, fee:0,   note:'kept up, light soil'},
+    {id:'normal',  name:'Daily driver',    mult:1.00, fee:0,   note:'normal for around here'},
+    {id:'rough',   name:'Rough',           mult:1.30, fee:45,  note:'kids, dogs, mud season'},
+    {id:'trashed', name:'Trashed',         mult:1.65, fee:110, note:'spills, smoke, heavy pet, mystery smell'}
+  ],
+  towns: [
+    {id:'McCall',    miles:24, min:40},
+    {id:'Donnelly',  miles:10, min:20},
+    {id:'Lake Fork', miles:12, min:24},
+    {id:'Cascade',   miles:40, min:60},
+    {id:'New Meadows', miles:44, min:70},
+    {id:'Other',     miles:30, min:50}
+  ]
+};
+
+const CFG_KEY = 'dv_quote_cfg_v2';
+const SAVE_KEY = 'dv_quotes_v1';
+const clone = o => JSON.parse(JSON.stringify(o));
+
+let cfg = loadCfg();
+let saved = loadSaved();
+let state = {
+  make:'', model:'', year:'', size:null, sizeAuto:null,
+  cond:'normal', addons:[], town:'Donnelly', pkg:'full',
+  query:'', results:[], cursor:-1, notes:''
+};
+
+/* ---------- Storage ---------- */
+/* Merge saved settings over the defaults *by id*, so a package, add-on or town
+   added to DEFAULTS later still appears for someone with older saved settings —
+   and their tuned numbers survive. */
+function loadCfg(){
+  let saved_;
+  try{ saved_ = JSON.parse(localStorage.getItem(CFG_KEY)); }catch(e){}
+  const out = clone(DEFAULTS);
+  if(!saved_ || typeof saved_ !== 'object') return out;
+
+  ['targetHourly','supplyPerJob','supplyPerHr','costPerMile'].forEach(k=>{
+    if(typeof saved_[k] === 'number') out[k] = saved_[k];
+  });
+  ['pkgs','sizes','addons','cond','towns'].forEach(group=>{
+    if(!Array.isArray(saved_[group])) return;
+    out[group].forEach(item=>{
+      const was = saved_[group].find(x => x && x.id === item.id);
+      if(!was) return;
+      // Only the tunable numbers come back — names, blurbs and the include/exclude
+      // rules always come from the code so they can be fixed by an update.
+      ['price','min','mult','fee','miles'].forEach(f=>{
+        if(typeof was[f] === 'number') item[f] = was[f];
+      });
+    });
+  });
+  return out;
+}
+function saveCfg(){ try{ localStorage.setItem(CFG_KEY, JSON.stringify(cfg)); }catch(e){} }
+function resetCfg(){
+  if(!confirm('Put every price, time and drive back to the site defaults?')) return;
+  cfg = clone(DEFAULTS); saveCfg(); renderSettings(); render(); toast('Back to defaults');
+}
+function loadSaved(){ try{ return JSON.parse(localStorage.getItem(SAVE_KEY)) || []; }catch(e){ return []; } }
+function persistSaved(){ try{ localStorage.setItem(SAVE_KEY, JSON.stringify(saved)); }catch(e){} }
+
+/* ---------- Flat searchable index ---------- */
+const INDEX = [];
+for(const make of Object.keys(VEHICLES)){
+  for(const [k, size] of [['s','standard'],['m','midsize'],['o','oversize']]){
+    (VEHICLES[make][k]||[]).forEach(model=>{
+      INDEX.push({make, model, size, hay:(make+' '+model).toLowerCase()});
+    });
+  }
+}
+INDEX.sort((a,b)=> a.make.localeCompare(b.make) || a.model.localeCompare(b.model));
+
+function search(q){
+  q = q.trim().toLowerCase();
+  if(!q) return [];
+  const words = q.split(/\s+/);
+  const hits = INDEX.filter(v => words.every(w => v.hay.includes(w)));
+  // Anything whose model *starts* with the query is almost always what you meant.
+  hits.sort((a,b)=>{
+    const am = a.model.toLowerCase().startsWith(words[words.length-1]) ? 0 : 1;
+    const bm = b.model.toLowerCase().startsWith(words[words.length-1]) ? 0 : 1;
+    return am - bm;
+  });
+  return hits.slice(0, 40);
+}
+
+/* ---------- Helpers ---------- */
+const $ = id => document.getElementById(id);
+const money = n => '$' + Math.round(n).toLocaleString('en-US');
+const money2 = n => '$' + (Math.round(n*100)/100).toFixed(2);
+const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const pkgOf = id => cfg.pkgs.find(p=>p.id===id);
+const sizeOf = id => cfg.sizes.find(s=>s.id===id);
+const condOf = id => cfg.cond.find(c=>c.id===id) || cfg.cond[1];
+const townOf = id => cfg.towns.find(t=>t.id===id) || cfg.towns[0];
+const num = v => { const n = parseFloat(v); return isFinite(n) ? n : 0; };
+
+function hrs(min){
+  const h = min/60;
+  if(h < 1) return Math.round(min) + ' min';
+  const whole = Math.floor(h), rest = Math.round((h-whole)*60);
+  return whole + (rest ? ':' + String(rest).padStart(2,'0') : '') + ' hr' + (whole>1||rest?'s':'');
+}
+function toast(msg){
+  const t = $('toast'); t.textContent = msg; t.classList.add('show');
+  clearTimeout(toast._t); toast._t = setTimeout(()=>t.classList.remove('show'), 1900);
+}
+
+/* An add-on is free when the package already covers it, and unavailable when the
+   package rules it out — same logic the booking flow on index.html uses. */
+function addonIncluded(pkg, id){ return (pkg.includes||[]).includes(id); }
+function addonExcluded(pkg, id){ return (pkg.excludes||[]).includes(id); }
+
+/* ---------- The actual math ----------
+   One place computes everything for a given package, so the plan cards, the
+   breakdown and the saved quote can never drift apart. */
+function quote(pkgId){
+  const pkg = pkgOf(pkgId), sz = sizeOf(state.size) || cfg.sizes[0];
+  const cd = condOf(state.cond), tw = townOf(state.town);
+
+  const adds = state.addons
+    .filter(a => !addonExcluded(pkg, a))
+    .map(a => {
+      const def = cfg.addons.find(x=>x.id===a);
+      const inc = addonIncluded(pkg, a);
+      return {id:a, name:def.name, price: inc ? 0 : num(def.price), min: inc ? 0 : num(def.min), inc};
+    });
+
+  const addPrice = adds.reduce((s,a)=>s+a.price, 0);
+  const addMin   = adds.reduce((s,a)=>s+a.min, 0);
+
+  // Condition stretches the work, it doesn't stretch the drive — and it only
+  // bites as hard as this package's condWeight says it should.
+  const w      = pkg.condWeight == null ? 1 : num(pkg.condWeight);
+  const mult   = 1 + (num(cd.mult) - 1) * w;
+  const condFee = Math.round(num(cd.fee) * w / 5) * 5;
+
+  const baseMin  = num(pkg.min) + num(sz.min) + addMin;
+  const workMin  = Math.round(baseMin * mult);
+  const driveMin = num(tw.min);
+  const totalMin = workMin + driveMin;
+
+  const price = num(pkg.price) + num(sz.price) + addPrice + condFee;
+
+  const supplies = num(cfg.supplyPerJob) + num(cfg.supplyPerHr) * (workMin/60);
+  const fuel     = num(tw.miles) * num(cfg.costPerMile);
+  const net      = price - supplies - fuel;
+
+  const paidHrs  = totalMin/60;                     // door to door — the hours the job really costs you
+  const rate     = paidHrs > 0 ? price / paidHrs : 0;
+  const netRate  = paidHrs > 0 ? net / paidHrs : 0;
+
+  // What you'd have to charge for this exact job to hit your target rate.
+  const needed   = num(cfg.targetHourly) * paidHrs + supplies + fuel;
+
+  return {pkg, sz, cd, tw, adds, addPrice, addMin, condFee, workMin, driveMin, totalMin,
+          price, supplies, fuel, net, paidHrs, rate, netRate,
+          needed: Math.ceil(needed/5)*5};
+}
+
+function rateClass(netRate){
+  const t = num(cfg.targetHourly) || 1;
+  if(netRate >= t) return 'r-good';
+  if(netRate >= t*0.8) return 'r-ok';
+  return 'r-bad';
+}
+
+/* ---------- Render: vehicle ---------- */
+function renderVehicle(){
+  const box = $('vehicle-box');
+  $('v-count').textContent = INDEX.length + ' models';
+
+  if(state.model){
+    const sz = sizeOf(state.size) || cfg.sizes[0];
+    const overridden = state.sizeAuto && state.sizeAuto !== state.size;
+    box.innerHTML = `
+      <div class="picked">
+        <div class="pv">
+          <b>${esc([state.year, state.make, state.model].filter(Boolean).join(' '))}</b>
+          <span>${esc(sz.name)}${overridden ? ' · set by hand' : ''}</span>
+        </div>
+        <span class="tag t-${state.size}">${esc(sz.short)}</span>
+        <button class="x" onclick="clearVehicle()" aria-label="Clear vehicle">✕</button>
+      </div>
+      <label for="yr">Year <span style="font-weight:500;color:var(--text-3)">(optional — just for the quote text)</span></label>
+      <input id="yr" type="text" inputmode="numeric" maxlength="4" placeholder="2019"
+             value="${esc(state.year)}" oninput="state.year=this.value.replace(/[^0-9]/g,'');renderDetail()">
+      <label>Size class ${overridden ? '<span style="color:var(--orange)">· overriding '+esc(sizeOf(state.sizeAuto).short)+'</span>' : ''}</label>
+      <div class="chips">
+        ${cfg.sizes.map(s=>`
+          <button class="chip ${state.size===s.id?'on':''}" onclick="setSize('${s.id}')">
+            ${esc(s.short)} <small>${s.price ? '+$'+s.price : 'base'}</small>
+          </button>`).join('')}
+      </div>`;
+    return;
+  }
+
+  box.innerHTML = `
+    <div class="vsearch">
+      <input id="q" type="text" autocomplete="off" autocapitalize="words" spellcheck="false"
+             placeholder="Search — “tahoe”, “subaru out”, “f-150”…"
+             value="${esc(state.query)}"
+             oninput="onQuery(this.value)" onkeydown="onQueryKey(event)">
+      <div class="results" id="results" hidden></div>
+    </div>
+    <label for="mk" style="margin-top:14px">…or browse by make</label>
+    <select id="mk" onchange="onMake(this.value)">
+      <option value="">Pick a make…</option>
+      ${Object.keys(VEHICLES).map(m=>`<option value="${esc(m)}">${esc(m)}</option>`).join('')}
+    </select>
+    <div id="model-wrap"></div>
+    <button class="btn alt" onclick="manualVehicle()">Not listed — enter it by hand</button>`;
+  renderResults();
+}
+
+function onQuery(v){
+  state.query = v; state.cursor = -1;
+  state.results = search(v);
+  renderResults();
+}
+function onQueryKey(e){
+  if(e.key === 'ArrowDown' || e.key === 'ArrowUp'){
+    e.preventDefault();
+    if(!state.results.length) return;
+    state.cursor += (e.key === 'ArrowDown' ? 1 : -1);
+    if(state.cursor < 0) state.cursor = state.results.length - 1;
+    if(state.cursor >= state.results.length) state.cursor = 0;
+    renderResults();
+  } else if(e.key === 'Enter'){
+    e.preventDefault();
+    const pick = state.results[state.cursor < 0 ? 0 : state.cursor];
+    if(pick) pickVehicle(pick.make, pick.model, pick.size);
+  } else if(e.key === 'Escape'){
+    state.query = ''; state.results = []; renderVehicle();
+  }
+}
+function renderResults(){
+  const el = $('results'); if(!el) return;
+  if(!state.query.trim()){ el.hidden = true; el.innerHTML = ''; return; }
+  el.hidden = false;
+  if(!state.results.length){
+    el.innerHTML = `<div class="res-empty">Nothing matches. Use “enter it by hand” below.</div>`;
+    return;
+  }
+  el.innerHTML = state.results.map((v,i)=>`
+    <button class="res ${i===state.cursor?'cursor':''}" onclick="pickResult(${i})">
+      <b><span class="mk">${esc(v.make)}</span> ${esc(v.model)}</b>
+      <span class="tag t-${v.size}">${esc(sizeOf(v.size).short)}</span>
+    </button>`).join('');
+}
+function pickResult(i){
+  const v = state.results[i];
+  if(v) pickVehicle(v.make, v.model, v.size);
+}
+function onMake(make){
+  const wrap = $('model-wrap'); if(!wrap) return;
+  if(!make){ wrap.innerHTML = ''; return; }
+  // Values are indexes into INDEX, so a model name never has to survive a round
+  // trip through markup.
+  const list = INDEX.map((v,i)=>({v,i})).filter(x=>x.v.make===make);
+  wrap.innerHTML = `
+    <label for="md">Model</label>
+    <select id="md" onchange="onModel(this.value)">
+      <option value="">Pick a model…</option>
+      ${list.map(({v,i})=>`<option value="${i}">${esc(v.model)} — ${esc(sizeOf(v.size).short)}</option>`).join('')}
+    </select>`;
+}
+function onModel(idx){
+  const v = INDEX[+idx];
+  if(v) pickVehicle(v.make, v.model, v.size);
+}
+function pickVehicle(make, model, size){
+  state.make = make; state.model = model;
+  state.size = size; state.sizeAuto = size;
+  state.query = ''; state.results = []; state.cursor = -1;
+  render();
+}
+function manualVehicle(){
+  const name = prompt('Year / make / model — however you want it written on the quote:');
+  if(!name) return;
+  state.make = ''; state.model = name.trim(); state.year = '';
+  state.size = state.size || 'midsize'; state.sizeAuto = null;
+  render();
+  toast('Pick the size class yourself');
+}
+function clearVehicle(){
+  state.make = state.model = state.year = ''; state.size = state.sizeAuto = null;
+  render();
+}
+function setSize(id){ state.size = id; render(); }
+
+/* ---------- Render: condition, add-ons, town ---------- */
+function renderCond(){
+  $('cond-chips').innerHTML = cfg.cond.map(c=>`
+    <button class="chip ${state.cond===c.id?'on':''}" onclick="setCond('${c.id}')">
+      ${esc(c.name)} <small>×${c.mult}${c.fee ? ' · +$'+c.fee : ''}</small>
+    </button>`).join('');
+}
+function setCond(id){ state.cond = id; render(); }
+
+function renderAddons(){
+  const pkg = pkgOf(state.pkg);
+  $('addon-chips').innerHTML = cfg.addons.map(a=>{
+    const inc = addonIncluded(pkg, a.id), exc = addonExcluded(pkg, a.id);
+    const on = state.addons.includes(a.id);
+    const note = exc ? "n/a" : inc ? 'included' : '+$' + a.price;
+    return `<button class="chip ${on?'on':''}" onclick="toggleAddon('${a.id}')"
+              ${exc ? 'style="opacity:.4"' : ''}>
+              ${esc(a.name)} <small>${note}</small></button>`;
+  }).join('');
+}
+function toggleAddon(id){
+  const i = state.addons.indexOf(id);
+  if(i < 0) state.addons.push(id); else state.addons.splice(i,1);
+  render();
+}
+
+function renderTown(){
+  const sel = $('town');
+  sel.innerHTML = cfg.towns.map(t=>`<option value="${esc(t.id)}" ${state.town===t.id?'selected':''}>${esc(t.id)}</option>`).join('');
+  const t = townOf(state.town);
+  const fuel = num(t.miles) * num(cfg.costPerMile);
+  $('trip-stats').innerHTML = `
+    <div class="stat"><b>${hrs(num(t.min))}</b><span>Round trip</span></div>
+    <div class="stat"><b>${money2(fuel)}</b><span>Fuel &amp; wear</span></div>`;
+}
+function setTown(id){ state.town = id; render(); }
+
+/* ---------- Render: plans ---------- */
+function renderPlans(){
+  if(!state.size){
+    $('plans').innerHTML = `<div class="empty">Pick a vehicle first.</div>`;
+    $('plans-hint').textContent = '';
+    return;
+  }
+  const quotes = cfg.pkgs.map(p=>({id:p.id, q:quote(p.id)}));
+  // Two different "best", and they often disagree: the highest hourly is usually
+  // a short job, but the site only books one job a day — so the plan that fills
+  // the day for the most money is the one that actually pays the bills.
+  const bestRate = quotes.reduce((a,b)=> b.q.netRate > a.q.netRate ? b : a);
+  const bestNet  = quotes.reduce((a,b)=> b.q.net > a.q.net ? b : a);
+  $('plans-hint').textContent = sizeOf(state.size).short + ' · ' + condOf(state.cond).name.toLowerCase();
+
+  $('plans').innerHTML = quotes.map(({id,q})=>{
+    const badge = id === bestNet.id ? 'Most for the day'
+                : id === bestRate.id ? 'Best $/hr' : '';
+    return `
+    <button class="plan ${state.pkg===id?'on':''}" onclick="setPkg('${id}')">
+      ${badge ? `<span class="best">${badge}</span>` : ''}
+      <div class="plan-top"><b>${esc(q.pkg.name)}</b><span class="amt">${money(q.price)}</span></div>
+      <div class="plan-meta">
+        <span>${hrs(q.workMin)} on site</span>
+        <span class="rate ${rateClass(q.netRate)}">${money(q.netRate)}/hr net</span>
+        <span>${money(q.net)} in pocket</span>
+      </div>
+    </button>`;
+  }).join('');
+}
+function setPkg(id){ state.pkg = id; render(); }
+
+/* ---------- Render: the picked quote ---------- */
+function renderDetail(){
+  const card = $('detail-card');
+  if(!state.size){ card.innerHTML = `<div class="empty">The breakdown shows up once a vehicle is picked.</div>`; return; }
+  const q = quote(state.pkg);
+  const veh = [state.year, state.make, state.model].filter(Boolean).join(' ');
+  const gap = q.price - q.needed;
+
+  const verdict = q.netRate >= num(cfg.targetHourly)
+    ? {cls:'v-good', txt:`Clears ${money(q.netRate)}/hr after supplies and the drive — above your ${money(cfg.targetHourly)} target. Quote it as-is.`}
+    : q.netRate >= num(cfg.targetHourly)*0.8
+    ? {cls:'v-ok',   txt:`${money(q.netRate)}/hr net, a bit under your ${money(cfg.targetHourly)} target. ${money(q.needed)} would get you there — worth it if the day's otherwise empty.`}
+    : {cls:'v-bad',  txt:`Only ${money(q.netRate)}/hr net against a ${money(cfg.targetHourly)} target. You'd need ${money(q.needed)} to make this worth the drive. Upsell, add the condition fee, or pass.`};
+
+  card.innerHTML = `
+    <h2>The quote <span class="hint">${esc(q.pkg.name)}</span></h2>
+
+    <div class="line"><span>${esc(q.pkg.name)}${veh ? ' · ' + esc(veh) : ''}</span><span>${money(q.pkg.price)}</span></div>
+    ${q.sz.price ? `<div class="line"><span>${esc(q.sz.name)}</span><span>+${money(q.sz.price)}</span></div>` : ''}
+    ${q.adds.map(a=>`<div class="line ${a.inc?'inc':''}"><span>${esc(a.name)}</span><span>${a.inc?'Included':'+'+money(a.price)}</span></div>`).join('')}
+    ${q.condFee ? `<div class="line"><span>${esc(q.cd.name)} condition</span><span>+${money(q.condFee)}</span></div>` : ''}
+    <div class="line total"><span>Quote</span><span>${money(q.price)}</span></div>
+
+    <div class="grid2">
+      <div class="stat"><b>${hrs(q.workMin)}</b><span>On site</span></div>
+      <div class="stat"><b>${hrs(q.totalMin)}</b><span>Door to door</span></div>
+      <div class="stat"><b class="${rateClass(q.netRate)}">${money(q.netRate)}</b><span>Net per hour</span></div>
+      <div class="stat"><b>${money(q.net)}</b><span>In your pocket</span></div>
+    </div>
+
+    <div class="verdict ${verdict.cls}">${verdict.txt}</div>
+
+    <div class="line" style="margin-top:14px;border-top:.5px solid var(--sep);padding-top:12px">
+      <span>Supplies</span><span>−${money2(q.supplies)}</span></div>
+    <div class="line"><span>Fuel &amp; wear · ${esc(q.tw.id)}, ${q.tw.miles} mi round trip</span><span>−${money2(q.fuel)}</span></div>
+    <div class="line"><span>To hit ${money(cfg.targetHourly)}/hr you'd charge</span>
+      <span class="${gap>=0?'r-good':'r-bad'}">${money(q.needed)}</span></div>
+
+    <label for="qnotes">Notes for yourself</label>
+    <textarea id="qnotes" placeholder="Gate code, dog in the yard, “wants it before the wedding”…"
+      oninput="state.notes=this.value">${esc(state.notes)}</textarea>
+
+    <div class="btn-row">
+      <button class="btn" onclick="copyQuote()">Copy quote to text</button>
+      <button class="btn alt" onclick="saveQuote()">Save</button>
+    </div>`;
+}
+
+/* "9:45 hrs" reads like a clock time to a customer. Round to the nearest half
+   hour and say it the way you'd say it out loud. */
+function roughHours(min){
+  const half = Math.max(0.5, Math.round(min/30)/2);
+  if(half < 1) return 'half an hour';
+  const whole = Math.floor(half);
+  return whole + (half % 1 ? '½' : '') + ' hour' + (half > 1 ? 's' : '');
+}
+
+/* Plain-text quote — short enough to paste into a text message. */
+function quoteText(){
+  const q = quote(state.pkg);
+  const veh = [state.year, state.make, state.model].filter(Boolean).join(' ') || 'your vehicle';
+  const lines = [];
+  lines.push(`Detail Valley — quote for ${veh}`);
+  lines.push('');
+  lines.push(`${q.pkg.name} — ${money(q.pkg.price)}`);
+  lines.push(`  ${q.pkg.blurb}`);
+  if(q.sz.price) lines.push(`${q.sz.name} — +${money(q.sz.price)}`);
+  q.adds.forEach(a=> lines.push(`${a.name} — ${a.inc ? 'included' : '+' + money(a.price)}`));
+  if(q.condFee) lines.push(`Extra time for the condition it's in — +${money(q.condFee)}`);
+  lines.push('');
+  lines.push(`Total: ${money(q.price)}`);
+  lines.push(`About ${roughHours(q.workMin)} on site — I come to you in ${q.tw.id}.`);
+  lines.push('');
+  lines.push('Book any open day at detailvalley.com');
+  return lines.join('\n');
+}
+function copyQuote(){
+  const txt = quoteText();
+  const done = ()=> toast('Copied — paste it in a text');
+  if(navigator.clipboard && window.isSecureContext){
+    navigator.clipboard.writeText(txt).then(done, ()=>fallbackCopy(txt, done));
+  } else fallbackCopy(txt, done);
+}
+function fallbackCopy(txt, done){
+  const ta = document.createElement('textarea');
+  ta.value = txt; ta.style.position = 'fixed'; ta.style.opacity = '0';
+  document.body.appendChild(ta); ta.select();
+  try{ document.execCommand('copy'); done(); }
+  catch(e){ prompt('Copy this:', txt); }
+  document.body.removeChild(ta);
+}
+
+/* ---------- Saved quotes ---------- */
+function saveQuote(){
+  const q = quote(state.pkg);
+  saved.unshift({
+    id: Date.now(),
+    veh: [state.year, state.make, state.model].filter(Boolean).join(' ') || 'Vehicle',
+    pkg: q.pkg.name, size: state.size, cond: state.cond, town: state.town,
+    addons: state.addons.slice(), notes: state.notes,
+    price: q.price, netRate: Math.round(q.netRate), workMin: q.workMin,
+    when: new Date().toISOString()
+  });
+  saved = saved.slice(0, 40);
+  persistSaved(); renderSaved(); toast('Saved');
+}
+function loadQuote(id){
+  const s = saved.find(x=>x.id===id); if(!s) return;
+  const parts = s.veh.split(' ');
+  state.year = /^\d{4}$/.test(parts[0]) ? parts.shift() : '';
+  state.make = parts.shift() || '';
+  state.model = parts.join(' ');
+  state.size = s.size; state.sizeAuto = null;
+  state.cond = s.cond; state.town = s.town; state.addons = (s.addons||[]).slice();
+  state.notes = s.notes || '';
+  const p = cfg.pkgs.find(p=>p.name===s.pkg); if(p) state.pkg = p.id;
+  render();
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+function delQuote(id, ev){
+  ev.stopPropagation();
+  saved = saved.filter(x=>x.id!==id); persistSaved(); renderSaved();
+}
+function renderSaved(){
+  const card = $('saved-card');
+  if(!saved.length){
+    card.innerHTML = `<h2>Saved quotes</h2><div class="empty">Nothing saved yet. Quote a car and tap Save — it stays on this phone.</div>`;
+    return;
+  }
+  card.innerHTML = `<h2>Saved quotes <span class="hint">${saved.length}</span></h2>` +
+    saved.map(s=>`
+      <div class="saved" onclick="loadQuote(${s.id})" style="cursor:pointer">
+        <div class="sv">
+          <b>${esc(s.veh)}</b>
+          <span>${esc(s.pkg)} · ${esc(s.town)} · ${money(s.netRate)}/hr net · ${new Date(s.when).toLocaleDateString('en-US',{month:'short',day:'numeric'})}</span>
+        </div>
+        <span class="amt">${money(s.price)}</span>
+        <button class="x" onclick="delQuote(${s.id}, event)" aria-label="Delete">✕</button>
+      </div>`).join('');
+}
+
+/* ---------- Settings ---------- */
+function renderSettings(){
+  $('s-target').value = cfg.targetHourly;
+  $('s-supjob').value = cfg.supplyPerJob;
+  $('s-suphr').value  = cfg.supplyPerHr;
+  $('s-mile').value   = cfg.costPerMile;
+
+  $('s-pkgs').innerHTML = cfg.pkgs.map((p,i)=>`
+    <div class="row4">
+      <div class="rl">${esc(p.name)}</div>
+      <input type="number" inputmode="decimal" step="5" value="${p.price}" oninput="setCfg('pkgs',${i},'price',this.value)">
+      <input type="number" inputmode="numeric" step="15" value="${p.min}" oninput="setCfg('pkgs',${i},'min',this.value)">
+    </div>`).join('');
+
+  $('s-sizes').innerHTML = cfg.sizes.map((s,i)=>`
+    <div class="row4">
+      <div class="rl">${esc(s.short)}</div>
+      <input type="number" inputmode="decimal" step="5" value="${s.price}" oninput="setCfg('sizes',${i},'price',this.value)">
+      <input type="number" inputmode="numeric" step="15" value="${s.min}" oninput="setCfg('sizes',${i},'min',this.value)">
+    </div>`).join('');
+
+  $('s-addons').innerHTML = cfg.addons.map((a,i)=>`
+    <div class="row4">
+      <div class="rl">${esc(a.name)}</div>
+      <input type="number" inputmode="decimal" step="5" value="${a.price}" oninput="setCfg('addons',${i},'price',this.value)">
+      <input type="number" inputmode="numeric" step="5" value="${a.min}" oninput="setCfg('addons',${i},'min',this.value)">
+    </div>`).join('');
+
+  $('s-cond').innerHTML = cfg.cond.map((c,i)=>`
+    <div class="row4">
+      <div class="rl">${esc(c.name)}</div>
+      <input type="number" inputmode="decimal" step="0.05" value="${c.mult}" oninput="setCfg('cond',${i},'mult',this.value)">
+      <input type="number" inputmode="decimal" step="5" value="${c.fee}" oninput="setCfg('cond',${i},'fee',this.value)">
+    </div>`).join('');
+
+  $('s-towns').innerHTML = cfg.towns.map((t,i)=>`
+    <div class="row4">
+      <div class="rl">${esc(t.id)}</div>
+      <input type="number" inputmode="decimal" step="1" value="${t.miles}" oninput="setCfg('towns',${i},'miles',this.value)">
+      <input type="number" inputmode="numeric" step="5" value="${t.min}" oninput="setCfg('towns',${i},'min',this.value)">
+    </div>`).join('');
+}
+function setCfg(group, i, field, val){
+  cfg[group][i][field] = num(val);
+  saveCfg();
+  // Don't re-render settings — that would yank the cursor out of the field being typed in.
+  if(!$('view-quote').hidden) render();
+}
+const SCALARS = {'s-target':'targetHourly','s-supjob':'supplyPerJob','s-suphr':'supplyPerHr','s-mile':'costPerMile'};
+document.addEventListener('input', e=>{
+  const key = SCALARS[e.target.id];
+  if(!key) return;
+  cfg[key] = num(e.target.value);
+  saveCfg();
+});
+
+/* ---------- Tabs ---------- */
+function showTab(which){
+  $('view-quote').hidden = which !== 'quote';
+  $('view-set').hidden   = which !== 'set';
+  $('tab-quote').classList.toggle('on', which === 'quote');
+  $('tab-set').classList.toggle('on', which === 'set');
+  if(which === 'quote') render(); else renderSettings();
+  window.scrollTo({top:0});
+}
+
+/* ---------- Render everything ---------- */
+function render(){
+  renderVehicle();
+  renderCond();
+  renderAddons();
+  renderTown();
+  renderPlans();
+  renderDetail();
+  renderSaved();
+}
+
+showTab('quote');
+</script>
+</body>
+</html>

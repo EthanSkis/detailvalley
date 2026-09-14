@@ -967,7 +967,22 @@ const HOURS = {
 // (they fall outside the booking window), but tidy them up when you think of it.
 const BLOCKED_DAYS = [
   '2026-08-14',   // Fri — booked
-  '2026-08-15'    // Sat — booked
+  '2026-08-15',   // Sat — booked
+
+  // McCall-Donnelly HS cross country, 2026 season (source: athletic.net).
+  // The whole schedule is listed, not just the Saturdays: weekday meets are
+  // already covered by HOURS having no Mon–Fri entry, but keeping them here
+  // means the block holds even if a weekday is reopened later. Dates already
+  // past are inert — they fall outside the booking window.
+  '2026-08-28',   // Fri — Weiser Invite
+  '2026-09-03',   // Thu — 24th Caldwell Twilight
+  '2026-09-10',   // Thu — SRV League Meet
+  '2026-09-12',   // Sat — Timberlake Invitational, Farragut State Park
+  '2026-09-23',   // Wed — Payette Open
+  '2026-10-02',   // Fri — Cascade Lake Run
+  '2026-10-10',   // Sat — Inland Empire XC Challenge
+  '2026-10-20',   // Tue — SRV 4A District Championship, Eagle Island
+  '2026-10-31'    // Sat — IHSAA State Championships
 ];
 const START_TIMES = ['08:00','09:00','10:00']; // only arrival times offered
 const BUFFER_MIN = 45;          // travel / cleanup gap kept between jobs

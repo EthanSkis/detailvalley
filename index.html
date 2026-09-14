@@ -52,7 +52,7 @@
     { "@type": "AdministrativeArea", "name": "Valley County, Idaho" }
   ],
   "openingHoursSpecification": [
-    { "@type": "OpeningHoursSpecification", "dayOfWeek": "Saturday", "opens": "09:00", "closes": "16:00" }
+    { "@type": "OpeningHoursSpecification", "dayOfWeek": "Saturday", "opens": "08:00", "closes": "18:00" }
   ],
   "sameAs": [
     "https://www.facebook.com/profile.php?id=61590927205017",
@@ -884,7 +884,7 @@
     </div>
     <div>
       <p class="foot-h">Hours</p>
-      <div class="hours-row"><span class="day">Saturday</span><span class="time">9am – 4pm</span></div>
+      <div class="hours-row"><span class="day">Saturday</span><span class="time">8am – 6pm</span></div>
       <div class="hours-row closed"><span class="day">Sun–Fri</span><span class="time">Closed</span></div>
     </div>
   </div>
@@ -954,13 +954,15 @@ const MIN_LEAD_DAYS = 1;             // earliest bookable day, in calendar days 
 const OPEN_FROM = '2026-07-01';      // closed until this date (MT, 'YYYY-MM-DD'); set '' to remove
 const BIZ_PHONE  = '(208) 315-1420';
 // Working hours per weekday (0=Sun … 6=Sat). Omit a day to close it.
-// Posted hours: Saturday only, 9–4. Monday–Friday are deliberately left out so
+// Posted hours: Saturday only, 8–6. Monday–Friday are deliberately left out so
 // nothing can be booked on a weekday; Sunday has always been closed. To reopen a
 // weekday, add it back by number (1=Mon … 5=Fri), e.g. 5:['08:00','18:00'].
-// Jobs may only START at the times in START_TIMES (and must still fit inside
-// working hours); each booking blocks off the time its job actually needs.
+// These are START windows: a job may begin at any START_TIMES entry that falls
+// inside them, and is allowed to run past the closing time rather than being
+// dropped — that's what keeps Showroom bookable on a big rig. Each booking still
+// blocks off the full time its job needs, so nothing double-books behind it.
 const HOURS = {
-  6:['09:00','16:00']
+  6:['08:00','18:00']
 };
 // Individual days off (MT, 'YYYY-MM-DD') — already booked up, out of town, holiday.
 // A day listed here is closed no matter what HOURS says. Past dates are harmless
@@ -1054,7 +1056,11 @@ function candidateStarts(jobMin){
     for(const st of START_TIMES){
       const [sH,sM] = st.split(':').map(Number);
       const t = sH*60 + sM;
-      if(t < openMin || t + jobMin > closeMin) continue;
+      // HOURS gates when a job may START, not when it has to be finished. A long
+      // job (Showroom on a big rig) is allowed to run past closing rather than
+      // being dropped from the calendar — the customer still sees the "ends ~"
+      // estimate on the slot, so nobody is surprised by a late finish.
+      if(t < openMin || t > closeMin) continue;
       const instant = mtToInstant(y,m,d,sH,sM);
       if(instant.getTime() < earliest) continue;
       const end = new Date(instant.getTime() + jobMin*60000);

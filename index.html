@@ -386,6 +386,10 @@
   .bk-o-price{flex:none;font-family:var(--f-head);font-weight:600;font-size:1.15rem;white-space:nowrap}
   .bk-badge{display:inline-block;background:var(--peach);font-size:.66rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;
     padding:3px 7px;border-radius:999px;vertical-align:2px;margin-left:4px;white-space:nowrap}
+  .bk-soil .bk-o-meta{font-size:.82rem;line-height:1.3}
+  .bk-body[data-step="3"] .bk-opt{min-height:50px;padding:7px 14px;margin-bottom:7px}
+  /* Review: a long list of extras stays to two lines */
+  .bk-line .clamp{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden}
   .bk-inc{background:#e9edf1;border-color:transparent;color:var(--mute);cursor:default}
   .bk-inc .bk-check{background:var(--mute);border-color:var(--mute)}
   .bk-inc .bk-o-price{font-family:var(--f-body);font-size:.84rem}
@@ -566,7 +570,9 @@
     .cal-times{margin-top:8px}
     .pick-h{margin-bottom:5px;font-size:.94rem}
     .bk-arr{padding:9px 14px}
-    .bk-arr .e{display:none}
+    .bk-arr .e,.bk-arr .l{display:none}
+    .bk-body[data-step="3"] .bk-opt{min-height:44px;padding:4px 12px;margin-bottom:5px}
+    .bk-body[data-step="3"] .bk-title{margin-bottom:8px}
     .bk-card.tight .bk-line{padding:6px 0}
     .bk-tip,.bk-tick{display:none}
     .util-note,.form-err{padding:7px 10px;font-size:.86rem;margin-top:6px}
@@ -1063,6 +1069,12 @@ const PACKAGES = DV_PRICING.packages, ADDONS = DV_PRICING.addons, SIZES = DV_PRI
 // Minutes per job — drives how much time a booking blocks off.
 const minsOf = list => Object.fromEntries(list.map(x=>[x.id, x.min]));
 const PKG_MIN = minsOf(PACKAGES), SIZE_MIN = minsOf(SIZES), ADDON_MIN = minsOf(ADDONS);
+// Condition surcharge the customer ticks on the extras step (see dv-pricing.js).
+const SOILED = DV_PRICING.soiled;
+// Finish estimates are shown to the nearest quarter hour ("ends ~3:15 PM", not 3:09).
+function quarter(d){ return new Date(Math.round(d.getTime()/900000)*900000); }
+function soiledOffered(){ return !!state.pkg && !(SOILED.excludes||[]).includes(state.pkg); }
+function soiledOn(){ return !!state.soiled && soiledOffered(); }
 const DOW = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
 
 /* Minutes SLOT_TZ is offset from UTC at a given instant (handles DST). */
@@ -1106,7 +1118,9 @@ function earliestBookable(now){
 /* How long the chosen job runs, in minutes (package + vehicle size + add-ons). */
 function jobMinutes(){
   const addons = state.addons.reduce((s,a)=> s + (pkgIncludes(a) ? 0 : (ADDON_MIN[a]||0)), 0);
-  return (PKG_MIN[state.pkg] || 180) + (SIZE_MIN[state.size] || 0) + addons;
+  const base = (PKG_MIN[state.pkg] || 180) + (SIZE_MIN[state.size] || 0) + addons;
+  // A heavily soiled interior stretches the whole job, not just one task.
+  return soiledOn() ? Math.round(base * SOILED.mult) : base;
 }
 
 /* Every allowed start time (START_TIMES) that fits a jobMin-minute job inside
@@ -1135,7 +1149,7 @@ function candidateStarts(jobMin){
       if(instant.getTime() < earliest) continue;
       const end = new Date(instant.getTime() + jobMin*60000);
       out.push({key:instant.getTime(), iso:instant.toISOString(), instant,
-                label:`ends ~${fmtTime(end)}`});
+                label:`ends ~${fmtTime(quarter(end))}`});
     }
   }
   return out;
@@ -1191,7 +1205,7 @@ const SIZE_ICON = {
   oversize:'<svg viewBox="0 0 56 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.500 18H5.500a2 2 0 0 1-2-2v-5.500a1 1 0 0 1 1-1H24V5.500a2 2 0 0 1 2-2h7.800a5 5 0 0 1 3.900 1.900L41 10l8.300 1.300a4 4 0 0 1 3.200 3.900V16a2 2 0 0 1-2 2h-4M18.500 18h19M24 9.500V14M28 10h12.500"/><circle cx="14" cy="18" r="4"/><circle cx="42" cy="18" r="4"/></svg>'
 };
 
-function freshState(){ return {step:1, pkg:null, size:null, addons:[], slot:null, calDate:null, name:'', phone:'', address:'', town:'', utilities:null, hp:false}; }
+function freshState(){ return {step:1, pkg:null, size:null, addons:[], soiled:false, slot:null, calDate:null, name:'', phone:'', address:'', town:'', utilities:null, hp:false}; }
 let state = freshState();
 let slotCache = null;
 let submitting = false;
@@ -1245,7 +1259,16 @@ function refreshMoney(){
   }
   const as = document.getElementById('bkAside'); if(as) as.innerHTML = asideInner();
 }
-function dropUnusableAddons(){ state.addons = state.addons.filter(id=>!pkgIncludes(id) && !pkgExcludes(id)); }
+function dropUnusableAddons(){
+  state.addons = state.addons.filter(id=>!pkgIncludes(id) && !pkgExcludes(id));
+  if(!soiledOffered()) state.soiled = false;
+}
+function toggleSoiled(){
+  state.soiled = !state.soiled;
+  const el = document.getElementById('ad-soiled');
+  if(el){ el.classList.toggle('sel', state.soiled); el.setAttribute('aria-pressed', state.soiled); }
+  refreshMoney();
+}
 function pickPkg(id){ state.pkg=id; dropUnusableAddons(); markSel('pkg',id); enableGo(true); refreshMoney(); }
 function pickSize(id){ state.size=id; markSel('size',id); enableGo(true); refreshMoney(); }
 function utilNoteText(v){
@@ -1288,6 +1311,7 @@ function total(){
   let t = PACKAGES.find(p=>p.id===state.pkg)?.price || 0;
   t += SIZES.find(s=>s.id===state.size)?.price || 0;
   state.addons.forEach(a=>{ if(!pkgIncludes(a) && !pkgExcludes(a)) t += ADDONS.find(x=>x.id===a).price; });
+  if(soiledOn()) t += SOILED.price;
   return t;
 }
 // Keep whatever is typed on the details step when the customer steps away from it.
@@ -1323,6 +1347,7 @@ function asideInner(){
   h += `<div class="bk-a-line"><span>${p.name}</span><b>$${p.price}</b></div>`;
   if(sz) h += `<div class="bk-a-line"><span>${sz.name}</span>${sz.price?`<b>+$${sz.price}</b>`:`<span class="m">No charge</span>`}</div>`;
   h += state.addons.map(a=>{ const x=ADDONS.find(z=>z.id===a); return `<div class="bk-a-line"><span>${x.name}</span><b>+$${x.price}</b></div>`; }).join('');
+  if(soiledOn()) h += `<div class="bk-a-line"><span>${SOILED.name}</span><b>+$${SOILED.price}</b></div>`;
   if(state.slot) h += `<div class="bk-a-line"><span>${fmtDay(state.slot.instant)} · ${fmtTime(state.slot.instant)}</span><span class="m">${state.slot.label}</span></div>`;
   h += `<div class="bk-a-total"><span>Total</span><b>$${total()}</b></div>`;
   return h + asideNotes();
@@ -1348,7 +1373,7 @@ function sheet(n, body, foot){
   inner.classList.toggle('done', !n);
   inner.innerHTML = `<div class="bk-main">`
     + (n ? topBar(n, dir==='fwd') : `<div class="bk-done-top"><button class="bk-ic" onclick="closeBooking()" aria-label="Close booking">${IC_CLOSE}</button></div>`)
-    + `<div class="bk-body slide-${dir}" id="sheetBody">${body}</div>${foot||''}</div>`
+    + `<div class="bk-body slide-${dir}" id="sheetBody" data-step="${state.step}">${body}</div>${foot||''}</div>`
     + (n ? `<aside class="bk-aside" id="bkAside" aria-label="Your booking">${asideInner()}</aside>` : '');
 }
 function footNext(label, enabled, action, totLabel){
@@ -1360,7 +1385,7 @@ function shortName(a){ return a.name.split(' — ')[0]; }
 function extrasLines(){
   const xs = state.addons.map(a=>ADDONS.find(z=>z.id===a));
   if(xs.length < 3) return xs.map(x=>`<div class="bk-line"><span>${shortName(x)}</span><b>+$${x.price}</b></div>`).join('');
-  return `<div class="bk-line"><span>${xs.length} extras: ${xs.map(shortName).join(', ').toLowerCase()}</span><b>+$${xs.reduce((t,x)=>t+x.price,0)}</b></div>`;
+  return `<div class="bk-line"><span class="clamp">${xs.length} extras: ${xs.map(shortName).join(', ').toLowerCase()}</span><b>+$${xs.reduce((t,x)=>t+x.price,0)}</b></div>`;
 }
 function jobEnd(){ return new Date(state.slot.instant.getTime() + jobMinutes()*60000); }
 /* Downloadable calendar event for the success screen (opens iOS/Google Calendar). */
@@ -1413,6 +1438,13 @@ function render(){
     sheet(3, `
       <h2 class="bk-title">Want to add anything?</h2>
       <p class="bk-intro">Optional. Tap to add, or just keep going.</p>
+      ${soiledOffered() ? `<button class="bk-opt bk-soil ${state.soiled?'sel':''}" id="ad-soiled"
+            aria-pressed="${!!state.soiled}" onclick="toggleSoiled()">
+            <span class="bk-check" aria-hidden="true"></span>
+            <span class="bk-o-tx"><span class="bk-o-name">${SOILED.name}</span>
+            <span class="bk-o-meta">${SOILED.note}</span></span>
+            <span class="bk-o-price">+$${SOILED.price}</span>
+          </button>` : ''}
       ${ADDONS.filter(a=>!pkgExcludes(a.id)).map(a=> pkgIncludes(a.id)
         ? `<div class="bk-opt bk-inc">
             <span class="bk-check" aria-hidden="true"></span>
@@ -1469,13 +1501,14 @@ function render(){
       <h2 class="bk-title">Does this look right?</h2>
       <div class="bk-arr">
         <div><div class="l">Arriving</div><div class="w">${fmtDay(state.slot.instant)} · ${fmtTime(state.slot.instant)}</div>
-        <div class="e">Done around ${fmtTime(jobEnd())}</div></div>
+        <div class="e">Done around ${fmtTime(quarter(jobEnd()))}</div></div>
         <button class="bk-change" onclick="go(4)">Change</button>
       </div>
       <div class="bk-card tight bk-items">
         <div class="bk-line"><span>${p.name}</span><b>$${p.price}</b></div>
         ${sz ? `<div class="bk-line"><span>${sz.name}</span><b>+$${sz.price}</b></div>` : ''}
         ${extrasLines()}
+        ${soiledOn() ? `<div class="bk-line"><span>${SOILED.name}</span><b>+$${SOILED.price}</b></div>` : ''}
       </div>
       <div class="bk-card tight"><div class="bk-who">
         <div><div class="n">${esc(state.name)} · ${esc(state.phone)}</div>
@@ -1492,7 +1525,7 @@ function render(){
   else if(state.step===7){
     const p = PACKAGES.find(x=>x.id===state.pkg);
     const sz = SIZES.find(x=>x.id===state.size);
-    const svc = [p.name, sz && sz.name].concat(state.addons.map(a=>shortName(ADDONS.find(z=>z.id===a)))).filter(Boolean).join(', ');
+    const svc = [p.name, sz && sz.name].concat(state.addons.map(a=>shortName(ADDONS.find(z=>z.id===a))), soiledOn() && SOILED.name).filter(Boolean).join(', ');
     sheet(0, `
       <div class="bk-tick" aria-hidden="true"></div>
       <h2 class="bk-done-h">You're booked in.</h2>
@@ -1686,7 +1719,7 @@ async function submitBooking(){
   const { error } = await sb.from('bookings').insert({
     slot_start: state.slot.iso,
     package: PACKAGES.find(p=>p.id===state.pkg).name + (sz ? ` · ${sz.name}` : '') + (state.utilities!=='yes' ? ` · ⚠ Water/power: ${state.utilities==='no'?'NOT available':'unsure'}` : ''),
-    addons: state.addons.map(a=>ADDONS.find(x=>x.id===a).name),
+    addons: state.addons.map(a=>ADDONS.find(x=>x.id===a).name).concat(soiledOn() ? [SOILED.name] : []),
     customer_name: state.name,
     customer_phone: state.phone,
     address: state.address,

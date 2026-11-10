@@ -29,5 +29,13 @@ window.DV_PRICING = {
     {id:'engine',   name:'Engine bay wipe-down',               price:25, min:20},
     {id:'intglass', name:'Interior glass refresh',             price:15, min:10},
     {id:'wax',      name:'Extra wax coat — longer protection', price:30, min:20}
-  ]
+  ],
+  /* Condition surcharge: an interior that is well past normal dirty. Customers
+     tick it themselves when booking; it is confirmed when we see the vehicle.
+     price is added to the total. mult stretches the whole job's time (it is not
+     shown to customers — it only makes the finish estimate and the calendar
+     block honest). Not offered on packages listed in `excludes`.
+     The quoting tool's "Rough" condition uses these same two numbers. */
+  soiled: {name:'Heavily soiled interior', note:'Stains, spills or smoke. Confirmed on arrival.',
+           price:45, mult:1.3, excludes:['maintenance']}
 };

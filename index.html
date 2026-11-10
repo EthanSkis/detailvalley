@@ -366,6 +366,10 @@
   .bk-foot{flex:none;background:var(--surface);border-top:1px solid var(--rule);
     padding:14px 20px calc(16px + env(safe-area-inset-bottom));display:flex;align-items:center;gap:16px}
   .bk-foot.col{flex-direction:column;align-items:stretch;gap:10px}
+  .bk-foot.keep-tot .bk-tot span{white-space:nowrap}
+  .bk-foot.keep-tot .bk-go{padding:0 22px}
+  .bk-foot.pair{gap:10px}
+  .bk-foot.pair>*{flex:1 1 0;min-width:0;padding:0 10px}
   .bk-tot{flex:1;min-width:0}
   .bk-tot span{display:block;font-size:.75rem;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--mute)}
   .bk-tot b{display:block;font-family:var(--f-head);font-weight:600;font-size:1.5rem;line-height:1.1;letter-spacing:-.02em}
@@ -383,19 +387,19 @@
   /* Day & time */
   .slot-status{color:var(--mute);padding:10px 0 14px;text-align:center}
   .slot-status a{font-weight:600}
-  .cal{background:var(--surface);border:1px solid var(--rule);border-radius:12px;padding:10px 12px 12px}
+  .pick-h{font-family:var(--f-head);font-weight:600;font-size:1.02rem;letter-spacing:-.015em;margin-bottom:8px}
+  .cal{--cal-row:38px;background:var(--surface);border:1px solid var(--rule);border-radius:12px;padding:4px 10px 10px}
   .cal-head{display:flex;align-items:center;justify-content:space-between}
-  .cal-title{font-family:var(--f-head);font-weight:600;font-size:1.06rem;letter-spacing:-.015em}
+  .cal-title{font-family:var(--f-head);font-weight:600;font-size:1.02rem;letter-spacing:-.015em}
   .cal-nav:disabled{color:#b4c0cb;cursor:default;background:transparent}
-  .cal-dow{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));padding:2px 0 4px}
-  .cal-dow span{text-align:center;font-size:.75rem;font-weight:600;color:var(--mute)}
+  .cal-dow{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));padding-bottom:2px}
+  .cal-dow span{text-align:center;font-size:.72rem;font-weight:600;color:var(--mute)}
   .cal-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:2px 3px}
-  .cal-cell{height:44px;border:none;background:transparent;border-radius:10px;font-family:var(--f-body);font-size:1rem;color:#8497a8;
+  .cal-cell{height:var(--cal-row);border:none;background:transparent;border-radius:9px;font-family:var(--f-body);font-size:.98rem;color:#8497a8;
     display:flex;align-items:center;justify-content:center;padding:0}
   .cal-cell.avail{border:1.5px solid var(--text);background:var(--surface);color:var(--text);font-weight:600;cursor:pointer}
   .cal-cell.sel{border:none;background:var(--text);color:#fff;font-weight:600;cursor:pointer}
-  .cal-times{margin-top:18px}
-  .cal-times-h{font-family:var(--f-head);font-weight:600;font-size:1.06rem;letter-spacing:-.015em;margin-bottom:10px}
+  .cal-times{margin-top:14px}
   .bk-times{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
   .time-btn{background:var(--surface);color:var(--text);border:1.5px solid #cbd4dc;border-radius:10px;padding:10px 4px;min-height:62px;
     cursor:pointer;font-family:var(--f-body);text-align:center;transition:border-color .12s,box-shadow .12s}
@@ -410,7 +414,10 @@
     font-size:1rem;font-family:inherit;color:var(--text);background:var(--surface);transition:border-color .12s,box-shadow .12s}
   .field input:focus,.field select:focus{outline:none;border-color:var(--text);box-shadow:0 0 0 3px rgba(11,42,69,.15)}
   .field .hint{font-size:.82rem;color:var(--mute);margin-top:6px}
-  .bk-row2{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr);gap:10px}
+  .bk-row2{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);gap:10px}
+  .bk-row2.even{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .field label,.field legend{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .opt-note{font-weight:400;color:var(--mute)}
   fieldset.field{border:none}
   .util-grp{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
   .util-opt{height:50px;border:1.5px solid #cbd4dc;border-radius:10px;background:var(--surface);font-family:var(--f-body);
@@ -429,6 +436,8 @@
   .bk-arr .w{font-family:var(--f-head);font-weight:600;font-size:1.3rem;line-height:1.2;letter-spacing:-.02em}
   .bk-arr .e{font-size:.88rem;color:var(--on-navy)}
   .bk-card{background:var(--surface);border:1px solid var(--rule);border-radius:12px;padding:4px 18px;margin-bottom:14px}
+  .bk-card.tight{padding:2px 16px;margin-bottom:10px}
+  .bk-card.tight .bk-line{padding:8px 0;font-size:.96rem}
   .bk-line{display:flex;justify-content:space-between;align-items:baseline;gap:16px;padding:12px 0;border-bottom:1px solid #e6ebef}
   .bk-line:last-child{border-bottom:none}
   .bk-line b{font-weight:600;white-space:nowrap}
@@ -464,16 +473,71 @@
 
   @media(min-width:860px){
     .modal-bg{align-items:center;padding:24px}
-    .modal{max-width:980px;height:min(700px,calc(100vh - 48px));height:min(700px,calc(100dvh - 48px));border-radius:16px;
+    .modal{max-width:980px;height:min(700px,calc(100vh - 16px));height:min(700px,calc(100dvh - 16px));border-radius:16px;
       box-shadow:0 40px 90px rgba(6,20,34,.45)}
-    .modal.done{max-width:520px;height:auto;max-height:calc(100vh - 48px);max-height:calc(100dvh - 48px)}
+    .modal.done{max-width:520px;height:auto;max-height:calc(100vh - 16px);max-height:calc(100dvh - 16px)}
     .bk-aside{display:flex}
     .bk-head{padding:12px 24px 16px}
     .bk-prog{padding:6px 0 0}
     .bk-body{padding:28px 32px 24px}
     .bk-foot{padding:16px 32px;justify-content:flex-end}
-    .bk-foot:not(.col) .bk-tot{display:none}
+    .bk-foot:not(.col):not(.keep-tot) .bk-tot{display:none}
+    .bk-items{display:none}
     .modal.done .bk-body{padding-top:8px}
+  }
+
+  /* Phones: every step fits one screen with no scrolling. Rows get tighter as
+     the visible height shrinks (browser toolbars, small phones, short laptops). */
+  @media(max-width:859px),(max-height:760px){
+    .bk-head{padding:4px 8px 10px}
+    .bk-body{padding:18px 20px 12px}
+    .bk-title{font-size:1.5rem;margin-bottom:6px}
+    .bk-intro{margin-bottom:12px;font-size:.94rem}
+    .bk-title+.bk-opt,.bk-title+.bk-row2,.bk-title+#slotArea{margin-top:14px}
+    .bk-opt{margin-bottom:8px;padding:11px 14px;min-height:56px}
+    .bk-foot{padding:10px 20px calc(12px + env(safe-area-inset-bottom))}
+    .field{margin-bottom:10px}
+    .bk-arr{margin:12px 0 10px;padding:12px 16px}
+    .bk-arr .w{font-size:1.15rem}
+    .bk-tick{width:44px;height:44px;margin-bottom:10px}
+    .bk-tick::after{left:16px;top:9px;width:10px;height:19px;border-width:3px}
+    .bk-done-h{font-size:1.6rem}
+    .bk-done-p{font-size:.98rem;margin:6px 0 12px}
+    .modal.done .bk-card .bk-line{padding:9px 0;font-size:.96rem}
+    .bk-tip{padding:10px 14px;font-size:.9rem}
+  }
+  @media(max-height:620px),(min-width:860px) and (max-height:700px){
+    .bk-body{padding-top:12px}
+    .bk-title{font-size:1.3rem}
+    .bk-intro{display:none}
+    .bk-opt{margin-bottom:6px;padding:7px 12px;min-height:48px}
+    .bk-o-meta{font-size:.82rem}
+    .bk-veh,.bk-veh svg{width:42px}
+    .bk-go,.bk-alt{height:48px}
+    .bk-tot b{font-size:1.3rem}
+    .field input,.field select,.util-opt{height:46px}
+    .field{margin-bottom:8px}
+    .cal{--cal-row:30px;padding-bottom:6px}
+    .cal-head .bk-ic{height:36px}
+    .time-btn{min-height:54px;padding:6px 4px}
+    .cal-times{margin-top:8px}
+    .pick-h{margin-bottom:5px;font-size:.94rem}
+    .bk-arr{padding:9px 14px}
+    .bk-arr .e{display:none}
+    .bk-card.tight .bk-line{padding:6px 0}
+    .bk-tip,.bk-tick{display:none}
+    .util-note,.form-err{padding:7px 10px;font-size:.86rem;margin-top:6px}
+    .form-err{margin:0}
+    .field label,.field legend{font-size:.88rem;margin-bottom:4px}
+    .bk-arr{margin:8px 0}
+    .bk-arr .w{font-size:1.05rem}
+    .bk-card.tight{margin-bottom:8px}
+    .bk-card.tight .bk-line{padding:5px 0;font-size:.92rem}
+    .bk-who{padding:7px 0;font-size:.88rem}
+    .bk-done-h{font-size:1.4rem}
+    .bk-done-p{margin:4px 0 10px;font-size:.92rem}
+    .modal.done .bk-card .bk-line{padding:6px 0;font-size:.92rem}
+    .modal-bg{padding-top:8px;padding-bottom:8px}
   }
 
   /* ---------- PACKAGE CHOOSE BUTTON ---------- */
@@ -1057,10 +1121,10 @@ async function availableSlots(){
 }
 
 const PACKAGES = [
-  {id:'maintenance', name:'Maintenance Wash', price:85, meta:'Exterior wash, wheels, tires, glass · ~1½–2 hrs'},
-  {id:'interior',    name:'Interior Detail', price:185, meta:'Inside only — vacuum, shampoo, surfaces & glass · ~3½–4 hrs', includes:['intglass'], excludes:['wax']},
-  {id:'full',        name:'Full Detail', price:295, meta:'Adds full interior clean & shampoo · ~6 hrs', includes:['intglass']},
-  {id:'showroom',    name:'Showroom', price:360, meta:'Adds clay bar & wax protection · ~6½–7½ hrs', includes:['intglass']},
+  {id:'maintenance', name:'Maintenance Wash', price:85, meta:'Exterior wash · ~1½–2 hrs'},
+  {id:'interior',    name:'Interior Detail', price:185, meta:'Inside only · ~3½–4 hrs', includes:['intglass'], excludes:['wax']},
+  {id:'full',        name:'Full Detail', price:295, meta:'Inside & out · ~6 hrs', includes:['intglass']},
+  {id:'showroom',    name:'Showroom', price:360, meta:'Adds clay bar & wax · ~6½–7½ hrs', includes:['intglass']},
 ];
 const ADDONS = [
   {id:'pet', name:'Pet hair removal', price:40},
@@ -1129,8 +1193,8 @@ function dropUnusableAddons(){ state.addons = state.addons.filter(id=>!pkgInclud
 function pickPkg(id){ state.pkg=id; dropUnusableAddons(); markSel('pkg',id); enableGo(true); refreshMoney(); }
 function pickSize(id){ state.size=id; markSel('size',id); enableGo(true); refreshMoney(); }
 function utilNoteText(v){
-  if(v==='no') return `<b>We can't complete the detail without this.</b> We bring all our own gear, but we need access to an outdoor water tap <b>and</b> a power outlet where the car will be parked. Text us at ${BIZ_PHONE} and we'll sort out a spot that works.`;
-  if(v==='unsure') return `No worries — just double-check before your appointment. We do need an outdoor water tap and a power outlet on site to get the job done.`;
+  if(v==='no') return `<b>We need both to do the job.</b> Text us at ${BIZ_PHONE} and we'll sort out a spot that works.`;
+  if(v==='unsure') return `No worries. Just double-check before we come: we need both on site.`;
   return '';
 }
 function pickUtil(v){
@@ -1235,13 +1299,14 @@ function footNext(label, enabled, action, totLabel){
   return `<div class="bk-foot"><div class="bk-tot"><span>${totLabel||'Total so far'}</span><b id="runTotal">$${total()}</b></div>`
     + `<button class="bk-go" id="bkGo" onclick="${action}" ${enabled?'':'disabled'}>${label}</button></div>`;
 }
-function jobEnd(){ return new Date(state.slot.instant.getTime() + jobMinutes()*60000); }
-function openDaysText(){
-  const names = ['Sundays','Mondays','Tuesdays','Wednesdays','Thursdays','Fridays','Saturdays'];
-  const days = Object.keys(HOURS).map(Number).sort();
-  return (days.length===1 ? `We detail on ${names[days[0]]}. ` : '') + 'Open days are outlined.';
+// Add-on name without its trailing blurb, so each row stays on one line.
+function shortName(a){ return a.name.split(' — ')[0]; }
+function extrasLines(){
+  const xs = state.addons.map(a=>ADDONS.find(z=>z.id===a));
+  if(xs.length < 3) return xs.map(x=>`<div class="bk-line"><span>${shortName(x)}</span><b>+$${x.price}</b></div>`).join('');
+  return `<div class="bk-line"><span>${xs.length} extras: ${xs.map(shortName).join(', ').toLowerCase()}</span><b>+$${xs.reduce((t,x)=>t+x.price,0)}</b></div>`;
 }
-
+function jobEnd(){ return new Date(state.slot.instant.getTime() + jobMinutes()*60000); }
 /* Downloadable calendar event for the success screen (opens iOS/Google Calendar). */
 function icsHref(){
   const st = state.slot.instant;
@@ -1272,7 +1337,6 @@ function render(){
           <span class="bk-o-meta">${p.meta}</span></span>
           <span class="bk-o-price">$${p.price}</span>
         </button>`).join('')}
-      <p class="bk-note">No deposit. You pay after the work is done.</p>
     `, footNext('Continue', !!state.pkg, 'go(2)'));
   }
   else if(state.step===2){
@@ -1296,13 +1360,13 @@ function render(){
       ${ADDONS.filter(a=>!pkgExcludes(a.id)).map(a=> pkgIncludes(a.id)
         ? `<div class="bk-opt bk-inc">
             <span class="bk-check" aria-hidden="true"></span>
-            <span class="bk-o-tx"><span class="bk-o-name">${a.name}</span></span>
+            <span class="bk-o-tx"><span class="bk-o-name">${shortName(a)}</span></span>
             <span class="bk-o-price">Included</span>
           </div>`
         : `<button class="bk-opt ${state.addons.includes(a.id)?'sel':''}" id="ad-${a.id}"
             aria-pressed="${state.addons.includes(a.id)}" onclick="toggleAddon('${a.id}')">
             <span class="bk-check" aria-hidden="true"></span>
-            <span class="bk-o-tx"><span class="bk-o-name">${a.name}</span></span>
+            <span class="bk-o-tx"><span class="bk-o-name">${shortName(a)}</span></span>
             <span class="bk-o-price">+$${a.price}</span>
           </button>`).join('')}
     `, footNext('Continue', true, 'go(4)'));
@@ -1310,18 +1374,18 @@ function render(){
   else if(state.step===4){
     sheet(4, `
       <h2 class="bk-title">When works for you?</h2>
-      <p class="bk-intro">${openDaysText()}</p>
       <div id="slotArea"><p class="slot-status">Loading available days…</p></div>
     `, footNext('Continue', !!state.slot, 'go(5)'));
   }
   else if(state.step===5){
     sheet(5, `
       <h2 class="bk-title">Your details</h2>
-      <div class="field"><label for="f-name">Your name</label>
-        <input id="f-name" value="${esc(state.name)}" placeholder="Jordan Smith" autocomplete="name" autocapitalize="words" enterkeyhint="next"></div>
-      <div class="field"><label for="f-phone">Phone number</label>
-        <input id="f-phone" type="tel" inputmode="tel" value="${esc(state.phone)}" placeholder="(208) 555-0123" autocomplete="tel" oninput="onPhoneInput(this)" enterkeyhint="next">
-        <p class="hint">We'll text you here to confirm.</p></div>
+      <div class="bk-row2 even">
+        <div class="field"><label for="f-name">Your name</label>
+          <input id="f-name" value="${esc(state.name)}" placeholder="Jordan Smith" autocomplete="name" autocapitalize="words" enterkeyhint="next"></div>
+        <div class="field"><label for="f-phone">Phone <span class="opt-note">(we'll text you)</span></label>
+          <input id="f-phone" type="tel" inputmode="tel" value="${esc(state.phone)}" placeholder="(208) 555-0123" autocomplete="tel" oninput="onPhoneInput(this)" enterkeyhint="next"></div>
+      </div>
       <div class="bk-row2">
         <div class="field"><label for="f-address">Where should we come?</label>
           <input id="f-address" value="${esc(state.address)}" placeholder="123 Main St" autocomplete="street-address" autocapitalize="words" enterkeyhint="next"></div>
@@ -1330,7 +1394,7 @@ function render(){
           ${TOWNS.map(t=>`<option value="${t}" ${state.town===t?'selected':''}>${t}</option>`).join('')}
         </select></div>
       </div>
-      <fieldset class="field"><legend>Is there an outdoor water tap &amp; power outlet we can use?</legend>
+      <fieldset class="field"><legend>Outdoor water tap &amp; power outlet nearby?</legend>
         <div class="util-grp" id="utilGrp">
           <button type="button" class="util-opt ${state.utilities==='yes'?'sel':''}" data-v="yes" aria-pressed="${state.utilities==='yes'}" onclick="pickUtil('yes')">Yes</button>
           <button type="button" class="util-opt ${state.utilities==='no'?'sel':''}" data-v="no" aria-pressed="${state.utilities==='no'}" onclick="pickUtil('no')">No</button>
@@ -1352,28 +1416,27 @@ function render(){
         <div class="e">Done around ${fmtTime(jobEnd())}</div></div>
         <button class="bk-change" onclick="go(4)">Change</button>
       </div>
-      <div class="bk-card">
+      <div class="bk-card tight bk-items">
         <div class="bk-line"><span>${p.name}</span><b>$${p.price}</b></div>
         ${sz ? `<div class="bk-line"><span>${sz.name}</span><b>+$${sz.price}</b></div>` : ''}
-        ${state.addons.map(a=>{const x=ADDONS.find(z=>z.id===a);return `<div class="bk-line"><span>${x.name}</span><b>+$${x.price}</b></div>`}).join('')}
-        <div class="bk-line total"><span>Total, due after the job</span><b>$${total()}</b></div>
+        ${extrasLines()}
       </div>
-      <div class="bk-card"><div class="bk-who">
+      <div class="bk-card tight"><div class="bk-who">
         <div><div class="n">${esc(state.name)} · ${esc(state.phone)}</div>
         <div class="s">${esc(state.address)}, ${esc(state.town)}</div>
-        <div class="s ${state.utilities==='yes'?'':'warn'}">${state.utilities==='yes'?'Water tap &amp; power outlet on site':(state.utilities==='no'?'⚠ No water tap or power outlet on site':'Water tap &amp; power outlet: not sure yet')}</div></div>
+        ${state.utilities==='yes'?'':`<div class="s warn">${state.utilities==='no'?'⚠ No water tap or power outlet on site':'Water &amp; power: not sure yet'}</div>`}</div>
         <button class="bk-change" onclick="go(5)">Change</button>
       </div></div>
       <p id="confirmErr" class="form-err" hidden></p>
-    `, `<div class="bk-foot col">
+    `, `<div class="bk-foot keep-tot">
+      <div class="bk-tot"><span>Pay after the job</span><b>$${total()}</b></div>
       <button class="bk-go" id="confirmBtn" onclick="submitBooking()">Confirm booking</button>
-      <p class="foot-note">No card needed. Pay after the job's done.</p>
     </div>`);
   }
   else if(state.step===7){
     const p = PACKAGES.find(x=>x.id===state.pkg);
     const sz = SIZES.find(x=>x.id===state.size);
-    const svc = [p.name, sz && sz.name].concat(state.addons.map(a=>ADDONS.find(z=>z.id===a).name)).filter(Boolean).join(', ');
+    const svc = [p.name, sz && sz.name].concat(state.addons.map(a=>shortName(ADDONS.find(z=>z.id===a)))).filter(Boolean).join(', ');
     sheet(0, `
       <div class="bk-tick" aria-hidden="true"></div>
       <h2 class="bk-done-h">You're booked in.</h2>
@@ -1385,19 +1448,21 @@ function render(){
         <div class="bk-line"><span class="k">Total due after</span><span class="v">$${total()}</span></div>
       </div>
       <p class="bk-tip"><b>Before we arrive:</b> park near the water tap and outlet, and clear out anything you want kept.</p>
-    `, `<div class="bk-foot col">
+    `, `<div class="bk-foot pair">
       <a class="bk-go navy" download="detail-valley-booking.ics" href="${icsHref()}">Add to calendar</a>
       <button class="bk-alt" onclick="closeBooking()">Done</button>
     </div>`);
   }
 }
 
-/* ---------- Calendar booking ---------- */
+/* ---------- Day & time ---------- */
+/* A compact month grid with the arrival times right under it. The grid's row
+   height comes from CSS so the whole step still fits one phone screen. */
 const CAL_MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
 const CAL_DOW = ['Su','Mo','Tu','We','Th','Fr','Sa'];
-let slotsByDate = {};   // 'y-m-d' -> [slot,…]
 let calMonths = [];     // [{y,m}] months that have availability
 let calIdx = 0;
+let slotsByDate = {};   // 'y-m-d' -> [slot,…]
 function dateKey(instant){ const {y,m,d} = mtDateParts(instant); return y+'-'+m+'-'+d; }
 
 async function loadSlots(){
@@ -1425,10 +1490,7 @@ async function loadSlots(){
   calMonths = Object.keys(monthSet).map(Number).sort((a,b)=>a-b)
     .map(n=>({y:Math.floor(n/12), m:(n%12)+1}));
   // Forget a previously chosen day/time if it just got booked out (or no longer fits the job).
-  if(state.slot){
-    const fresh = slots.find(s=>s.key===state.slot.key);
-    state.slot = fresh || null;
-  }
+  if(state.slot) state.slot = slots.find(s=>s.key===state.slot.key) || null;
   if(state.calDate && !slotsByDate[state.calDate]) state.calDate = null;
   // Start on the first open day so its arrival times are showing straight away.
   if(!state.calDate) state.calDate = dateKey(slots[0].instant);
@@ -1456,13 +1518,14 @@ function drawCalendar(){
       ? `<button class="cal-cell ${sel?'sel':'avail'}" onclick="pickDate('${k}')" aria-pressed="${sel}" aria-label="${aria}">${d}</button>`
       : `<div class="cal-cell" aria-label="${aria}">${d}</div>`;
   }
+  const chev = d => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="${d}"/></svg>`;
 
   area.innerHTML = `
     <div class="cal">
       <div class="cal-head">
-        <button class="bk-ic cal-nav" onclick="calMove(-1)" ${calIdx<=0?'disabled':''} aria-label="Previous month"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button>
+        <button class="bk-ic cal-nav" onclick="calMove(-1)" ${calIdx<=0?'disabled':''} aria-label="Previous month">${chev('M15 5l-7 7 7 7')}</button>
         <div class="cal-title">${CAL_MONTHS[cur.m-1]} ${cur.y}</div>
-        <button class="bk-ic cal-nav" onclick="calMove(1)" ${calIdx>=calMonths.length-1?'disabled':''} aria-label="Next month"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg></button>
+        <button class="bk-ic cal-nav" onclick="calMove(1)" ${calIdx>=calMonths.length-1?'disabled':''} aria-label="Next month">${chev('M9 5l7 7-7 7')}</button>
       </div>
       <div class="cal-dow">${CAL_DOW.map(x=>`<span>${x}</span>`).join('')}</div>
       <div class="cal-grid">${cells}</div>
@@ -1480,8 +1543,6 @@ function pickDate(k){
   // A time picked on another day no longer applies.
   if(state.slot && dateKey(state.slot.instant)!==k){ state.slot = null; enableGo(false); refreshMoney(); }
   drawCalendar();
-  const ta = document.getElementById('timeArea');
-  if(ta) ta.scrollIntoView({block:'nearest'});
 }
 
 function renderTimes(){
@@ -1489,7 +1550,7 @@ function renderTimes(){
   if(!items.length) return '';
   return `
     <div class="cal-times">
-      <div class="cal-times-h">Arrival time on ${fmtDay(items[0].instant)}</div>
+      <div class="pick-h">Arrival time on ${fmtDay(items[0].instant)}</div>
       <div class="bk-times">
       ${items.map(s=>`
         <button class="time-btn ${state.slot&&state.slot.key===s.key?'sel':''}" aria-pressed="${!!(state.slot&&state.slot.key===s.key)}" onclick="pickSlot(${s.key})">

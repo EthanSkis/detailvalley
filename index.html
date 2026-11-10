@@ -1002,6 +1002,8 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<!-- The one price list, shared with the quoting tool (quote.html) -->
+<script src="dv-pricing.js"></script>
 <script>
 /* ---------- Supabase ---------- */
 const SUPABASE_URL = 'https://utybbdrthxgsijplowup.supabase.co';
@@ -1055,10 +1057,12 @@ const BLOCKED_DAYS = [
 const START_TIMES = ['08:00','09:00','10:00']; // only arrival times offered
 const BUFFER_MIN = 45;          // travel / cleanup gap kept between jobs
 const MAX_JOBS_PER_DAY = 1;     // never offer more than this many jobs in one day
-// How long each job runs (minutes) — drives how much time a booking blocks off.
-const PKG_MIN   = { maintenance:105, interior:150, full:300, showroom:360 };
-const SIZE_MIN  = { standard:0, midsize:30, oversize:60 };
-const ADDON_MIN = { pet:30, dirt:30, engine:20, intglass:10, wax:20 };
+// Packages, sizes, add-ons, their prices and how long each runs all come from
+// dv-pricing.js, which the quoting tool reads too. Edit them there.
+const PACKAGES = DV_PRICING.packages, ADDONS = DV_PRICING.addons, SIZES = DV_PRICING.sizes;
+// Minutes per job — drives how much time a booking blocks off.
+const minsOf = list => Object.fromEntries(list.map(x=>[x.id, x.min]));
+const PKG_MIN = minsOf(PACKAGES), SIZE_MIN = minsOf(SIZES), ADDON_MIN = minsOf(ADDONS);
 const DOW = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
 
 /* Minutes SLOT_TZ is offset from UTC at a given instant (handles DST). */
@@ -1179,26 +1183,6 @@ async function availableSlots(){
     return true;
   });
 }
-
-const PACKAGES = [
-  {id:'maintenance', name:'Maintenance Wash', price:85, meta:'Exterior wash · ~1½–2 hrs'},
-  {id:'interior',    name:'Interior Detail', price:185, meta:'Inside only · ~2–3 hrs', includes:['intglass'], excludes:['wax']},
-  {id:'full',        name:'Full Detail', price:295, meta:'Inside & out · ~5 hrs', includes:['intglass']},
-  {id:'showroom',    name:'Showroom', price:360, meta:'Adds clay bar & wax · ~6 hrs', includes:['intglass']},
-];
-const ADDONS = [
-  {id:'pet', name:'Pet hair removal', price:40},
-  {id:'dirt', name:'Excessive dirt, mud or sand', price:30},
-  {id:'engine', name:'Engine bay wipe-down', price:25},
-  {id:'intglass', name:'Interior glass refresh', price:15},
-  {id:'wax', name:'Extra wax coat — longer protection', price:30},
-];
-// Vehicle size surcharge — bigger rigs take more time. 'standard' is the default (no charge).
-const SIZES = [
-  {id:'standard', name:'Sedan / coupe', note:'No extra charge', price:0},
-  {id:'midsize',  name:'SUV / crossover / small truck', note:'More surface to cover', price:30},
-  {id:'oversize', name:'Large truck / 3-row SUV / van', note:'The big rigs', price:60},
-];
 
 /* Line-art icons for the vehicle choices (inline SVG, currentColor). */
 const SIZE_ICON = {

@@ -4,8 +4,11 @@ Marketing + booking site for **Detail Valley**, a mobile car detailing business
 serving Valley County, Idaho (McCall · Cascade · Donnelly).
 
 It's a single-page, conversion-focused static site with a built-in multi-step
-booking flow (package → add-ons → pick a day & time on a calendar → details →
-confirm) that saves real bookings to a Supabase database. The flow is built
+booking flow (package → vehicle → add-ons → day & time on a calendar → details →
+review) that saves real bookings to a Supabase database. It opens full-screen on
+phones and as a two-column dialog with a live order summary on wider screens,
+with a running total and a Continue button pinned to the bottom of every step.
+The flow is built
 mobile-first with large tap targets, a step progress bar, an auto-formatting
 phone field, and a real month-grid calendar so it's easy to use one-handed on a
 phone. No build step — just HTML, CSS, and a little vanilla JavaScript (plus the
@@ -126,9 +129,10 @@ slot back up, or `confirmed` / `completed` to track it.
   needs** (package + vehicle size + add-ons), plus a travel/cleanup buffer. So a
   quick Maintenance Wash only ties up ~1¼ hr while a Showroom takes most of the day, and
   the calendar never offers a time that would overlap an existing job.
-- Customers see a month-grid **calendar**: days with openings are highlighted
-  (with a dot), full/out-of-range days are greyed out, and tapping a day reveals
-  that day's available start times (each labelled with roughly when it finishes).
+- Customers see a month-grid **calendar**: days with openings are outlined,
+  full/out-of-range days are greyed out, and the first open day is preselected
+  with its start times listed underneath (each labelled with roughly when it
+  finishes). Tapping another day swaps the times.
 - Knobs near the top of the `<script>` in `index.html`:
   - `HOURS` — working hours per weekday (omit a day to close it; Sunday is closed)
   - `BLOCKED_DAYS` — one-off days off, as `'YYYY-MM-DD'` strings. A listed day is

@@ -80,16 +80,6 @@
 <link href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
   :root{
-    /* brand + booking-sheet tokens (the light booking modal depends on these — do not retune) */
-    --navy:#0f2c44; --navy-2:#15395a;
-    --blue:#2b6cb0; --blue-dark:#225a93;
-    --mist:#eef3f7; --ink:#0f2233; --slate:#3f566a;
-    --copper:#b8632c; --copper-2:#974f22;
-    --white:#ffffff; --line:#d9e2ea;
-    --hairline:rgba(15,44,68,.1);
-    --blue-tint:rgba(43,108,176,.1);
-    --shadow-card:0 1px 2px rgba(15,44,68,.05),0 8px 24px rgba(15,44,68,.06);
-    --shadow-raised:0 2px 6px rgba(15,44,68,.07),0 14px 36px rgba(15,44,68,.1);
     --font:-apple-system,BlinkMacSystemFont,'SF Pro Text','SF Pro Display','Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;
     /* "Daylight" page tokens */
     --bg:#f4f6f8; --surface:#ffffff;
@@ -312,230 +302,179 @@
   .pay svg.v-word{width:auto;height:15px}
   .foot-bottom{max-width:1200px;margin:0 auto;padding:18px 20px 30px;border-top:1px solid var(--rule);font-size:.82rem;color:var(--mute)}
 
-  /* ---------- MODAL — iOS sheet ---------- */
-  .modal-bg{display:none;position:fixed;inset:0;background:rgba(10,25,38,.5);
-    backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);
-    align-items:flex-end;justify-content:center;z-index:50}
+  /* ---------- BOOKING FLOW ---------- */
+  /* Full-screen on phones; a centered two-column dialog (steps + live summary)
+     from 860px up. The dialog is a flex row: .bk-main is a column whose header
+     and footer stay put while only .bk-body scrolls (no position:sticky — it
+     misbehaves inside iOS overlays). dvh tracks the browser's dynamic toolbars. */
+  .modal-bg{display:none;position:fixed;inset:0;background:rgba(11,42,69,.55);align-items:stretch;justify-content:center;z-index:50}
   .modal-bg.open{display:flex}
-  /* The sheet is a flex column: grabber + header + steps stay fixed, only
-     .sheet-body scrolls, and .sheet-foot sits flush at the bottom outside the
-     scroll area (no position:sticky — it misbehaves inside iOS sheets).
-     dvh tracks the browser's dynamic toolbars; vh is the fallback. */
-  .modal{background:var(--white);color:var(--ink);width:100%;max-width:480px;border-radius:22px 22px 0 0;
-    display:flex;flex-direction:column;overflow:hidden;padding:14px 0 0;
-    max-height:92vh;max-height:92dvh;animation:rise .26s cubic-bezier(.32,.72,.35,1)}
-  /* sheet grabber */
-  .modal::before{content:"";display:block;flex:none;width:36px;height:5px;border-radius:3px;background:var(--line);margin:0 auto 14px}
-  .sheet-body{flex:1 1 auto;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;
-    padding:2px 24px 26px;scrollbar-width:thin;scrollbar-color:#aebfce transparent}
-  /* subtle neutral scrollbar (WebKit) */
-  .sheet-body::-webkit-scrollbar{width:9px}
-  .sheet-body::-webkit-scrollbar-track{background:transparent;margin:12px 0}
-  .sheet-body::-webkit-scrollbar-thumb{background:#aebfce;border-radius:8px;border:2px solid var(--white)}
-  .sheet-body::-webkit-scrollbar-thumb:hover{background:#8ba1b3}
-  @keyframes rise{from{transform:translateY(48px);opacity:.4}to{transform:translateY(0);opacity:1}}
-  @media(min-width:520px){
-    .modal-bg{align-items:center}
-    .modal{border-radius:20px;padding-top:26px}
-    .modal::before{display:none}
-  }
-  .modal-top{display:flex;justify-content:space-between;align-items:center;gap:10px;flex:none;padding:0 24px}
-  .step-label{flex:1;min-width:0;font-weight:700;font-size:.74rem;letter-spacing:.1em;text-transform:uppercase;color:var(--copper-2)}
-  .run-total{flex:none;font-weight:700;font-size:.92rem;letter-spacing:-.01em;color:var(--navy);background:var(--mist);padding:4px 11px;border-radius:999px}
+  .modal{background:var(--bg);color:var(--text);width:100%;height:100vh;height:100dvh;display:flex;overflow:hidden;
+    font-family:var(--f-body);font-size:1rem;line-height:1.45}
+  .bk-main{flex:1 1 0;min-width:0;min-height:0;display:flex;flex-direction:column}
+  .bk-aside{display:none}
+
+  .bk-head{flex:none;background:var(--surface);border-bottom:1px solid var(--rule);padding:8px 8px 14px}
+  .bk-head-row{display:flex;align-items:center;justify-content:space-between;gap:8px}
+  .bk-ic{width:44px;height:44px;flex:none;border:none;background:transparent;color:var(--text);cursor:pointer;border-radius:50%;
+    display:flex;align-items:center;justify-content:center}
+  .bk-ic:hover{background:var(--bg)}
+  .bk-ic svg{width:20px;height:20px;display:block}
+  .bk-ic-gap{width:44px;height:44px;flex:none}
+  .bk-step{font-size:.8rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--cop);text-align:center}
+  .bk-prog{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:5px;padding:6px 12px 0}
+  .bk-prog span{height:4px;border-radius:2px;background:var(--rule);transition:background .25s ease}
+  .bk-prog span.on{background:var(--text)}
+
+  .bk-body{flex:1 1 auto;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:24px 20px 20px}
+  .bk-title{font-size:1.7rem;line-height:1.12;margin-bottom:8px}
+  .bk-intro{color:var(--mute);margin-bottom:16px}
+  .bk-title+.bk-opt,.bk-title+.field{margin-top:16px}
+  .bk-note{font-size:.88rem;color:var(--mute);margin-top:14px}
   /* step content slides in from the direction of travel */
   .slide-fwd{animation:slideF .22s ease}
   .slide-back{animation:slideB .22s ease}
   @keyframes slideF{from{transform:translateX(26px);opacity:.35}to{transform:none;opacity:1}}
   @keyframes slideB{from{transform:translateX(-26px);opacity:.35}to{transform:none;opacity:1}}
   @media(prefers-reduced-motion:reduce){.slide-fwd,.slide-back{animation:none}}
-  .close{background:var(--mist);border:none;font-size:1.35rem;line-height:1;cursor:pointer;color:var(--slate);width:36px;height:36px;display:flex;align-items:center;justify-content:center;margin:-2px -4px 0 0;border-radius:50%;transition:background .12s}
-  .close:hover{background:var(--line);color:var(--navy)}
-  .modal h3{font-size:1.32rem;font-weight:700;letter-spacing:-.02em;margin:10px 0 14px}
-  .field-intro{color:var(--slate);font-size:.94rem;margin:-8px 0 14px}
 
-  .opt{display:block;width:100%;text-align:left;background:var(--white);border:1.5px solid var(--line);border-radius:14px;padding:14px 42px 14px 15px;margin-bottom:10px;cursor:pointer;font-family:var(--font);font-size:1rem;position:relative;transition:border-color .12s,background .12s,box-shadow .12s}
-  .opt:hover{border-color:var(--blue)}
-  .opt.sel{border-color:var(--blue);background:var(--blue-tint);box-shadow:0 0 0 1px var(--blue) inset}
-  .opt .o-name{font-weight:700;font-size:1.05rem;letter-spacing:-.015em}
-  .opt .o-meta{font-size:.86rem;color:var(--slate);display:block;margin-top:2px;line-height:1.45}
-  .opt::after{content:"›";position:absolute;right:18px;top:50%;transform:translateY(-50%);font-size:1.7rem;line-height:1;color:#aebfce}
-  .opt:hover::after{color:var(--blue)}
-  /* Size options just select (no navigation) — drop the chevron, show a tick when chosen */
-  .opt.size-opt::after{content:none}
-  .opt.size-opt.sel::after{content:"✓";font-size:1.25rem;color:var(--blue)}
-  .opt.size-opt{display:flex;align-items:center;gap:14px}
-  .o-ic{flex:none;width:46px;color:var(--blue);display:flex;align-items:center}
-  .o-ic svg{width:46px;height:auto;display:block}
-  .o-txt{flex:1;min-width:0}
+  /* Choice rows: radio (service, vehicle) and checkbox (extras) */
+  .bk-opt{display:flex;align-items:center;gap:14px;width:100%;min-height:58px;text-align:left;background:var(--surface);color:var(--text);
+    border:1.5px solid #cbd4dc;border-radius:12px;padding:14px 16px;margin-bottom:10px;cursor:pointer;
+    font-family:var(--f-body);font-size:1rem;line-height:1.4;transition:border-color .12s,box-shadow .12s}
+  .bk-opt.sel{border-color:var(--text);box-shadow:0 0 0 1px var(--text) inset}
+  @media(hover:hover){.bk-opt:hover{border-color:var(--text)}}
+  .bk-radio{flex:none;width:20px;height:20px;border-radius:50%;border:1.5px solid #8497a8}
+  .bk-opt.sel .bk-radio{border:6px solid var(--text)}
+  .bk-check{flex:none;width:22px;height:22px;border-radius:6px;border:1.5px solid #8497a8;position:relative}
+  .bk-opt.sel .bk-check,.bk-inc .bk-check{background:var(--text);border-color:var(--text)}
+  .bk-opt.sel .bk-check::after,.bk-inc .bk-check::after{content:"";position:absolute;left:6px;top:2px;width:6px;height:11px;
+    border-right:2.5px solid #fff;border-bottom:2.5px solid #fff;transform:rotate(45deg)}
+  .bk-veh{flex:none;width:52px;display:flex;align-items:center}
+  .bk-veh svg{width:52px;height:auto;display:block}
+  .bk-o-tx{flex:1;min-width:0}
+  .bk-o-name{display:block;font-weight:600;font-size:1.04rem}
+  .bk-o-meta{display:block;font-size:.88rem;color:var(--mute)}
+  .bk-o-price{flex:none;font-family:var(--f-head);font-weight:600;font-size:1.15rem;white-space:nowrap}
+  .bk-badge{display:inline-block;background:var(--peach);font-size:.66rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;
+    padding:3px 7px;border-radius:999px;vertical-align:2px;margin-left:4px;white-space:nowrap}
+  .bk-inc{background:#e9edf1;border-color:transparent;color:var(--mute);cursor:default}
+  .bk-inc .bk-check{background:var(--mute);border-color:var(--mute)}
+  .bk-inc .bk-o-price{font-family:var(--f-body);font-size:.84rem}
 
-  /* Add-ons: compact two-column toggle grid */
-  .addons{display:grid;grid-template-columns:1fr 1fr;gap:9px}
-  .chip-add{display:flex;align-items:center;gap:10px;text-align:left;
-    background:var(--white);border:1.5px solid var(--line);border-radius:12px;padding:11px 12px;
-    cursor:pointer;font-family:var(--font);transition:border-color .12s,background .12s,box-shadow .12s}
-  .ca-ic{flex:none;width:22px;height:22px;color:var(--blue)}
-  .ca-ic svg{width:22px;height:22px;display:block}
-  .ca-tx{display:flex;flex-direction:column;gap:2px;min-width:0}
-  .chip-add:hover{border-color:var(--blue)}
-  .chip-add.sel{border-color:var(--blue);background:var(--blue-tint);box-shadow:0 0 0 1px var(--blue) inset}
-  .chip-add .ca-name{font-weight:600;font-size:.9rem;color:var(--ink);line-height:1.3}
-  .chip-add .ca-price{font-weight:700;font-size:.84rem;color:var(--blue)}
-  /* Add-ons a chosen package already bundles: shown as included, not purchasable */
-  .chip-add.included{cursor:default;border-color:var(--blue);background:var(--blue-tint);box-shadow:0 0 0 1px var(--blue) inset}
+  /* Fixed action bar */
+  .bk-foot{flex:none;background:var(--surface);border-top:1px solid var(--rule);
+    padding:14px 20px calc(16px + env(safe-area-inset-bottom));display:flex;align-items:center;gap:16px}
+  .bk-foot.col{flex-direction:column;align-items:stretch;gap:10px}
+  .bk-tot{flex:1;min-width:0}
+  .bk-tot span{display:block;font-size:.75rem;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--mute)}
+  .bk-tot b{display:block;font-family:var(--f-head);font-weight:600;font-size:1.5rem;line-height:1.1;letter-spacing:-.02em}
+  .bk-go,.bk-alt{display:flex;align-items:center;justify-content:center;height:54px;padding:0 30px;border-radius:8px;
+    font-family:var(--f-body);font-weight:600;font-size:1.06rem;cursor:pointer;text-decoration:none;transition:background .12s}
+  .bk-go{background:var(--cop);color:#fff;border:none}
+  .bk-go:hover{background:var(--cop-hover);color:#fff}
+  .bk-go:disabled{background:var(--rule);color:#5a6f82;cursor:not-allowed}
+  .bk-go.navy{background:var(--text)}
+  .bk-go.navy:hover{background:#143a5c}
+  .bk-alt{background:transparent;color:var(--text);border:1.5px solid var(--text)}
+  .bk-alt:hover{background:var(--text);color:#fff}
+  .foot-note{text-align:center;font-size:.88rem;color:var(--mute)}
 
-  /* Touch screens: no hover highlights — iOS "sticks" hover on the element under
-     the last tap, which made freshly rendered options look pre-selected. */
-  @media(hover:none){
-    .opt:hover{border-color:var(--line)}
-    .opt.sel:hover{border-color:var(--blue)}
-    .opt:hover::after{color:#aebfce}
-    .chip-add:hover{border-color:var(--line)}
-    .chip-add.sel:hover,.chip-add.included:hover{border-color:var(--blue)}
-    .time-btn:hover{border-color:var(--line)}
-    .time-btn.sel:hover{border-color:var(--blue)}
-    .cal-cell.avail:hover{background:var(--blue-tint)}
-    .cal-nav:hover:not(:disabled){background:transparent}
-    .close:hover{background:var(--mist);color:var(--slate)}
-  }
+  /* Day & time */
+  .slot-status{color:var(--mute);padding:10px 0 14px;text-align:center}
+  .slot-status a{font-weight:600}
+  .cal{background:var(--surface);border:1px solid var(--rule);border-radius:12px;padding:10px 12px 12px}
+  .cal-head{display:flex;align-items:center;justify-content:space-between}
+  .cal-title{font-family:var(--f-head);font-weight:600;font-size:1.06rem;letter-spacing:-.015em}
+  .cal-nav:disabled{color:#b4c0cb;cursor:default;background:transparent}
+  .cal-dow{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));padding:2px 0 4px}
+  .cal-dow span{text-align:center;font-size:.75rem;font-weight:600;color:var(--mute)}
+  .cal-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:2px 3px}
+  .cal-cell{height:44px;border:none;background:transparent;border-radius:10px;font-family:var(--f-body);font-size:1rem;color:#8497a8;
+    display:flex;align-items:center;justify-content:center;padding:0}
+  .cal-cell.avail{border:1.5px solid var(--text);background:var(--surface);color:var(--text);font-weight:600;cursor:pointer}
+  .cal-cell.sel{border:none;background:var(--text);color:#fff;font-weight:600;cursor:pointer}
+  .cal-times{margin-top:18px}
+  .cal-times-h{font-family:var(--f-head);font-weight:600;font-size:1.06rem;letter-spacing:-.015em;margin-bottom:10px}
+  .bk-times{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+  .time-btn{background:var(--surface);color:var(--text);border:1.5px solid #cbd4dc;border-radius:10px;padding:10px 4px;min-height:62px;
+    cursor:pointer;font-family:var(--f-body);text-align:center;transition:border-color .12s,box-shadow .12s}
+  .time-btn.sel{border-color:var(--text);box-shadow:0 0 0 1px var(--text) inset}
+  .time-btn .t-time{display:block;font-weight:600;font-size:1.06rem}
+  .time-btn .t-label{display:block;font-size:.76rem;color:var(--mute)}
 
-  /* Fixed action bar: a flex row below the scroll area, flush with the sheet edge */
-  .sheet-foot{flex:none;padding:10px 24px calc(10px + env(safe-area-inset-bottom));
-    background:var(--white);border-top:1px solid var(--hairline)}
-  .sheet-foot .btn{width:100%;text-align:center;margin-top:0}
-  .sheet-foot .back{margin-top:2px;margin-bottom:0;padding:9px 9px 2px}
-
-  /* Short screens (browser toolbars, small phones): tighten further so every
-     option list fits the sheet with no scrolling. */
-  @media(max-height:700px){
-    .modal::before{margin-bottom:8px}
-    .modal h3{font-size:1.2rem;margin:6px 0 10px}
-    .field-intro{margin:-4px 0 10px}
-    .steps{margin:10px 24px 10px}
-    .opt{padding:11px 38px 11px 13px;margin-bottom:8px;border-radius:12px}
-    .opt .o-name{font-size:1rem}
-    .opt .o-meta{font-size:.8rem}
-    .o-ic{width:38px}
-    .o-ic svg{width:38px}
-  }
-  @media(max-height:640px){
-    .addons{gap:7px}
-    .chip-add{padding:8px 10px;gap:8px}
-    .chip-add .ca-name{font-size:.82rem}
-    .chip-add .ca-price{font-size:.78rem}
-    .ca-ic{width:18px;height:18px}
-    .ca-ic svg{width:18px;height:18px}
-    .sheet-foot{padding-top:8px}
-    .sheet-foot .back{padding-bottom:0}
-  }
-
-  .field{margin-bottom:16px}
-  .field label{display:block;font-weight:600;font-size:.95rem;margin-bottom:8px;color:var(--ink)}
-  .field input{width:100%;padding:15px 16px;border:1.5px solid transparent;border-radius:12px;font-size:1.05rem;background:var(--mist);font-family:inherit;transition:border-color .12s,background .12s}
-  .field input:focus{outline:none;border-color:var(--blue);background:var(--white);box-shadow:0 0 0 3px rgba(43,108,176,.15)}
-  .field .hint{font-size:.85rem;color:var(--slate);margin-top:6px}
-  .util-grp{display:flex;gap:8px}
-  .util-opt{flex:1;padding:13px 8px;border:1.5px solid transparent;border-radius:12px;background:var(--mist);font-family:var(--font);font-weight:600;font-size:1rem;color:var(--ink);cursor:pointer;transition:border-color .12s,background .12s,color .12s}
-  .util-opt.sel{border-color:var(--blue);background:var(--blue-tint);color:var(--blue)}
-  .util-note{font-size:.9rem;color:var(--slate);margin-top:10px;line-height:1.5;background:var(--mist);border-radius:12px;padding:11px 13px}
+  /* Details form */
+  .field{margin-bottom:14px}
+  .field label,.field legend{display:block;font-weight:600;font-size:.94rem;margin-bottom:6px}
+  .field input,.field select{width:100%;height:50px;padding:0 14px;border:1.5px solid #cbd4dc;border-radius:10px;
+    font-size:1rem;font-family:inherit;color:var(--text);background:var(--surface);transition:border-color .12s,box-shadow .12s}
+  .field input:focus,.field select:focus{outline:none;border-color:var(--text);box-shadow:0 0 0 3px rgba(11,42,69,.15)}
+  .field .hint{font-size:.82rem;color:var(--mute);margin-top:6px}
+  .bk-row2{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr);gap:10px}
+  fieldset.field{border:none}
+  .util-grp{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+  .util-opt{height:50px;border:1.5px solid #cbd4dc;border-radius:10px;background:var(--surface);font-family:var(--f-body);
+    font-weight:600;font-size:1rem;color:var(--text);cursor:pointer;transition:border-color .12s,box-shadow .12s}
+  .util-opt.sel{border-color:var(--text);box-shadow:0 0 0 1px var(--text) inset}
+  .util-note{font-size:.9rem;color:var(--mute);margin-top:10px;line-height:1.5;background:#e9edf1;border-radius:10px;padding:11px 13px}
   .util-note.warn-note{color:#8a3b12;background:#fbf0e9;border:1px solid #e7c3aa}
-  .util-note b{color:#c0392b}
-
-  /* ---------- REVIEW TICKET (step 5) ---------- */
-  .tix{margin-bottom:18px}
-  .tix-top{position:relative;background:var(--navy);color:var(--white);border-radius:18px 18px 0 0;padding:16px 18px 14px;overflow:hidden}
-  .tix-top::before{content:"";position:absolute;inset:0;pointer-events:none;background:
-    radial-gradient(120% 90% at 90% -10%, rgba(43,108,176,.5) 0%, transparent 60%),
-    radial-gradient(80% 60% at 0% 110%, rgba(184,99,44,.28) 0%, transparent 55%)}
-  .tix-top>*{position:relative}
-  .tix-row1{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:10px}
-  .tix-brand{font-size:.64rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:#c5d4e1}
-  .tix-admit{font-size:.62rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#e0904e;border:1px solid rgba(224,144,78,.5);padding:3px 10px;border-radius:999px;white-space:nowrap}
-  .tix-feature{font-size:1.4rem;font-weight:700;letter-spacing:-.02em;line-height:1.15;margin-bottom:10px}
-  .tix-cols{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:8px}
-  .tix-cols.single{grid-template-columns:1fr}
-  .tix-cols:last-child{margin-bottom:2px}
-  .tix-l{display:block;font-size:.6rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#8ba1b3;margin-bottom:2px}
-  .tix-cols b{font-size:.94rem;font-weight:600;letter-spacing:-.01em;overflow-wrap:anywhere}
-  /* perforation: dashed gaps show the sheet behind; side notches "punch" the edges */
-  .tix-tear{position:relative;height:0;border-top:2px dashed rgba(15,44,68,.3)}
-  .tix-tear::before,.tix-tear::after{content:"";position:absolute;top:-12px;width:22px;height:22px;border-radius:50%;background:var(--white)}
-  .tix-tear::before{left:-11px}
-  .tix-tear::after{right:-11px}
-  .tix-stub{background:var(--mist);border:1px solid var(--hairline);border-top:none;border-radius:0 0 18px 18px;padding:10px 18px 14px}
-  .tix-item{display:flex;justify-content:space-between;gap:12px;padding:3px 0;font-size:.9rem;color:var(--slate)}
-  .tix-item.warn{color:#8a3b12;font-weight:600}
-  .tix-total{display:flex;justify-content:space-between;align-items:baseline;border-top:1px solid var(--hairline);margin-top:6px;padding-top:9px}
-  .tix-total span{font-size:.68rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--slate)}
-  .tix-total b{font-size:1.35rem;font-weight:700;letter-spacing:-.02em;color:var(--navy)}
-  .tix-code{margin-top:10px;text-align:center}
-  .tix-bar{height:26px;max-width:230px;margin:0 auto 6px;opacity:.85;background:
-    repeating-linear-gradient(90deg,var(--ink) 0 2px,transparent 2px 4px),
-    repeating-linear-gradient(90deg,var(--ink) 0 1px,transparent 1px 7px),
-    repeating-linear-gradient(90deg,var(--ink) 0 3px,transparent 3px 11px)}
-  .tix-code span{font-size:.72rem;font-weight:700;letter-spacing:.28em;color:var(--slate)}
-  .tix .tap{cursor:pointer}
-  .tix-hint{text-align:center;font-size:.8rem;color:var(--slate);margin-top:10px}
-  .foot-note{text-align:center;font-size:.78rem;color:var(--slate);margin-top:8px}
-  .btn2{display:block;width:100%;margin-top:14px;padding:14px;border:none;border-radius:14px;
-    background:var(--blue-tint);color:var(--blue);font-family:var(--font);font-size:1.02rem;font-weight:600;
-    text-align:center;text-decoration:none;cursor:pointer}
-  .btn2:hover{background:rgba(43,108,176,.2)}
-
-  .modal .btn{width:100%;text-align:center;margin-top:10px;font-size:1.12rem;padding:17px 24px}
-  .back{background:none;border:none;color:var(--slate);font-size:1rem;font-weight:600;cursor:pointer;margin-top:12px;display:block;width:100%;text-align:center;padding:12px;font-family:inherit}
-  .back:hover{color:var(--navy)}
-
-  .done{text-align:center;padding:14px 0}
-  .done .tick{width:62px;height:62px;border-radius:50%;background:var(--blue);margin:0 auto 18px;position:relative}
-  .done .tick::after{content:"";position:absolute;left:22px;top:17px;width:16px;height:28px;border-right:4px solid var(--white);border-bottom:4px solid var(--white);transform:rotate(45deg)}
-  .done h3{margin-bottom:8px}
-  .done p{color:var(--slate);font-size:.95rem;margin-bottom:6px}
-
-  /* ---------- BOOKING SLOTS ---------- */
-  .slot-status{color:var(--slate);font-size:1rem;padding:10px 0 14px;text-align:center}
-  .slot-status a{color:var(--blue);font-weight:600}
-  .slot-chosen{font-weight:600;color:var(--blue);margin:-6px 0 16px}
-  .form-err{color:#c0392b;font-size:.95rem;font-weight:600;margin:4px 0 12px;background:#fdecea;border:1px solid #f5c6c0;border-radius:12px;padding:10px 12px}
-  .field select{width:100%;padding:15px 16px;border:1.5px solid transparent;border-radius:12px;font-size:1.05rem;background:var(--mist) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%233f566a' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E") no-repeat right 16px center;font-family:inherit;color:var(--ink);appearance:none;-webkit-appearance:none;transition:border-color .12s,background-color .12s}
-  .field select:focus{outline:none;border-color:var(--blue);background-color:var(--white);box-shadow:0 0 0 3px rgba(43,108,176,.15)}
+  .util-note b{color:#b3261e}
+  .form-err{color:#b3261e;font-size:.95rem;font-weight:600;margin:4px 0 12px;background:#fdecea;border:1px solid #f5c6c0;border-radius:10px;padding:10px 12px}
   .hp{position:absolute;left:-9999px;width:1px;height:1px;opacity:0}
 
-  /* ---------- PROGRESS STEPS ---------- */
-  .steps{display:flex;gap:6px;flex:none;margin:14px 24px 16px}
-  .steps .seg{height:6px;flex:1;border-radius:99px;background:var(--line);transition:background .25s ease}
-  .steps .seg.on{background:var(--blue)}
+  /* Review + confirmation */
+  .bk-arr{background:var(--text);color:#fff;border-radius:12px;padding:16px 18px;margin:16px 0 14px;
+    display:flex;justify-content:space-between;align-items:center;gap:12px}
+  .bk-arr .l{font-size:.75rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--peach)}
+  .bk-arr .w{font-family:var(--f-head);font-weight:600;font-size:1.3rem;line-height:1.2;letter-spacing:-.02em}
+  .bk-arr .e{font-size:.88rem;color:var(--on-navy)}
+  .bk-card{background:var(--surface);border:1px solid var(--rule);border-radius:12px;padding:4px 18px;margin-bottom:14px}
+  .bk-line{display:flex;justify-content:space-between;align-items:baseline;gap:16px;padding:12px 0;border-bottom:1px solid #e6ebef}
+  .bk-line:last-child{border-bottom:none}
+  .bk-line b{font-weight:600;white-space:nowrap}
+  .bk-line .k{color:var(--mute);flex:none}
+  .bk-line .v{font-weight:600;text-align:right;overflow-wrap:anywhere}
+  .bk-line.total span{font-weight:600}
+  .bk-line.total b{font-family:var(--f-head);font-size:1.6rem;letter-spacing:-.02em}
+  .bk-who{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;padding:10px 0;font-size:.94rem}
+  .bk-who .n{font-weight:600;overflow-wrap:anywhere}
+  .bk-who .s{color:var(--mute);overflow-wrap:anywhere}
+  .bk-who .warn{color:#8a3b12;font-weight:600}
+  .bk-change{flex:none;background:none;border:none;color:inherit;font-family:var(--f-body);font-weight:600;font-size:.88rem;
+    text-decoration:underline;cursor:pointer;padding:12px 4px;margin:-8px -4px}
+  .bk-done-top{display:flex;justify-content:flex-end;padding:8px 8px 0}
+  .bk-tick{width:56px;height:56px;border-radius:50%;background:var(--text);position:relative;margin-bottom:16px}
+  .bk-tick::after{content:"";position:absolute;left:21px;top:13px;width:12px;height:23px;border-right:3.5px solid #fff;border-bottom:3.5px solid #fff;transform:rotate(45deg)}
+  .bk-done-h{font-size:2rem;line-height:1.08;letter-spacing:-.03em}
+  .bk-done-p{font-size:1.06rem;color:var(--mute);margin:10px 0 20px}
+  .bk-tip{background:#e9edf1;border-radius:12px;padding:14px 18px;font-size:.94rem}
 
-  /* ---------- CALENDAR — iOS date-picker style ---------- */
-  .cal{border:1px solid var(--hairline);border-radius:18px;padding:14px 14px 18px;box-shadow:var(--shadow-card)}
-  .cal-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
-  .cal-title{font-weight:700;font-size:1.12rem;letter-spacing:-.015em;color:var(--navy)}
-  .cal-nav{width:44px;height:44px;flex:none;border:none;background:transparent;border-radius:50%;font-size:1.6rem;line-height:1;color:var(--blue);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .12s}
-  .cal-nav:hover:not(:disabled){background:var(--mist)}
-  .cal-nav:disabled{opacity:.28;cursor:default}
-  .cal-dow{display:grid;grid-template-columns:repeat(7,1fr);gap:5px;margin-bottom:7px}
-  .cal-dow span{text-align:center;font-size:.72rem;font-weight:700;color:#8ba1b3;text-transform:uppercase;letter-spacing:.02em}
-  .cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:5px}
-  .cal-cell{aspect-ratio:1/1;border:none;background:transparent;border-radius:50%;font-family:var(--font);font-weight:600;font-size:1.02rem;color:#9fb0be;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;padding:0;cursor:default;transition:background .12s}
-  .cal-cell.empty{visibility:hidden}
-  .cal-cell.avail{color:var(--blue);background:var(--blue-tint);cursor:pointer}
-  .cal-cell.avail:hover{background:rgba(43,108,176,.2)}
-  .cal-cell.sel{background:var(--blue);color:#fff;cursor:pointer}
-  .cal-cell .dot{width:5px;height:5px;border-radius:50%;background:var(--copper);line-height:0}
-  .cal-cell.sel .dot{background:#fff}
-  .cal-hint{text-align:center;font-size:.86rem;color:var(--slate);margin-top:14px}
+  /* Live summary (desktop only) */
+  .bk-aside{flex:none;width:320px;background:var(--text);color:#fff;flex-direction:column;padding:30px 28px 28px;overflow-y:auto}
+  .bk-a-h{font-size:.8rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--peach);margin-bottom:16px}
+  .bk-a-line{display:flex;justify-content:space-between;gap:12px;padding:13px 0;border-top:1px solid var(--rule-navy)}
+  .bk-a-line b{font-weight:600;white-space:nowrap}
+  .bk-a-line .m{color:var(--on-navy);white-space:nowrap}
+  .bk-a-empty{padding:13px 0;border-top:1px solid var(--rule-navy);color:var(--on-navy)}
+  .bk-a-total{display:flex;justify-content:space-between;align-items:baseline;gap:12px;padding-top:18px;border-top:1px solid var(--rule-navy)}
+  .bk-a-total span{font-weight:600}
+  .bk-a-total b{font-family:var(--f-head);font-weight:600;font-size:2.1rem;letter-spacing:-.02em}
+  .bk-a-notes{margin-top:auto;padding-top:18px;font-size:.88rem;color:var(--on-navy);display:flex;flex-direction:column;gap:6px}
+  .bk-a-notes::before{content:"";display:block;border-top:1px solid var(--rule-navy);margin-bottom:12px}
 
-  /* Picked day collapses to a chip; times take the calendar's place */
-  .day-chip-row{display:flex;align-items:center;justify-content:space-between;gap:12px;
-    background:var(--mist);border-radius:14px;padding:14px 16px;margin-bottom:14px}
-  .dc-day{font-weight:700;font-size:1.05rem;color:var(--navy);letter-spacing:-.01em}
-  .dc-change{background:none;border:none;color:var(--blue);font-family:var(--font);font-size:.9rem;font-weight:600;cursor:pointer;padding:4px}
-  .cal-times{margin-top:8px}
-  .cal-times-h{font-weight:700;font-size:1.05rem;letter-spacing:-.01em;color:var(--ink);margin-bottom:12px;text-align:center}
-  .time-btn{display:flex;align-items:center;gap:12px;width:100%;border:1.5px solid var(--line);background:var(--white);border-radius:14px;padding:18px;margin-bottom:11px;cursor:pointer;text-align:left;font-family:var(--font);transition:border-color .12s,background .12s,box-shadow .12s}
-  .time-btn:hover{border-color:var(--blue)}
-  .time-btn.sel{border-color:var(--blue);background:var(--blue-tint);box-shadow:0 0 0 1px var(--blue) inset}
-  .time-btn .t-time{font-weight:700;font-size:1.2rem;letter-spacing:-.015em;color:var(--navy)}
-  .time-btn .t-label{margin-left:auto;font-size:.82rem;font-weight:700;letter-spacing:.02em;color:var(--white);background:var(--copper);padding:5px 13px;border-radius:99px}
+  @media(min-width:860px){
+    .modal-bg{align-items:center;padding:24px}
+    .modal{max-width:980px;height:min(700px,calc(100vh - 48px));height:min(700px,calc(100dvh - 48px));border-radius:16px;
+      box-shadow:0 40px 90px rgba(6,20,34,.45)}
+    .modal.done{max-width:520px;height:auto;max-height:calc(100vh - 48px);max-height:calc(100dvh - 48px)}
+    .bk-aside{display:flex}
+    .bk-head{padding:12px 24px 16px}
+    .bk-prog{padding:6px 0 0}
+    .bk-body{padding:28px 32px 24px}
+    .bk-foot{padding:16px 32px;justify-content:flex-end}
+    .bk-foot:not(.col) .bk-tot{display:none}
+    .modal.done .bk-body{padding-top:8px}
+  }
 
   /* ---------- PACKAGE CHOOSE BUTTON ---------- */
   .pkg-btn{display:block;width:100%;background:var(--surface);color:var(--text);
@@ -545,10 +484,6 @@
   .pkg-btn:active{transform:scale(.98)}
   .pkg.featured .pkg-btn{background:var(--peach);border-color:var(--peach);color:var(--text)}
   .pkg.featured .pkg-btn:hover{background:#f6d3b6}
-
-  /* The booking sheet keeps its own system-font look */
-  .modal,.modal .btn{font-family:var(--font)}
-  .modal .btn{border-radius:14px}
 
   /* ---------- STICKY MOBILE BOOK BAR ---------- */
   body.modal-open{position:fixed;left:0;right:0;overflow:hidden}
@@ -1136,26 +1071,19 @@ const ADDONS = [
 ];
 // Vehicle size surcharge — bigger rigs take more time. 'standard' is the default (no charge).
 const SIZES = [
-  {id:'standard', name:'Sedan / coupe', meta:'No extra charge', price:0},
-  {id:'midsize',  name:'SUV / crossover / small truck', meta:'+$30 · more surface to cover', price:30},
-  {id:'oversize', name:'Large truck / 3-row SUV / van', meta:'+$60 · the big rigs', price:60},
+  {id:'standard', name:'Sedan / coupe', note:'No extra charge', price:0},
+  {id:'midsize',  name:'SUV / crossover / small truck', note:'More surface to cover', price:30},
+  {id:'oversize', name:'Large truck / 3-row SUV / van', note:'The big rigs', price:60},
 ];
 
-/* Line-art icons for the vehicle + add-on choices (inline SVG, currentColor). */
+/* Line-art icons for the vehicle choices (inline SVG, currentColor). */
 const SIZE_ICON = {
   standard:'<svg viewBox="0 0 48 22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 15h-1v-3c0-1.1.9-2 2-2h5l6-5h11l7 5h7c1.6 0 3 1.4 3 3v2h-2"/><circle cx="13" cy="16" r="3"/><circle cx="35" cy="16" r="3"/><path d="M16 15h16"/></svg>',
   midsize:'<svg viewBox="0 0 48 22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 16h-1v-5c0-1.1.9-2 2-2h3l4-5h16l5 5h9c1.1 0 2 .9 2 2v5h-2"/><circle cx="13" cy="17" r="3"/><circle cx="36" cy="17" r="3"/><path d="M16 16h17"/></svg>',
   oversize:'<svg viewBox="0 0 48 22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 16v-4h2V6c0-.6.4-1 1-1h16c.6 0 1 .4 1 1v6h6l4-4h8c1.1 0 2 .9 2 2v6h-2"/><circle cx="12" cy="17" r="3"/><circle cx="37" cy="17" r="3"/><path d="M15 16h19"/></svg>'
 };
-const ADDON_ICON = {
-  pet:'<svg viewBox="0 0 24 24" fill="currentColor"><ellipse cx="7" cy="9" rx="1.8" ry="2.4"/><ellipse cx="12" cy="7.5" rx="1.8" ry="2.4"/><ellipse cx="17" cy="9" rx="1.8" ry="2.4"/><path d="M12 11c-2.8 0-5.5 2.2-5.5 4.8 0 1.6 1.2 2.7 2.8 2.7 1 0 1.8-.4 2.7-.4s1.7.4 2.7.4c1.6 0 2.8-1.1 2.8-2.7C17.5 13.2 14.8 11 12 11z"/></svg>',
-  dirt:'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.5c2 3.2 3.6 5.4 3.6 7.4A3.6 3.6 0 0 1 12 13.5a3.6 3.6 0 0 1-3.6-3.6c0-2 1.6-4.2 3.6-7.4z"/><circle cx="6" cy="17.5" r="1.7"/><circle cx="12" cy="19.5" r="1.7"/><circle cx="18" cy="17.5" r="1.7"/></svg>',
-  engine:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a4.2 4.2 0 0 0-5.6 5.6L4 17l3 3 5.1-5.1a4.2 4.2 0 0 0 5.6-5.6L15 12l-3-3 2.7-2.7z"/></svg>',
-  intglass:'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M11 2.5l1.7 4.8 4.8 1.7-4.8 1.7L11 15.5 9.3 10.7 4.5 9l4.8-1.7L11 2.5z"/><path d="M18 14l.9 2.6 2.6.9-2.6.9-.9 2.6-.9-2.6-2.6-.9 2.6-.9.9-2.6z"/></svg>',
-  wax:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M12 3l7 3v5c0 4.5-3 8.3-7 10-4-1.7-7-5.5-7-10V6l7-3z"/><path d="M9 11.5l2 2 4-4.5" stroke-linecap="round"/></svg>'
-};
 
-function freshState(){ return {step:1, v2:'size', pkg:null, size:null, addons:[], slot:null, calDate:null, calOpen:true, name:'', phone:'', address:'', town:'', utilities:null, hp:false}; }
+function freshState(){ return {step:1, pkg:null, size:null, addons:[], slot:null, calDate:null, name:'', phone:'', address:'', town:'', utilities:null, hp:false}; }
 let state = freshState();
 let slotCache = null;
 let submitting = false;
@@ -1166,7 +1094,7 @@ const TOWNS = ['McCall','Cascade','Donnelly','Other'];
 
 function openBooking(pre){
   state = freshState();
-  slotCache = null; submitting = false;
+  slotCache = null; submitting = false; lastStep = 0;
   if(pre && PACKAGES.some(p=>p.id===pre)){ state.pkg = pre; state.step = 2; }
   scrollLockY = window.scrollY || window.pageYOffset || 0;
   document.body.style.top = `-${scrollLockY}px`;
@@ -1183,10 +1111,23 @@ function closeBooking(){
 modal.addEventListener('click', e=>{ if(e.target===modal) closeBooking(); });
 document.addEventListener('keydown', e=>{ if(e.key==='Escape' && modal.classList.contains('open')) closeBooking(); });
 
-function pickPkg(id){ state.pkg=id; state.v2='size'; go(2); }
-function pickSize(id){ state.size=id; state.v2='extras'; render(); }   // auto-advance to add-ons
-function v2Size(){ state.v2='size'; render(); }
-function backToExtras(){ state.v2='extras'; go(2); }
+/* Steps: 1 service · 2 vehicle · 3 extras · 4 day & time · 5 details · 6 review · 7 booked.
+   Choices update in place (no re-render) so nothing jumps under the customer's
+   finger; the footer's Continue button moves them on. */
+function markSel(grp, id){
+  document.querySelectorAll(`[data-grp="${grp}"]`).forEach(b=>{
+    const on = b.dataset.id===String(id);
+    b.classList.toggle('sel', on); b.setAttribute('aria-pressed', on);
+  });
+}
+function enableGo(on){ const g = document.getElementById('bkGo'); if(g) g.disabled = !on; }
+function refreshMoney(){
+  const rt = document.getElementById('runTotal'); if(rt) rt.textContent = '$'+total();
+  const as = document.getElementById('bkAside'); if(as) as.innerHTML = asideInner();
+}
+function dropUnusableAddons(){ state.addons = state.addons.filter(id=>!pkgIncludes(id) && !pkgExcludes(id)); }
+function pickPkg(id){ state.pkg=id; dropUnusableAddons(); markSel('pkg',id); enableGo(true); refreshMoney(); }
+function pickSize(id){ state.size=id; markSel('size',id); enableGo(true); refreshMoney(); }
 function utilNoteText(v){
   if(v==='no') return `<b>We can't complete the detail without this.</b> We bring all our own gear, but we need access to an outdoor water tap <b>and</b> a power outlet where the car will be parked. Text us at ${BIZ_PHONE} and we'll sort out a spot that works.`;
   if(v==='unsure') return `No worries — just double-check before your appointment. We do need an outdoor water tap and a power outlet on site to get the job done.`;
@@ -1195,7 +1136,9 @@ function utilNoteText(v){
 function pickUtil(v){
   // Update without a full re-render so the customer's typed name/phone/address aren't wiped.
   state.utilities = v;
-  document.querySelectorAll('#utilGrp .util-opt').forEach(b=>b.classList.toggle('sel', b.dataset.v===v));
+  document.querySelectorAll('#utilGrp .util-opt').forEach(b=>{
+    b.classList.toggle('sel', b.dataset.v===v); b.setAttribute('aria-pressed', b.dataset.v===v);
+  });
   const note = document.getElementById('utilNote');
   if(note){
     note.innerHTML = utilNoteText(v);
@@ -1213,18 +1156,13 @@ function pkgExcludes(id){
   const p = PACKAGES.find(x=>x.id===state.pkg);
   return !!(p && p.excludes && p.excludes.includes(id));
 }
-function extrasLabel(){ return state.addons.length ? `Continue · $${total()}` : 'No extras — continue'; }
 function toggleAddon(id){
   if(pkgIncludes(id) || pkgExcludes(id)) return;   // bundled or not applicable — not a paid extra
   const i=state.addons.indexOf(id);
   if(i>-1) state.addons.splice(i,1); else state.addons.push(id);
-  // Update in place — a full re-render would yank the scroll position around.
   const el = document.getElementById('ad-'+id);
-  if(el) el.classList.toggle('sel', state.addons.includes(id));
-  const eb = document.getElementById('extrasBtn');
-  if(eb) eb.textContent = extrasLabel();
-  const rt = document.getElementById('runTotal');
-  if(rt) rt.textContent = '$'+total();
+  if(el){ const on = state.addons.includes(id); el.classList.toggle('sel', on); el.setAttribute('aria-pressed', on); }
+  refreshMoney();
 }
 function total(){
   let t = PACKAGES.find(p=>p.id===state.pkg)?.price || 0;
@@ -1232,17 +1170,44 @@ function total(){
   state.addons.forEach(a=>{ if(!pkgIncludes(a) && !pkgExcludes(a)) t += ADDONS.find(x=>x.id===a).price; });
   return t;
 }
-function go(step){ state.step=step; render(); if(step===3) loadSlots(); }
-function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
-const STEP_LABELS = {1:'Choose your service', 2:'Add extras', 3:'Pick a day & time', 4:'Your details', 5:'Confirm'};
-function topBar(n){
-  const segs = [1,2,3,4,5].map(i=>`<span class="seg ${i<=n?'on':''}"></span>`).join('');
-  return `<div class="modal-top">`+
-    `<span class="step-label">Step ${n} of 5 · ${STEP_LABELS[n]}</span>`+
-    (state.pkg ? `<span class="run-total" id="runTotal">$${total()}</span>` : '')+
-    `<button class="close" onclick="closeBooking()" aria-label="Close">×</button></div>`+
-    `<div class="steps" aria-hidden="true">${segs}</div>`;
+// Keep whatever is typed on the details step when the customer steps away from it.
+function stashDetails(){
+  const v = id => { const el = document.getElementById(id); return el ? el.value : null; };
+  if(v('f-name')===null) return;
+  state.name = v('f-name').trim(); state.phone = v('f-phone').trim();
+  state.address = v('f-address').trim(); state.town = v('f-town') || '';
 }
+function go(step){
+  if(state.step===5) stashDetails();
+  state.step=step; render();
+  if(step===4) loadSlots();
+}
+function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+const STEP_LABELS = {1:'Service', 2:'Vehicle', 3:'Extras', 4:'Day & time', 5:'Your details', 6:'Review'};
+const IC_BACK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>';
+const IC_CLOSE = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>';
+function topBar(n){
+  const segs = [1,2,3,4,5,6].map(i=>`<span class="${i<=n?'on':''}"></span>`).join('');
+  return `<div class="bk-head"><div class="bk-head-row">`+
+    (n>1 ? `<button class="bk-ic" onclick="go(${n-1})" aria-label="Back">${IC_BACK}</button>` : `<span class="bk-ic-gap"></span>`)+
+    `<span class="bk-step">Step ${n} of 6 · ${STEP_LABELS[n]}</span>`+
+    `<button class="bk-ic" onclick="closeBooking()" aria-label="Close booking">${IC_CLOSE}</button></div>`+
+    `<div class="bk-prog" aria-hidden="true">${segs}</div></div>`;
+}
+/* Live order summary shown beside the steps on wide screens. */
+function asideInner(){
+  const p = PACKAGES.find(x=>x.id===state.pkg);
+  const sz = SIZES.find(x=>x.id===state.size);
+  let h = `<p class="bk-a-h">Your booking</p>`;
+  if(!p) return h + `<p class="bk-a-empty">Pick a service to get started.</p>` + asideNotes();
+  h += `<div class="bk-a-line"><span>${p.name}</span><b>$${p.price}</b></div>`;
+  if(sz) h += `<div class="bk-a-line"><span>${sz.name}</span>${sz.price?`<b>+$${sz.price}</b>`:`<span class="m">No charge</span>`}</div>`;
+  h += state.addons.map(a=>{ const x=ADDONS.find(z=>z.id===a); return `<div class="bk-a-line"><span>${x.name}</span><b>+$${x.price}</b></div>`; }).join('');
+  if(state.slot) h += `<div class="bk-a-line"><span>${fmtDay(state.slot.instant)} · ${fmtTime(state.slot.instant)}</span><span class="m">${state.slot.label}</span></div>`;
+  h += `<div class="bk-a-total"><span>Total</span><b>$${total()}</b></div>`;
+  return h + asideNotes();
+}
+function asideNotes(){ return `<div class="bk-a-notes"><span>No deposit, no card needed.</span><span>Pay after the job's done.</span><span>Not happy? We fix it.</span></div>`; }
 
 /* Ghost-tap guard: when a tap swaps the sheet's content, iOS can dispatch a
    trailing click at the same coordinates that lands on whatever new button is
@@ -1253,60 +1218,29 @@ inner.addEventListener('click', e=>{
   if(performance.now() < tapBlockUntil){ e.stopPropagation(); e.preventDefault(); }
 }, true);
 
-// Sheet layout: fixed header/steps, scrollable body, optional fixed footer.
+// Layout: fixed header, scrollable body, fixed footer, plus the summary column.
 // The body slides in from the direction of travel (forward vs back).
-let lastOrd = 0;
+let lastStep = 0;
 function sheet(n, body, foot){
   tapGuard();
-  const ord = state.step===2 ? (state.v2==='size'?2:3) : (state.step>=3 ? state.step+1 : 1);
-  const dir = ord >= lastOrd ? 'fwd' : 'back';
-  lastOrd = ord;
-  inner.innerHTML = (n ? topBar(n) : '')
-    + `<div class="sheet-body slide-${dir}" id="sheetBody">${body}</div>`
-    + (foot ? `<div class="sheet-foot">${foot}</div>` : '');
+  const dir = state.step >= lastStep ? 'fwd' : 'back';
+  lastStep = state.step;
+  inner.classList.toggle('done', !n);
+  inner.innerHTML = `<div class="bk-main">`
+    + (n ? topBar(n) : `<div class="bk-done-top"><button class="bk-ic" onclick="closeBooking()" aria-label="Close booking">${IC_CLOSE}</button></div>`)
+    + `<div class="bk-body slide-${dir}" id="sheetBody">${body}</div>${foot||''}</div>`
+    + (n ? `<aside class="bk-aside" id="bkAside" aria-label="Your booking">${asideInner()}</aside>` : '');
 }
-/* The review ticket, shared by the confirm step (tappable) and success screen. */
-function ticketHtml(edit){
-  const p = PACKAGES.find(x=>x.id===state.pkg);
-  const sz = SIZES.find(x=>x.id===state.size);
-  // Display-only booking code for the ticket stub, e.g. DV-TUEJUL14-9AM
-  const code = 'DV-' + fmtDay(state.slot.instant).replace(/[^A-Za-z0-9]/g,'').toUpperCase()
-             + '-' + fmtTime(state.slot.instant).replace(/[^0-9APM]/gi,'').toUpperCase();
-  // Tappable regions jump straight to the step that edits them.
-  const T = fn => edit ? ` role="button" tabindex="0" onclick="${fn}"` : '';
-  const tap = edit ? ' tap' : '';
-  return `
-      <div class="tix">
-        <div class="tix-top">
-          <div class="tix-row1">
-            <span class="tix-brand">Detail Valley · Mobile Detailing</span>
-            <span class="tix-admit">Admit one</span>
-          </div>
-          <div class="tix-feature${tap}"${T('go(1)')}>${p.name}</div>
-          <div class="tix-cols${tap}"${T('go(3)')}>
-            <div><span class="tix-l">Date</span><b>${fmtDay(state.slot.instant)}</b></div>
-            <div><span class="tix-l">Arrival</span><b>${fmtTime(state.slot.instant)}</b></div>
-          </div>
-          <div class="tix-cols single${tap}"${T('go(4)')}>
-            <div><span class="tix-l">Location</span><b>${esc(state.address)}, ${esc(state.town)}</b></div>
-          </div>
-          <div class="tix-cols${tap}"${T('go(4)')}>
-            <div><span class="tix-l">Guest</span><b>${esc(state.name)}</b></div>
-            <div><span class="tix-l">Contact</span><b>${esc(state.phone)}</b></div>
-          </div>
-        </div>
-        <div class="tix-tear" aria-hidden="true"></div>
-        <div class="tix-stub">
-          <div class="tix-item${tap}"${T('go(1)')}><span>${p.name}</span><span>$${p.price}</span></div>
-          ${sz && sz.price ? `<div class="tix-item${tap}"${T('editSize()')}><span>+ ${sz.name}</span><span>$${sz.price}</span></div>` : ''}
-          ${state.addons.map(a=>{const x=ADDONS.find(z=>z.id===a);return `<div class="tix-item${tap}"${T('backToExtras()')}><span>+ ${x.name}</span><span>${pkgIncludes(a)?'Included':'$'+x.price}</span></div>`}).join('')}
-          ${state.utilities!=='yes' ? `<div class="tix-item warn${tap}"${T('go(4)')}><span>Water &amp; power on site</span><span>${state.utilities==='no'?'⚠ Not available':'Unsure'}</span></div>` : ''}
-          <div class="tix-total"><span>Total · due after service</span><b>$${total()}</b></div>
-          <div class="tix-code"><div class="tix-bar" aria-hidden="true"></div><span>${code}</span></div>
-        </div>
-      </div>`;
+function footNext(label, enabled, action, totLabel){
+  return `<div class="bk-foot"><div class="bk-tot"><span>${totLabel||'Total so far'}</span><b id="runTotal">$${total()}</b></div>`
+    + `<button class="bk-go" id="bkGo" onclick="${action}" ${enabled?'':'disabled'}>${label}</button></div>`;
 }
-function editSize(){ state.v2='size'; go(2); }
+function jobEnd(){ return new Date(state.slot.instant.getTime() + jobMinutes()*60000); }
+function openDaysText(){
+  const names = ['Sundays','Mondays','Tuesdays','Wednesdays','Thursdays','Fridays','Saturdays'];
+  const days = Object.keys(HOURS).map(Number).sort();
+  return (days.length===1 ? `We detail on ${names[days[0]]}. ` : '') + 'Open days are outlined.';
+}
 
 /* Downloadable calendar event for the success screen (opens iOS/Google Calendar). */
 function icsHref(){
@@ -1330,111 +1264,131 @@ function icsHref(){
 function render(){
   if(state.step===1){
     sheet(1, `
-      <h3>What does your car need?</h3>
+      <h2 class="bk-title">What does your car need?</h2>
       ${PACKAGES.map(p=>`
-        <button class="opt ${state.pkg===p.id?'sel':''}" onclick="pickPkg('${p.id}')">
-          <span class="o-name">${p.name} — $${p.price}</span>
-          <span class="o-meta">${p.meta}</span>
+        <button class="bk-opt ${state.pkg===p.id?'sel':''}" data-grp="pkg" data-id="${p.id}" aria-pressed="${state.pkg===p.id}" onclick="pickPkg('${p.id}')">
+          <span class="bk-radio" aria-hidden="true"></span>
+          <span class="bk-o-tx"><span class="bk-o-name">${p.name}${p.id==='full'?' <span class="bk-badge">Most popular</span>':''}</span>
+          <span class="bk-o-meta">${p.meta}</span></span>
+          <span class="bk-o-price">$${p.price}</span>
         </button>`).join('')}
-    `);
-  }
-  else if(state.step===2 && state.v2==='size'){
-    sheet(2, `
-      <h3>What are you driving?</h3>
-      <p class="field-intro">Bigger rigs take more time, so pick the closest match.</p>
-      ${SIZES.map(s=>`
-        <button class="opt size-opt ${state.size===s.id?'sel':''}" onclick="pickSize('${s.id}')">
-          <span class="o-ic" aria-hidden="true">${SIZE_ICON[s.id]||''}</span>
-          <span class="o-txt"><span class="o-name">${s.name}</span>
-          <span class="o-meta">${s.meta}</span></span>
-        </button>`).join('')}
-      <button class="back" onclick="go(1)">← Back</button>
-    `);
+      <p class="bk-note">No deposit. You pay after the work is done.</p>
+    `, footNext('Continue', !!state.pkg, 'go(2)'));
   }
   else if(state.step===2){
-    state.addons = state.addons.filter(id=>!pkgIncludes(id) && !pkgExcludes(id));   // drop anything the package covers or can't take
     sheet(2, `
-      <h3>Want to add anything?</h3>
-      <p class="field-intro">Optional — tap to add, or just keep going.</p>
-      <div class="addons">
-      ${ADDONS.filter(a=>!pkgExcludes(a.id)).map(a=> pkgIncludes(a.id)
-        ? `<div class="chip-add included" aria-disabled="true">
-            <span class="ca-ic" aria-hidden="true">${ADDON_ICON[a.id]||''}</span>
-            <span class="ca-tx"><span class="ca-name">${a.name}</span>
-            <span class="ca-price">✓ Included</span></span>
-          </div>`
-        : `<button class="chip-add ${state.addons.includes(a.id)?'sel':''}" id="ad-${a.id}"
-            aria-pressed="${state.addons.includes(a.id)}" onclick="toggleAddon('${a.id}')">
-            <span class="ca-ic" aria-hidden="true">${ADDON_ICON[a.id]||''}</span>
-            <span class="ca-tx"><span class="ca-name">${a.name}</span>
-            <span class="ca-price">+$${a.price}</span></span>
-          </button>`).join('')}
-      </div>
-    `, `
-      <button class="btn" id="extrasBtn" onclick="go(3)">${extrasLabel()}</button>
-      <button class="back" onclick="v2Size()">← Back</button>
-    `);
+      <h2 class="bk-title">What are you driving?</h2>
+      <p class="bk-intro">Bigger rigs take more time, so pick the closest match.</p>
+      ${SIZES.map(s=>`
+        <button class="bk-opt ${state.size===s.id?'sel':''}" data-grp="size" data-id="${s.id}" aria-pressed="${state.size===s.id}" onclick="pickSize('${s.id}')">
+          <span class="bk-veh" aria-hidden="true">${SIZE_ICON[s.id]||''}</span>
+          <span class="bk-o-tx"><span class="bk-o-name">${s.name}</span>
+          <span class="bk-o-meta">${s.note}</span></span>
+          <span class="bk-o-price">+$${s.price}</span>
+        </button>`).join('')}
+    `, footNext('Continue', !!state.size, 'go(3)'));
   }
   else if(state.step===3){
+    dropUnusableAddons();   // drop anything the package covers or can't take
     sheet(3, `
-      <h3>When works for you?</h3>
-      <div id="slotArea"><p class="slot-status">Loading available days…</p></div>
-      <button class="back" onclick="backToExtras()">← Back</button>
-    `);
+      <h2 class="bk-title">Want to add anything?</h2>
+      <p class="bk-intro">Optional. Tap to add, or just keep going.</p>
+      ${ADDONS.filter(a=>!pkgExcludes(a.id)).map(a=> pkgIncludes(a.id)
+        ? `<div class="bk-opt bk-inc">
+            <span class="bk-check" aria-hidden="true"></span>
+            <span class="bk-o-tx"><span class="bk-o-name">${a.name}</span></span>
+            <span class="bk-o-price">Included</span>
+          </div>`
+        : `<button class="bk-opt ${state.addons.includes(a.id)?'sel':''}" id="ad-${a.id}"
+            aria-pressed="${state.addons.includes(a.id)}" onclick="toggleAddon('${a.id}')">
+            <span class="bk-check" aria-hidden="true"></span>
+            <span class="bk-o-tx"><span class="bk-o-name">${a.name}</span></span>
+            <span class="bk-o-price">+$${a.price}</span>
+          </button>`).join('')}
+    `, footNext('Continue', true, 'go(4)'));
   }
   else if(state.step===4){
     sheet(4, `
-      <h3>Your details</h3>
-      <p class="slot-chosen">${state.slot ? fmtDay(state.slot.instant)+' · '+fmtTime(state.slot.instant) : ''}</p>
-      <div class="field"><label>Your name</label>
-        <input id="f-name" value="${esc(state.name)}" placeholder="Jordan Smith" autocomplete="name" autocapitalize="words" enterkeyhint="next"></div>
-      <div class="field"><label>Phone number</label>
-        <input id="f-phone" type="tel" inputmode="tel" value="${esc(state.phone)}" placeholder="(208) 555-0123" autocomplete="tel" oninput="onPhoneInput(this)" enterkeyhint="next">
-        <p class="hint">We'll text you here to confirm.</p></div>
-      <div class="field"><label>Where should we come?</label>
-        <input id="f-address" value="${esc(state.address)}" placeholder="123 Main St" autocomplete="street-address" autocapitalize="words" enterkeyhint="next"></div>
-      <div class="field"><label>Town</label><select id="f-town">
-        <option value="" ${state.town?'':'selected'} disabled>Tap to choose your town…</option>
-        ${TOWNS.map(t=>`<option value="${t}" ${state.town===t?'selected':''}>${t}</option>`).join('')}
-      </select></div>
-      <div class="field"><label>Is there an outdoor water tap &amp; power outlet we can use?</label>
-        <div class="util-grp" id="utilGrp">
-          <button type="button" class="util-opt ${state.utilities==='yes'?'sel':''}" data-v="yes" onclick="pickUtil('yes')">Yes</button>
-          <button type="button" class="util-opt ${state.utilities==='no'?'sel':''}" data-v="no" onclick="pickUtil('no')">No</button>
-          <button type="button" class="util-opt ${state.utilities==='unsure'?'sel':''}" data-v="unsure" onclick="pickUtil('unsure')">Not sure</button>
-        </div>
-        <p class="util-note ${state.utilities==='no'?'warn-note':''}" id="utilNote" ${state.utilities==='no'||state.utilities==='unsure'?'':'hidden'}>${utilNoteText(state.utilities)}</p>
-      </div>
-      <input type="text" id="f-company" class="hp" tabindex="-1" autocomplete="off" aria-hidden="true">
-      <p id="detailErr" class="form-err" hidden></p>
-    `, `
-      <button class="btn" onclick="saveDetails()">Review booking</button>
-      <button class="back" onclick="go(3)">← Back</button>
-    `);
+      <h2 class="bk-title">When works for you?</h2>
+      <p class="bk-intro">${openDaysText()}</p>
+      <div id="slotArea"><p class="slot-status">Loading available days…</p></div>
+    `, footNext('Continue', !!state.slot, 'go(5)'));
   }
   else if(state.step===5){
     sheet(5, `
-      <h3>Does this look right?</h3>
-      ${ticketHtml(true)}
-      <p class="tix-hint">Tap any detail on the ticket to change it.</p>
-      <p id="confirmErr" class="form-err" hidden></p>
-    `, `
-      <button class="btn" id="confirmBtn" onclick="submitBooking()">Confirm booking · $${total()}</button>
-      <p class="foot-note">No card needed — pay after the job's done.</p>
-      <button class="back" onclick="go(4)">← Back</button>
-    `);
+      <h2 class="bk-title">Your details</h2>
+      <div class="field"><label for="f-name">Your name</label>
+        <input id="f-name" value="${esc(state.name)}" placeholder="Jordan Smith" autocomplete="name" autocapitalize="words" enterkeyhint="next"></div>
+      <div class="field"><label for="f-phone">Phone number</label>
+        <input id="f-phone" type="tel" inputmode="tel" value="${esc(state.phone)}" placeholder="(208) 555-0123" autocomplete="tel" oninput="onPhoneInput(this)" enterkeyhint="next">
+        <p class="hint">We'll text you here to confirm.</p></div>
+      <div class="bk-row2">
+        <div class="field"><label for="f-address">Where should we come?</label>
+          <input id="f-address" value="${esc(state.address)}" placeholder="123 Main St" autocomplete="street-address" autocapitalize="words" enterkeyhint="next"></div>
+        <div class="field"><label for="f-town">Town</label><select id="f-town">
+          <option value="" ${state.town?'':'selected'} disabled>Choose…</option>
+          ${TOWNS.map(t=>`<option value="${t}" ${state.town===t?'selected':''}>${t}</option>`).join('')}
+        </select></div>
+      </div>
+      <fieldset class="field"><legend>Is there an outdoor water tap &amp; power outlet we can use?</legend>
+        <div class="util-grp" id="utilGrp">
+          <button type="button" class="util-opt ${state.utilities==='yes'?'sel':''}" data-v="yes" aria-pressed="${state.utilities==='yes'}" onclick="pickUtil('yes')">Yes</button>
+          <button type="button" class="util-opt ${state.utilities==='no'?'sel':''}" data-v="no" aria-pressed="${state.utilities==='no'}" onclick="pickUtil('no')">No</button>
+          <button type="button" class="util-opt ${state.utilities==='unsure'?'sel':''}" data-v="unsure" aria-pressed="${state.utilities==='unsure'}" onclick="pickUtil('unsure')">Not sure</button>
+        </div>
+        <p class="util-note ${state.utilities==='no'?'warn-note':''}" id="utilNote" ${state.utilities==='no'||state.utilities==='unsure'?'':'hidden'}>${utilNoteText(state.utilities)}</p>
+      </fieldset>
+      <input type="text" id="f-company" class="hp" tabindex="-1" autocomplete="off" aria-hidden="true">
+      <p id="detailErr" class="form-err" hidden></p>
+    `, footNext('Review', true, 'saveDetails()', 'Total'));
   }
   else if(state.step===6){
-    sheet(0, `
-      <div class="done">
-        <div class="tick"></div>
-        <h3>You're booked in.</h3>
-        <p>We'll text ${esc(state.phone)||'you'} to confirm. Nothing to pay until the work's done.</p>
+    const p = PACKAGES.find(x=>x.id===state.pkg);
+    const sz = SIZES.find(x=>x.id===state.size);
+    sheet(6, `
+      <h2 class="bk-title">Does this look right?</h2>
+      <div class="bk-arr">
+        <div><div class="l">Arriving</div><div class="w">${fmtDay(state.slot.instant)} · ${fmtTime(state.slot.instant)}</div>
+        <div class="e">Done around ${fmtTime(jobEnd())}</div></div>
+        <button class="bk-change" onclick="go(4)">Change</button>
       </div>
-      ${ticketHtml(false)}
-      <a class="btn2" download="detail-valley-booking.ics" href="${icsHref()}">＋ Add to calendar</a>
-      <button class="btn" onclick="closeBooking()" style="display:block;width:100%;margin-top:10px;text-align:center">Done</button>
-    `);
+      <div class="bk-card">
+        <div class="bk-line"><span>${p.name}</span><b>$${p.price}</b></div>
+        ${sz ? `<div class="bk-line"><span>${sz.name}</span><b>+$${sz.price}</b></div>` : ''}
+        ${state.addons.map(a=>{const x=ADDONS.find(z=>z.id===a);return `<div class="bk-line"><span>${x.name}</span><b>+$${x.price}</b></div>`}).join('')}
+        <div class="bk-line total"><span>Total, due after the job</span><b>$${total()}</b></div>
+      </div>
+      <div class="bk-card"><div class="bk-who">
+        <div><div class="n">${esc(state.name)} · ${esc(state.phone)}</div>
+        <div class="s">${esc(state.address)}, ${esc(state.town)}</div>
+        <div class="s ${state.utilities==='yes'?'':'warn'}">${state.utilities==='yes'?'Water tap &amp; power outlet on site':(state.utilities==='no'?'⚠ No water tap or power outlet on site':'Water tap &amp; power outlet: not sure yet')}</div></div>
+        <button class="bk-change" onclick="go(5)">Change</button>
+      </div></div>
+      <p id="confirmErr" class="form-err" hidden></p>
+    `, `<div class="bk-foot col">
+      <button class="bk-go" id="confirmBtn" onclick="submitBooking()">Confirm booking</button>
+      <p class="foot-note">No card needed. Pay after the job's done.</p>
+    </div>`);
+  }
+  else if(state.step===7){
+    const p = PACKAGES.find(x=>x.id===state.pkg);
+    const sz = SIZES.find(x=>x.id===state.size);
+    const svc = [p.name, sz && sz.name].concat(state.addons.map(a=>ADDONS.find(z=>z.id===a).name)).filter(Boolean).join(', ');
+    sheet(0, `
+      <div class="bk-tick" aria-hidden="true"></div>
+      <h2 class="bk-done-h">You're booked in.</h2>
+      <p class="bk-done-p">We'll text ${esc(state.phone)||'you'} to confirm. Nothing to pay until the work's done.</p>
+      <div class="bk-card">
+        <div class="bk-line"><span class="k">When</span><span class="v">${fmtDay(state.slot.instant)} · ${fmtTime(state.slot.instant)}</span></div>
+        <div class="bk-line"><span class="k">Where</span><span class="v">${esc(state.address)}, ${esc(state.town)}</span></div>
+        <div class="bk-line"><span class="k">Service</span><span class="v">${svc}</span></div>
+        <div class="bk-line"><span class="k">Total due after</span><span class="v">$${total()}</span></div>
+      </div>
+      <p class="bk-tip"><b>Before we arrive:</b> park near the water tap and outlet, and clear out anything you want kept.</p>
+    `, `<div class="bk-foot col">
+      <a class="bk-go navy" download="detail-valley-booking.ics" href="${icsHref()}">Add to calendar</a>
+      <button class="bk-alt" onclick="closeBooking()">Done</button>
+    </div>`);
   }
 }
 
@@ -1444,6 +1398,7 @@ const CAL_DOW = ['Su','Mo','Tu','We','Th','Fr','Sa'];
 let slotsByDate = {};   // 'y-m-d' -> [slot,…]
 let calMonths = [];     // [{y,m}] months that have availability
 let calIdx = 0;
+function dateKey(instant){ const {y,m,d} = mtDateParts(instant); return y+'-'+m+'-'+d; }
 
 async function loadSlots(){
   const area = () => document.getElementById('slotArea');
@@ -1453,7 +1408,7 @@ async function loadSlots(){
     if(area()) area().innerHTML = `<p class="slot-status">Couldn't load available times. Call or text <a href="tel:+12083151420">${BIZ_PHONE}</a> to book.</p>`;
     return;
   }
-  if(state.step!==3) return;
+  if(state.step!==4) return;
   slotCache = slots;
   if(!slots.length){
     area().innerHTML = `<p class="slot-status">No open days right now. Call or text <a href="tel:+12083151420">${BIZ_PHONE}</a> and we'll fit you in.</p>`;
@@ -1463,69 +1418,56 @@ async function loadSlots(){
   slotsByDate = {};
   const monthSet = {};
   slots.forEach(s=>{
-    const {y,m,d} = mtDateParts(s.instant);
-    (slotsByDate[y+'-'+m+'-'+d] ||= []).push(s);
+    const {y,m} = mtDateParts(s.instant);
+    (slotsByDate[dateKey(s.instant)] ||= []).push(s);
     monthSet[y*12+(m-1)] = true;
   });
   calMonths = Object.keys(monthSet).map(Number).sort((a,b)=>a-b)
     .map(n=>({y:Math.floor(n/12), m:(n%12)+1}));
-  // Forget a previously chosen day/time if it just got booked out.
-  if(state.slot && !slots.some(s=>s.key===state.slot.key)){ state.slot=null; state.calDate=null; }
-  if(state.calDate && !slotsByDate[state.calDate]){ state.calDate=null; }
-  // Open on the month of the chosen day, otherwise the first month with openings.
-  calIdx = 0;
-  if(state.calDate){
-    const [yy,mm] = state.calDate.split('-').map(Number);
-    const i = calMonths.findIndex(c=>c.y===yy && c.m===mm);
-    if(i>=0) calIdx = i;
+  // Forget a previously chosen day/time if it just got booked out (or no longer fits the job).
+  if(state.slot){
+    const fresh = slots.find(s=>s.key===state.slot.key);
+    state.slot = fresh || null;
   }
+  if(state.calDate && !slotsByDate[state.calDate]) state.calDate = null;
+  // Start on the first open day so its arrival times are showing straight away.
+  if(!state.calDate) state.calDate = dateKey(slots[0].instant);
+  const [yy,mm] = state.calDate.split('-').map(Number);
+  calIdx = Math.max(0, calMonths.findIndex(c=>c.y===yy && c.m===mm));
+  enableGo(!!state.slot); refreshMoney();
   drawCalendar();
 }
 
 function drawCalendar(){
   const area = document.getElementById('slotArea');
   if(!area || !calMonths.length) return;
-  tapGuard();   // day cells swap to time buttons at the same spot — swallow the trailing tap
-  // A picked day collapses the calendar to a one-line chip so the times sit right there.
-  if(state.calDate && !state.calOpen && slotsByDate[state.calDate]){
-    const day = slotsByDate[state.calDate][0].instant;
-    area.innerHTML = `
-      <div class="day-chip-row">
-        <span class="dc-day">${fmtDay(day)}</span>
-        <button class="dc-change" onclick="calReopen()">Change day</button>
-      </div>
-      <div id="timeArea">${renderTimes()}</div>`;
-    return;
-  }
   const cur = calMonths[calIdx];
   const startDow = new Date(cur.y, cur.m-1, 1).getDay();   // 0=Sun … 6=Sat
   const daysInMonth = new Date(cur.y, cur.m, 0).getDate();
 
   let cells = '';
-  for(let i=0;i<startDow;i++) cells += `<div class="cal-cell empty"></div>`;
+  for(let i=0;i<startDow;i++) cells += `<div class="cal-cell"></div>`;
   for(let d=1; d<=daysInMonth; d++){
     const k = cur.y+'-'+cur.m+'-'+d;
     const avail = !!slotsByDate[k];
     const sel = state.calDate===k;
-    const cls = 'cal-cell' + (sel?' sel':(avail?' avail':' disabled'));
-    const aria = `${CAL_MONTHS[cur.m-1]} ${d}, ${avail?'has openings':'no openings'}`;
+    const aria = `${CAL_MONTHS[cur.m-1]} ${d}, ${avail?(sel?'selected':'has openings'):'no openings'}`;
     cells += avail
-      ? `<button class="${cls}" onclick="pickDate('${k}')" aria-label="${aria}">${d}<span class="dot"></span></button>`
-      : `<div class="${cls}" aria-label="${aria}">${d}</div>`;
+      ? `<button class="cal-cell ${sel?'sel':'avail'}" onclick="pickDate('${k}')" aria-pressed="${sel}" aria-label="${aria}">${d}</button>`
+      : `<div class="cal-cell" aria-label="${aria}">${d}</div>`;
   }
 
   area.innerHTML = `
     <div class="cal">
       <div class="cal-head">
-        <button class="cal-nav" onclick="calMove(-1)" ${calIdx<=0?'disabled':''} aria-label="Previous month">‹</button>
+        <button class="bk-ic cal-nav" onclick="calMove(-1)" ${calIdx<=0?'disabled':''} aria-label="Previous month"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button>
         <div class="cal-title">${CAL_MONTHS[cur.m-1]} ${cur.y}</div>
-        <button class="cal-nav" onclick="calMove(1)" ${calIdx>=calMonths.length-1?'disabled':''} aria-label="Next month">›</button>
+        <button class="bk-ic cal-nav" onclick="calMove(1)" ${calIdx>=calMonths.length-1?'disabled':''} aria-label="Next month"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg></button>
       </div>
       <div class="cal-dow">${CAL_DOW.map(x=>`<span>${x}</span>`).join('')}</div>
       <div class="cal-grid">${cells}</div>
-      <p class="cal-hint">Highlighted days have openings — tap one to see times.</p>
     </div>
-    <div id="timeArea">${state.calDate?renderTimes():''}</div>`;
+    <div id="timeArea">${renderTimes()}</div>`;
 }
 
 function calMove(dir){
@@ -1535,14 +1477,11 @@ function calMove(dir){
 
 function pickDate(k){
   state.calDate = k;
-  state.calOpen = false;
-  const sb = document.getElementById('sheetBody');
-  if(sb) sb.scrollTop = 0;
+  // A time picked on another day no longer applies.
+  if(state.slot && dateKey(state.slot.instant)!==k){ state.slot = null; enableGo(false); refreshMoney(); }
   drawCalendar();
-}
-function calReopen(){
-  state.calOpen = true;
-  drawCalendar();
+  const ta = document.getElementById('timeArea');
+  if(ta) ta.scrollIntoView({block:'nearest'});
 }
 
 function renderTimes(){
@@ -1550,18 +1489,22 @@ function renderTimes(){
   if(!items.length) return '';
   return `
     <div class="cal-times">
-      <div class="cal-times-h">Choose an arrival time</div>
+      <div class="cal-times-h">Arrival time on ${fmtDay(items[0].instant)}</div>
+      <div class="bk-times">
       ${items.map(s=>`
-        <button class="time-btn ${state.slot&&state.slot.key===s.key?'sel':''}" onclick="pickSlot(${s.key})">
+        <button class="time-btn ${state.slot&&state.slot.key===s.key?'sel':''}" aria-pressed="${!!(state.slot&&state.slot.key===s.key)}" onclick="pickSlot(${s.key})">
           <span class="t-time">${fmtTime(s.instant)}</span>
           <span class="t-label">${s.label}</span>
         </button>`).join('')}
+      </div>
     </div>`;
 }
 
 function pickSlot(key){
   state.slot = (slotCache||[]).find(s=>s.key===key) || null;
-  if(state.slot) go(4);
+  const ta = document.getElementById('timeArea');
+  if(ta) ta.innerHTML = renderTimes();
+  enableGo(!!state.slot); refreshMoney();
 }
 
 /* Format a US phone as the customer types: (208) 315-1420 */
@@ -1586,15 +1529,15 @@ function saveDetails(){
   if(state.address.length < 5) return showErr(err,'Please enter the address we should come to.');
   if(!state.town) return showErr(err,'Please choose your town.');
   if(!state.utilities) return showErr(err,'Please let us know if a water tap and power outlet are available.');
-  go(5);
+  go(6);
 }
 
 async function submitBooking(){
   if(submitting) return;
   const btn = document.getElementById('confirmBtn');
   const err = document.getElementById('confirmErr');
-  if(!state.slot){ go(3); return; }
-  if(state.hp){ go(6); return; }                       // honeypot: bot, skip silently
+  if(!state.slot){ go(4); return; }
+  if(state.hp){ go(7); return; }                       // honeypot: bot, skip silently
   if(!sb) return showErr(err, `Booking is offline right now — call or text ${BIZ_PHONE}.`);
   submitting = true; if(btn){ btn.disabled=true; btn.textContent='Booking…'; }
   const sz = SIZES.find(s=>s.id===state.size);
@@ -1610,17 +1553,17 @@ async function submitBooking(){
     duration_min: jobMinutes(),
     status: 'pending'
   });
-  submitting = false; if(btn){ btn.disabled=false; btn.textContent='Confirm booking · $'+total(); }
+  submitting = false; if(btn){ btn.disabled=false; btn.textContent='Confirm booking'; }
   if(error){
     if(error.code==='23505' || error.code==='23P01'){
       showErr(err,'Sorry — that time was just booked. Choose another.');
-      setTimeout(()=>go(3), 1300);
+      setTimeout(()=>go(4), 1300);
     } else {
       showErr(err, `Couldn't complete the booking. Call or text ${BIZ_PHONE}.`);
     }
     return;
   }
-  go(6);
+  go(7);
 }
 
 /* Sticky bottom "Book a detail" bar: stays hidden while the hero button is in

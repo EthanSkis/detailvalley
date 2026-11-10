@@ -423,7 +423,9 @@ const DEFAULTS = {
   cond: [
     {id:'clean',   name:'Just detailed',   mult:0.85, fee:0,   note:'kept up, light soil'},
     {id:'normal',  name:'Daily driver',    mult:1.00, fee:0,   note:'normal for around here'},
-    {id:'rough',   name:'Rough',           mult:1.30, fee:45,  note:'kids, dogs, mud season'},
+    // "Rough" is the condition customers can tick when booking online, so its
+    // surcharge and time multiplier are the site's (dv-pricing.js), not editable here.
+    {id:'rough',   name:'Rough',           mult:SITE.soiled.mult, fee:SITE.soiled.price, note:'heavily soiled — the online surcharge', site:true},
     {id:'trashed', name:'Trashed',         mult:1.65, fee:110, note:'spills, smoke, heavy pet, mystery smell'}
   ],
   towns: [
@@ -466,7 +468,7 @@ function loadCfg(){
     if(!Array.isArray(saved_[group])) return;
     out[group].forEach(item=>{
       const was = saved_[group].find(x => x && x.id === item.id);
-      if(!was) return;
+      if(!was || item.site) return;   // site-owned rows never come back from the device
       // Only the tunable numbers come back — names always come from the code.
       ['min','mult','fee','miles'].forEach(f=>{
         if(typeof was[f] === 'number') item[f] = was[f];
@@ -957,9 +959,10 @@ function renderSettings(){
 
   $('s-cond').innerHTML = cfg.cond.map((c,i)=>`
     <div class="row4">
-      <div class="rl">${esc(c.name)}</div>
+      <div class="rl">${esc(c.name)}${c.site ? ' <span class="locked">booking site</span>' : ''}</div>
+      ${c.site ? `<div class="ro">${c.mult}</div><div class="ro">$${c.fee}</div>` : `
       <input type="number" inputmode="decimal" step="0.05" value="${c.mult}" oninput="setCfg('cond',${i},'mult',this.value)">
-      <input type="number" inputmode="decimal" step="5" value="${c.fee}" oninput="setCfg('cond',${i},'fee',this.value)">
+      <input type="number" inputmode="decimal" step="5" value="${c.fee}" oninput="setCfg('cond',${i},'fee',this.value)">`}
     </div>`).join('');
 
   $('s-towns').innerHTML = cfg.towns.map((t,i)=>`

@@ -308,14 +308,15 @@
      and footer stay put while only .bk-body scrolls (no position:sticky — it
      misbehaves inside iOS overlays). dvh tracks the browser's dynamic toolbars. */
   .modal-bg{display:none;position:fixed;inset:0;background:rgba(11,42,69,.55);align-items:stretch;justify-content:center;z-index:50}
-  .modal-bg.open{display:flex;animation:bkFade .22s ease both}
-  .modal-bg.open .modal{animation:bkRise .34s cubic-bezier(.2,.8,.2,1) both}
-  .modal-bg.closing{animation:bkFadeOut .19s ease both;pointer-events:none}
-  .modal-bg.closing .modal{animation:bkDrop .19s ease both}
+  /* Opens like a native sheet: slides up from the bottom edge, slides back down to close. */
+  .modal-bg.open{display:flex;animation:bkFade .3s ease both}
+  .modal-bg.open .modal{animation:bkRise .5s cubic-bezier(.32,.72,0,1) both}
+  .modal-bg.closing{animation:bkFadeOut .3s ease both;pointer-events:none}
+  .modal-bg.closing .modal{animation:bkDrop .3s cubic-bezier(.4,0,1,1) both}
   @keyframes bkFade{from{opacity:0}to{opacity:1}}
   @keyframes bkFadeOut{from{opacity:1}to{opacity:0}}
-  @keyframes bkRise{from{transform:translateY(32px);opacity:0}to{transform:none;opacity:1}}
-  @keyframes bkDrop{from{transform:none}to{transform:translateY(20px)}}
+  @keyframes bkRise{from{transform:translateY(100%)}to{transform:none}}
+  @keyframes bkDrop{from{transform:none}to{transform:translateY(100%)}}
   .modal{background:var(--bg);color:var(--text);width:100%;height:100vh;height:100dvh;display:flex;overflow:hidden;
     font-family:var(--f-body);font-size:1rem;line-height:1.45}
   .bk-main{flex:1 1 0;min-width:0;min-height:0;display:flex;flex-direction:column}
@@ -339,31 +340,28 @@
   .bk-title+.bk-opt,.bk-title+.field{margin-top:16px}
   .bk-note{font-size:.88rem;color:var(--mute);margin-top:14px}
   /* Step content comes in from the direction of travel, one row after another. */
-  .slide-fwd{--dx:20px}
-  .slide-back{--dx:-20px}
-  .bk-body>*{animation:bkItem .32s cubic-bezier(.2,.8,.2,1) both}
-  .bk-body>:nth-child(2){animation-delay:.035s}
-  .bk-body>:nth-child(3){animation-delay:.07s}
-  .bk-body>:nth-child(4){animation-delay:.105s}
-  .bk-body>:nth-child(5){animation-delay:.14s}
-  .bk-body>:nth-child(6){animation-delay:.175s}
-  .bk-body>:nth-child(n+7){animation-delay:.21s}
+  .slide-fwd{--dx:72px}
+  .slide-back{--dx:-72px}
+  .bk-body{overflow-x:hidden}
+  .bk-body>*{animation:bkItem .5s cubic-bezier(.3,.6,.2,1) both}
+  .bk-body>:nth-child(2){animation-delay:.06s}
+  .bk-body>:nth-child(3){animation-delay:.12s}
+  .bk-body>:nth-child(4){animation-delay:.18s}
+  .bk-body>:nth-child(5){animation-delay:.24s}
+  .bk-body>:nth-child(6){animation-delay:.3s}
+  .bk-body>:nth-child(n+7){animation-delay:.36s}
   @keyframes bkItem{from{transform:translateX(var(--dx,0));opacity:0}to{transform:none;opacity:1}}
-  @keyframes bkPop{0%{transform:scale(.6)}60%{transform:scale(1.12)}100%{transform:scale(1)}}
-  @keyframes bkUp{from{transform:translateY(8px);opacity:0}to{transform:none;opacity:1}}
+  @keyframes bkPop{0%{transform:scale(0)}55%{transform:scale(1.3)}100%{transform:scale(1)}}
+  @keyframes bkUp{from{transform:translateY(22px);opacity:0}to{transform:none;opacity:1}}
   @keyframes bkFill{to{background-size:100% 100%}}
-  @keyframes bkBump{0%{transform:scale(1)}40%{transform:scale(1.14)}100%{transform:scale(1)}}
+  @keyframes bkBump{0%{transform:scale(1);color:var(--cop)}35%{transform:scale(1.3);color:var(--cop)}100%{transform:scale(1)}}
   @keyframes bkShimmer{from{background-position:120% 0}to{background-position:-80% 0}}
   @keyframes bkCheck{from{opacity:0;transform:rotate(45deg) scale(.3)}to{opacity:1;transform:rotate(45deg) scale(1)}}
-  @media(prefers-reduced-motion:reduce){
-    .modal-bg,.modal-bg *,.modal-bg *::after{animation:none!important;transition:none!important}
-    .bk-prog span.now{background:var(--text)!important}
-  }
-  .bk-prog span.now{background:linear-gradient(var(--text),var(--text)) left/0 100% no-repeat var(--rule);animation:bkFill .45s .1s ease forwards}
-  .bk-opt.sel .bk-radio,.bk-opt.sel .bk-check{animation:bkPop .24s ease}
+  .bk-prog span.now{background:linear-gradient(var(--text),var(--text)) left/0 100% no-repeat var(--rule);animation:bkFill .7s .15s ease forwards}
+  .bk-opt.sel .bk-radio,.bk-opt.sel .bk-check{animation:bkPop .4s ease}
   .bk-tot b{transform-origin:left center}
-  .bk-tot b.bump{animation:bkBump .3s ease}
-  .bk-go:not(:disabled):active,.bk-alt:active,.bk-opt:active,.time-btn:active,.cal-cell.avail:active,.util-opt:active{transform:scale(.98)}
+  .bk-tot b.bump{animation:bkBump .5s ease}
+  .bk-go:not(:disabled):active,.bk-alt:active,.bk-opt:active,.time-btn:active,.cal-cell.avail:active,.util-opt:active{transform:scale(.96)}
   .sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 
   /* Choice rows: radio (service, vehicle) and checkbox (extras) */
@@ -434,10 +432,10 @@
   .time-skel{min-height:62px;border-radius:10px}
   .pick-h.skel-line{width:58%;border-radius:6px}
   /* …then the real days and times arrive */
-  .reveal .cal-cell.avail,.reveal .cal-cell.sel{animation:bkPop .3s ease both}
-  .reveal .time-btn,.swap .time-btn{animation:bkUp .28s ease both}
-  .reveal .time-btn:nth-child(2),.swap .time-btn:nth-child(2){animation-delay:.05s}
-  .reveal .time-btn:nth-child(n+3),.swap .time-btn:nth-child(n+3){animation-delay:.1s}
+  .reveal .cal-cell.avail,.reveal .cal-cell.sel{animation:bkPop .5s .15s ease both}
+  .reveal .time-btn,.swap .time-btn{animation:bkUp .45s .1s ease both}
+  .reveal .time-btn:nth-child(2),.swap .time-btn:nth-child(2){animation-delay:.18s}
+  .reveal .time-btn:nth-child(n+3),.swap .time-btn:nth-child(n+3){animation-delay:.26s}
   .cal-times{margin-top:14px}
   .bk-times{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
   .time-btn{background:var(--surface);color:var(--text);border:1.5px solid #cbd4dc;border-radius:10px;padding:10px 4px;min-height:62px;
@@ -492,8 +490,8 @@
     text-decoration:underline;cursor:pointer;padding:12px 4px;margin:-8px -4px}
   .bk-done-top{display:flex;justify-content:flex-end;padding:8px 8px 0}
   .bk-tick{width:56px;height:56px;border-radius:50%;background:var(--text);position:relative;margin-bottom:16px}
-  .bk-tick{animation:bkPop .45s ease both}
-  .bk-tick::after{animation:bkCheck .3s .28s ease both}
+  .bk-tick{animation:bkPop .6s .15s ease both}
+  .bk-tick::after{animation:bkCheck .4s .5s ease both}
   .bk-tick::after{content:"";position:absolute;left:21px;top:13px;width:12px;height:23px;border-right:3.5px solid #fff;border-bottom:3.5px solid #fff;transform:rotate(45deg)}
   .bk-done-h{font-size:2rem;line-height:1.08;letter-spacing:-.03em}
   .bk-done-p{font-size:1.06rem;color:var(--mute);margin:10px 0 20px}
@@ -516,7 +514,8 @@
     .modal-bg{align-items:center;padding:24px}
     .modal{max-width:980px;height:min(700px,calc(100vh - 16px));height:min(700px,calc(100dvh - 16px));border-radius:16px;
       box-shadow:0 40px 90px rgba(6,20,34,.45)}
-    @keyframes bkRise{from{transform:translateY(14px) scale(.97);opacity:0}to{transform:none;opacity:1}}
+    @keyframes bkRise{from{transform:translateY(40px) scale(.9);opacity:0}to{transform:none;opacity:1}}
+    @keyframes bkDrop{from{transform:none;opacity:1}to{transform:translateY(24px) scale(.94);opacity:0}}
     .modal.done{max-width:520px;height:auto;max-height:calc(100vh - 16px);max-height:calc(100dvh - 16px)}
     .bk-aside{display:flex}
     .bk-head{padding:12px 24px 16px}
@@ -581,6 +580,19 @@
     .bk-done-p{margin:4px 0 10px;font-size:.92rem}
     .modal.done .bk-card .bk-line{padding:6px 0;font-size:.92rem}
     .modal-bg{padding-top:8px;padding-bottom:8px}
+  }
+
+  /* Phones set to "Reduce Motion" still get feedback, just without movement:
+     the same moments become plain fades. (Declared last so these win.) */
+  @media(prefers-reduced-motion:reduce){
+    @keyframes bkRise{from{opacity:0}to{opacity:1}}
+    @keyframes bkDrop{from{opacity:1}to{opacity:0}}
+    @keyframes bkItem{from{opacity:0}to{opacity:1}}
+    @keyframes bkUp{from{opacity:0}to{opacity:1}}
+    @keyframes bkPop{from{opacity:0}to{opacity:1}}
+    @keyframes bkBump{from{color:var(--cop)}to{color:inherit}}
+    @keyframes bkCheck{from{opacity:0;transform:rotate(45deg)}to{opacity:1;transform:rotate(45deg)}}
+    .cal-cell.pend,.time-skel,.skel-line{animation:none}
   }
 
   /* ---------- PACKAGE CHOOSE BUTTON ---------- */
@@ -1230,15 +1242,13 @@ function openBooking(pre){
   render();
 }
 let closeTimer = null;
-const reduceMotion = window.matchMedia ? window.matchMedia('(prefers-reduced-motion: reduce)') : {matches:false};
 function closeBooking(){
   document.body.classList.remove('modal-open');
   document.body.style.top = '';
   window.scrollTo({ top: scrollLockY, left: 0, behavior: 'instant' });
   clearTimeout(closeTimer);
-  if(reduceMotion.matches){ modal.classList.remove('open','closing'); return; }
-  modal.classList.add('closing');   // fades out, then really closes
-  closeTimer = setTimeout(()=>modal.classList.remove('open','closing'), 190);
+  modal.classList.add('closing');   // animates out, then really closes
+  closeTimer = setTimeout(()=>modal.classList.remove('open','closing'), 300);
 }
 modal.addEventListener('click', e=>{ if(e.target===modal) closeBooking(); });
 document.addEventListener('keydown', e=>{ if(e.key==='Escape' && modal.classList.contains('open')) closeBooking(); });

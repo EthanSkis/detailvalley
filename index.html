@@ -308,7 +308,14 @@
      and footer stay put while only .bk-body scrolls (no position:sticky — it
      misbehaves inside iOS overlays). dvh tracks the browser's dynamic toolbars. */
   .modal-bg{display:none;position:fixed;inset:0;background:rgba(11,42,69,.55);align-items:stretch;justify-content:center;z-index:50}
-  .modal-bg.open{display:flex}
+  .modal-bg.open{display:flex;animation:bkFade .22s ease both}
+  .modal-bg.open .modal{animation:bkRise .34s cubic-bezier(.2,.8,.2,1) both}
+  .modal-bg.closing{animation:bkFadeOut .19s ease both;pointer-events:none}
+  .modal-bg.closing .modal{animation:bkDrop .19s ease both}
+  @keyframes bkFade{from{opacity:0}to{opacity:1}}
+  @keyframes bkFadeOut{from{opacity:1}to{opacity:0}}
+  @keyframes bkRise{from{transform:translateY(32px);opacity:0}to{transform:none;opacity:1}}
+  @keyframes bkDrop{from{transform:none}to{transform:translateY(20px)}}
   .modal{background:var(--bg);color:var(--text);width:100%;height:100vh;height:100dvh;display:flex;overflow:hidden;
     font-family:var(--f-body);font-size:1rem;line-height:1.45}
   .bk-main{flex:1 1 0;min-width:0;min-height:0;display:flex;flex-direction:column}
@@ -331,12 +338,33 @@
   .bk-intro{color:var(--mute);margin-bottom:16px}
   .bk-title+.bk-opt,.bk-title+.field{margin-top:16px}
   .bk-note{font-size:.88rem;color:var(--mute);margin-top:14px}
-  /* step content slides in from the direction of travel */
-  .slide-fwd{animation:slideF .22s ease}
-  .slide-back{animation:slideB .22s ease}
-  @keyframes slideF{from{transform:translateX(26px);opacity:.35}to{transform:none;opacity:1}}
-  @keyframes slideB{from{transform:translateX(-26px);opacity:.35}to{transform:none;opacity:1}}
-  @media(prefers-reduced-motion:reduce){.slide-fwd,.slide-back{animation:none}}
+  /* Step content comes in from the direction of travel, one row after another. */
+  .slide-fwd{--dx:20px}
+  .slide-back{--dx:-20px}
+  .bk-body>*{animation:bkItem .32s cubic-bezier(.2,.8,.2,1) both}
+  .bk-body>:nth-child(2){animation-delay:.035s}
+  .bk-body>:nth-child(3){animation-delay:.07s}
+  .bk-body>:nth-child(4){animation-delay:.105s}
+  .bk-body>:nth-child(5){animation-delay:.14s}
+  .bk-body>:nth-child(6){animation-delay:.175s}
+  .bk-body>:nth-child(n+7){animation-delay:.21s}
+  @keyframes bkItem{from{transform:translateX(var(--dx,0));opacity:0}to{transform:none;opacity:1}}
+  @keyframes bkPop{0%{transform:scale(.6)}60%{transform:scale(1.12)}100%{transform:scale(1)}}
+  @keyframes bkUp{from{transform:translateY(8px);opacity:0}to{transform:none;opacity:1}}
+  @keyframes bkFill{to{background-size:100% 100%}}
+  @keyframes bkBump{0%{transform:scale(1)}40%{transform:scale(1.14)}100%{transform:scale(1)}}
+  @keyframes bkShimmer{from{background-position:120% 0}to{background-position:-80% 0}}
+  @keyframes bkCheck{from{opacity:0;transform:rotate(45deg) scale(.3)}to{opacity:1;transform:rotate(45deg) scale(1)}}
+  @media(prefers-reduced-motion:reduce){
+    .modal-bg,.modal-bg *,.modal-bg *::after{animation:none!important;transition:none!important}
+    .bk-prog span.now{background:var(--text)!important}
+  }
+  .bk-prog span.now{background:linear-gradient(var(--text),var(--text)) left/0 100% no-repeat var(--rule);animation:bkFill .45s .1s ease forwards}
+  .bk-opt.sel .bk-radio,.bk-opt.sel .bk-check{animation:bkPop .24s ease}
+  .bk-tot b{transform-origin:left center}
+  .bk-tot b.bump{animation:bkBump .3s ease}
+  .bk-go:not(:disabled):active,.bk-alt:active,.bk-opt:active,.time-btn:active,.cal-cell.avail:active,.util-opt:active{transform:scale(.98)}
+  .sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 
   /* Choice rows: radio (service, vehicle) and checkbox (extras) */
   .bk-opt{display:flex;align-items:center;gap:14px;width:100%;min-height:58px;text-align:left;background:var(--surface);color:var(--text);
@@ -399,6 +427,17 @@
     display:flex;align-items:center;justify-content:center;padding:0}
   .cal-cell.avail{border:1.5px solid var(--text);background:var(--surface);color:var(--text);font-weight:600;cursor:pointer}
   .cal-cell.sel{border:none;background:var(--text);color:#fff;font-weight:600;cursor:pointer}
+  /* Loading state: days still being checked, and the times row, shimmer */
+  .cal-cell.pend,.time-skel,.skel-line{background:linear-gradient(100deg,#e3e8ed 30%,#f4f6f8 50%,#e3e8ed 70%) 0 0/200% 100%;
+    animation:bkShimmer 1.15s linear infinite}
+  .cal-cell.pend{color:#8497a8}
+  .time-skel{min-height:62px;border-radius:10px}
+  .pick-h.skel-line{width:58%;border-radius:6px}
+  /* …then the real days and times arrive */
+  .reveal .cal-cell.avail,.reveal .cal-cell.sel{animation:bkPop .3s ease both}
+  .reveal .time-btn,.swap .time-btn{animation:bkUp .28s ease both}
+  .reveal .time-btn:nth-child(2),.swap .time-btn:nth-child(2){animation-delay:.05s}
+  .reveal .time-btn:nth-child(n+3),.swap .time-btn:nth-child(n+3){animation-delay:.1s}
   .cal-times{margin-top:14px}
   .bk-times{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
   .time-btn{background:var(--surface);color:var(--text);border:1.5px solid #cbd4dc;border-radius:10px;padding:10px 4px;min-height:62px;
@@ -453,6 +492,8 @@
     text-decoration:underline;cursor:pointer;padding:12px 4px;margin:-8px -4px}
   .bk-done-top{display:flex;justify-content:flex-end;padding:8px 8px 0}
   .bk-tick{width:56px;height:56px;border-radius:50%;background:var(--text);position:relative;margin-bottom:16px}
+  .bk-tick{animation:bkPop .45s ease both}
+  .bk-tick::after{animation:bkCheck .3s .28s ease both}
   .bk-tick::after{content:"";position:absolute;left:21px;top:13px;width:12px;height:23px;border-right:3.5px solid #fff;border-bottom:3.5px solid #fff;transform:rotate(45deg)}
   .bk-done-h{font-size:2rem;line-height:1.08;letter-spacing:-.03em}
   .bk-done-p{font-size:1.06rem;color:var(--mute);margin:10px 0 20px}
@@ -475,6 +516,7 @@
     .modal-bg{align-items:center;padding:24px}
     .modal{max-width:980px;height:min(700px,calc(100vh - 16px));height:min(700px,calc(100dvh - 16px));border-radius:16px;
       box-shadow:0 40px 90px rgba(6,20,34,.45)}
+    @keyframes bkRise{from{transform:translateY(14px) scale(.97);opacity:0}to{transform:none;opacity:1}}
     .modal.done{max-width:520px;height:auto;max-height:calc(100vh - 16px);max-height:calc(100dvh - 16px)}
     .bk-aside{display:flex}
     .bk-head{padding:12px 24px 16px}
@@ -520,6 +562,7 @@
     .cal{--cal-row:30px;padding-bottom:6px}
     .cal-head .bk-ic{height:36px}
     .time-btn{min-height:54px;padding:6px 4px}
+    .time-skel{min-height:54px}
     .cal-times{margin-top:8px}
     .pick-h{margin-bottom:5px;font-size:.94rem}
     .bk-arr{padding:9px 14px}
@@ -1097,15 +1140,32 @@ function candidateStarts(jobMin){
 /* Candidate starts minus anything that would overlap an existing job (keeping a
    travel buffer) or exceed the daily job cap. Booked starts + durations come
    from Supabase via taken_slots — no PII. */
+/* Booked slots for a date range, cached briefly. warmSlots() asks for them the
+   moment the booking flow opens, so by the time the customer reaches the
+   calendar the answer is usually already here and there is nothing to wait for.
+   (A stale answer can't double-book: the database rejects overlapping jobs.) */
+let takenCache = null;   // {at, from, to, promise}
+function fetchTaken(fromMs, toMs){
+  const now = Date.now();
+  if(takenCache && now - takenCache.at < 45000 && takenCache.from <= fromMs && takenCache.to >= toMs) return takenCache.promise;
+  const c = {at:now, from:fromMs, to:toMs};
+  c.promise = Promise.resolve(sb.rpc('taken_slots',{p_from:new Date(fromMs).toISOString(), p_to:new Date(toMs).toISOString()}))
+    .then(({data, error})=>{ if(error) throw error; return data||[]; })
+    .catch(e=>{ if(takenCache===c) takenCache = null; throw e; });
+  takenCache = c;
+  return c.promise;
+}
+function warmSlots(){
+  if(!sb) return;
+  const all = candidateStarts(60);   // shortest job = widest set of start times, so the range covers any package
+  if(all.length) fetchTaken(all[0].key - 86400000, all[all.length-1].key + 86400000).catch(()=>{});
+}
 async function availableSlots(){
   const jobMin = jobMinutes();
   const all = candidateStarts(jobMin);
   if(!sb || !all.length) return all;
-  const from = new Date(all[0].key - 86400000).toISOString();
-  const to   = new Date(all[all.length-1].key + 86400000).toISOString();
-  const { data, error } = await sb.rpc('taken_slots',{p_from:from,p_to:to});
-  if(error) throw error;
-  const taken = (data||[]).map(r=>({ start:new Date(r.slot_start).getTime(), dur:(r.duration_min||180) }));
+  const data = await fetchTaken(all[0].key - 86400000, all[all.length-1].key + 86400000);
+  const taken = data.map(r=>({ start:new Date(r.slot_start).getTime(), dur:(r.duration_min||180) }));
   const perDay = {};
   taken.forEach(t=>{ const {y,m,d}=mtDateParts(new Date(t.start)); const k=y+'-'+m+'-'+d; perDay[k]=(perDay[k]||0)+1; });
   const buf = BUFFER_MIN*60000, len = jobMin*60000;
@@ -1142,9 +1202,9 @@ const SIZES = [
 
 /* Line-art icons for the vehicle choices (inline SVG, currentColor). */
 const SIZE_ICON = {
-  standard:'<svg viewBox="0 0 48 22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 15h-1v-3c0-1.1.9-2 2-2h5l6-5h11l7 5h7c1.6 0 3 1.4 3 3v2h-2"/><circle cx="13" cy="16" r="3"/><circle cx="35" cy="16" r="3"/><path d="M16 15h16"/></svg>',
-  midsize:'<svg viewBox="0 0 48 22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 16h-1v-5c0-1.1.9-2 2-2h3l4-5h16l5 5h9c1.1 0 2 .9 2 2v5h-2"/><circle cx="13" cy="17" r="3"/><circle cx="36" cy="17" r="3"/><path d="M16 16h17"/></svg>',
-  oversize:'<svg viewBox="0 0 48 22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 16v-4h2V6c0-.6.4-1 1-1h16c.6 0 1 .4 1 1v6h6l4-4h8c1.1 0 2 .9 2 2v6h-2"/><circle cx="12" cy="17" r="3"/><circle cx="37" cy="17" r="3"/><path d="M15 16h19"/></svg>'
+  standard:'<svg viewBox="0 0 56 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 18H5.5a2 2 0 0 1-2-2v-2.5c0-1.700 1.200-3.100 2.900-3.400L14 9l5.300-4a5 5 0 0 1 3-1h8.900a5 5 0 0 1 3.300 1.200L39.500 9.500l9.600 1.500a4 4 0 0 1 3.400 4V16a2 2 0 0 1-2 2H46M18 18h20M15 9.500h23.500"/><circle cx="14" cy="18" r="3.500"/><circle cx="42" cy="18" r="3.500"/></svg>',
+  midsize:'<svg viewBox="0 0 56 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.500 18H5.500a2 2 0 0 1-2-2V7.500a4 4 0 0 1 4-4H31a5 5 0 0 1 3.700 1.600L39.500 10.500l9.700 1.200a4 4 0 0 1 3.300 4V16a2 2 0 0 1-2 2h-4M18.500 18h19M3.500 10.500h35M22 3.500v7"/><circle cx="14" cy="18" r="4"/><circle cx="42" cy="18" r="4"/></svg>',
+  oversize:'<svg viewBox="0 0 56 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.500 18H5.500a2 2 0 0 1-2-2v-5.500a1 1 0 0 1 1-1H24V5.500a2 2 0 0 1 2-2h7.800a5 5 0 0 1 3.900 1.900L41 10l8.300 1.300a4 4 0 0 1 3.200 3.900V16a2 2 0 0 1-2 2h-4M18.500 18h19M24 9.500V14M28 10h12.500"/><circle cx="14" cy="18" r="4"/><circle cx="42" cy="18" r="4"/></svg>'
 };
 
 function freshState(){ return {step:1, pkg:null, size:null, addons:[], slot:null, calDate:null, name:'', phone:'', address:'', town:'', utilities:null, hp:false}; }
@@ -1163,14 +1223,22 @@ function openBooking(pre){
   scrollLockY = window.scrollY || window.pageYOffset || 0;
   document.body.style.top = `-${scrollLockY}px`;
   document.body.classList.add('modal-open');
+  clearTimeout(closeTimer);
+  modal.classList.remove('closing');
   modal.classList.add('open');
+  warmSlots();
   render();
 }
+let closeTimer = null;
+const reduceMotion = window.matchMedia ? window.matchMedia('(prefers-reduced-motion: reduce)') : {matches:false};
 function closeBooking(){
   document.body.classList.remove('modal-open');
   document.body.style.top = '';
   window.scrollTo({ top: scrollLockY, left: 0, behavior: 'instant' });
-  modal.classList.remove('open');
+  clearTimeout(closeTimer);
+  if(reduceMotion.matches){ modal.classList.remove('open','closing'); return; }
+  modal.classList.add('closing');   // fades out, then really closes
+  closeTimer = setTimeout(()=>modal.classList.remove('open','closing'), 190);
 }
 modal.addEventListener('click', e=>{ if(e.target===modal) closeBooking(); });
 document.addEventListener('keydown', e=>{ if(e.key==='Escape' && modal.classList.contains('open')) closeBooking(); });
@@ -1186,7 +1254,11 @@ function markSel(grp, id){
 }
 function enableGo(on){ const g = document.getElementById('bkGo'); if(g) g.disabled = !on; }
 function refreshMoney(){
-  const rt = document.getElementById('runTotal'); if(rt) rt.textContent = '$'+total();
+  const rt = document.getElementById('runTotal');
+  if(rt && rt.textContent !== '$'+total()){
+    rt.textContent = '$'+total();
+    rt.classList.remove('bump'); void rt.offsetWidth; rt.classList.add('bump');   // restart the little pop
+  }
   const as = document.getElementById('bkAside'); if(as) as.innerHTML = asideInner();
 }
 function dropUnusableAddons(){ state.addons = state.addons.filter(id=>!pkgIncludes(id) && !pkgExcludes(id)); }
@@ -1250,8 +1322,8 @@ function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;',
 const STEP_LABELS = {1:'Service', 2:'Vehicle', 3:'Extras', 4:'Day & time', 5:'Your details', 6:'Review'};
 const IC_BACK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>';
 const IC_CLOSE = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>';
-function topBar(n){
-  const segs = [1,2,3,4,5,6].map(i=>`<span class="${i<=n?'on':''}"></span>`).join('');
+function topBar(n, fwd){
+  const segs = [1,2,3,4,5,6].map(i=>`<span class="${i<n || (i===n && !fwd) ? 'on' : (i===n ? 'now' : '')}"></span>`).join('');
   return `<div class="bk-head"><div class="bk-head-row">`+
     (n>1 ? `<button class="bk-ic" onclick="go(${n-1})" aria-label="Back">${IC_BACK}</button>` : `<span class="bk-ic-gap"></span>`)+
     `<span class="bk-step">Step ${n} of 6 · ${STEP_LABELS[n]}</span>`+
@@ -1291,7 +1363,7 @@ function sheet(n, body, foot){
   lastStep = state.step;
   inner.classList.toggle('done', !n);
   inner.innerHTML = `<div class="bk-main">`
-    + (n ? topBar(n) : `<div class="bk-done-top"><button class="bk-ic" onclick="closeBooking()" aria-label="Close booking">${IC_CLOSE}</button></div>`)
+    + (n ? topBar(n, dir==='fwd') : `<div class="bk-done-top"><button class="bk-ic" onclick="closeBooking()" aria-label="Close booking">${IC_CLOSE}</button></div>`)
     + `<div class="bk-body slide-${dir}" id="sheetBody">${body}</div>${foot||''}</div>`
     + (n ? `<aside class="bk-aside" id="bkAside" aria-label="Your booking">${asideInner()}</aside>` : '');
 }
@@ -1374,7 +1446,7 @@ function render(){
   else if(state.step===4){
     sheet(4, `
       <h2 class="bk-title">When works for you?</h2>
-      <div id="slotArea"><p class="slot-status">Loading available days…</p></div>
+      <div id="slotArea">${skeletonHtml()}</div>
     `, footNext('Continue', !!state.slot, 'go(5)'));
   }
   else if(state.step===5){
@@ -1497,20 +1569,19 @@ async function loadSlots(){
   const [yy,mm] = state.calDate.split('-').map(Number);
   calIdx = Math.max(0, calMonths.findIndex(c=>c.y===yy && c.m===mm));
   enableGo(!!state.slot); refreshMoney();
-  drawCalendar();
+  drawCalendar(true);
 }
 
-function drawCalendar(){
-  const area = document.getElementById('slotArea');
-  if(!area || !calMonths.length) return;
-  const cur = calMonths[calIdx];
+/* The month grid. With `pending` (a Set of date keys) it is the loading state:
+   the real month and day numbers, with the days still being checked shimmering. */
+function gridHtml(cur, pending){
   const startDow = new Date(cur.y, cur.m-1, 1).getDay();   // 0=Sun … 6=Sat
   const daysInMonth = new Date(cur.y, cur.m, 0).getDate();
-
   let cells = '';
   for(let i=0;i<startDow;i++) cells += `<div class="cal-cell"></div>`;
   for(let d=1; d<=daysInMonth; d++){
     const k = cur.y+'-'+cur.m+'-'+d;
+    if(pending){ cells += `<div class="cal-cell ${pending.has(k)?'pend':''}">${d}</div>`; continue; }
     const avail = !!slotsByDate[k];
     const sel = state.calDate===k;
     const aria = `${CAL_MONTHS[cur.m-1]} ${d}, ${avail?(sel?'selected':'has openings'):'no openings'}`;
@@ -1519,18 +1590,41 @@ function drawCalendar(){
       : `<div class="cal-cell" aria-label="${aria}">${d}</div>`;
   }
   const chev = d => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="${d}"/></svg>`;
-
-  area.innerHTML = `
+  return `
     <div class="cal">
       <div class="cal-head">
-        <button class="bk-ic cal-nav" onclick="calMove(-1)" ${calIdx<=0?'disabled':''} aria-label="Previous month">${chev('M15 5l-7 7 7 7')}</button>
+        <button class="bk-ic cal-nav" onclick="calMove(-1)" ${pending||calIdx<=0?'disabled':''} aria-label="Previous month">${chev('M15 5l-7 7 7 7')}</button>
         <div class="cal-title">${CAL_MONTHS[cur.m-1]} ${cur.y}</div>
-        <button class="bk-ic cal-nav" onclick="calMove(1)" ${calIdx>=calMonths.length-1?'disabled':''} aria-label="Next month">${chev('M9 5l7 7-7 7')}</button>
+        <button class="bk-ic cal-nav" onclick="calMove(1)" ${pending||calIdx>=calMonths.length-1?'disabled':''} aria-label="Next month">${chev('M9 5l7 7-7 7')}</button>
       </div>
       <div class="cal-dow">${CAL_DOW.map(x=>`<span>${x}</span>`).join('')}</div>
       <div class="cal-grid">${cells}</div>
-    </div>
-    <div id="timeArea">${renderTimes()}</div>`;
+    </div>`;
+}
+
+/* Shown the instant the step opens. Which days *could* be open is worked out
+   locally (hours, lead time, blocked days), so the calendar is on screen at once;
+   only "is it already booked?" needs the network, and those days shimmer until
+   the answer lands. */
+function skeletonHtml(){
+  const cands = candidateStarts(jobMinutes());
+  if(!cands.length) return `<p class="slot-status">Checking available days…</p>`;
+  const pending = new Set(cands.map(s=>dateKey(s.instant)));
+  const key = (state.calDate && pending.has(state.calDate)) ? state.calDate : dateKey(cands[0].instant);
+  const [y,m] = key.split('-').map(Number);
+  return `<div aria-busy="true"><span class="sr-only">Checking available days…</span>
+    ${gridHtml({y,m}, pending)}
+    <div class="cal-times" aria-hidden="true">
+      <div class="pick-h skel-line">&nbsp;</div>
+      <div class="bk-times">${START_TIMES.slice(0,3).map(()=>`<div class="time-skel"></div>`).join('')}</div>
+    </div></div>`;
+}
+
+function drawCalendar(reveal){
+  const area = document.getElementById('slotArea');
+  if(!area || !calMonths.length) return;
+  area.innerHTML = `<div class="${reveal?'reveal':''}">${gridHtml(calMonths[calIdx], null)}
+    <div id="timeArea" class="${reveal?'':'swap'}">${renderTimes()}</div></div>`;
 }
 
 function calMove(dir){
@@ -1553,7 +1647,7 @@ function renderTimes(){
       <div class="pick-h">Arrival time on ${fmtDay(items[0].instant)}</div>
       <div class="bk-times">
       ${items.map(s=>`
-        <button class="time-btn ${state.slot&&state.slot.key===s.key?'sel':''}" aria-pressed="${!!(state.slot&&state.slot.key===s.key)}" onclick="pickSlot(${s.key})">
+        <button class="time-btn ${state.slot&&state.slot.key===s.key?'sel':''}" data-key="${s.key}" aria-pressed="${!!(state.slot&&state.slot.key===s.key)}" onclick="pickSlot(${s.key})">
           <span class="t-time">${fmtTime(s.instant)}</span>
           <span class="t-label">${s.label}</span>
         </button>`).join('')}
@@ -1563,8 +1657,11 @@ function renderTimes(){
 
 function pickSlot(key){
   state.slot = (slotCache||[]).find(s=>s.key===key) || null;
-  const ta = document.getElementById('timeArea');
-  if(ta) ta.innerHTML = renderTimes();
+  // Update in place so the buttons don't re-animate on every tap.
+  document.querySelectorAll('#timeArea .time-btn').forEach(b=>{
+    const on = !!state.slot && b.dataset.key===String(state.slot.key);
+    b.classList.toggle('sel', on); b.setAttribute('aria-pressed', on);
+  });
   enableGo(!!state.slot); refreshMoney();
 }
 
@@ -1617,6 +1714,7 @@ async function submitBooking(){
   submitting = false; if(btn){ btn.disabled=false; btn.textContent='Confirm booking'; }
   if(error){
     if(error.code==='23505' || error.code==='23P01'){
+      takenCache = null;   // our cached availability was out of date
       showErr(err,'Sorry — that time was just booked. Choose another.');
       setTimeout(()=>go(4), 1300);
     } else {
@@ -1624,6 +1722,7 @@ async function submitBooking(){
     }
     return;
   }
+  takenCache = null;
   go(7);
 }
 

@@ -129,9 +129,10 @@ slot back up, or `confirmed` / `completed` to track it.
   needs** (package + vehicle size + add-ons), plus a travel/cleanup buffer. So a
   quick Maintenance Wash only ties up ~1¼ hr while a Showroom takes most of the day, and
   the calendar never offers a time that would overlap an existing job.
-- Customers see only the **days that have openings**, as a row of buttons, with
-  the first open day preselected and its start times listed underneath (each
-  labelled with roughly when it finishes). Tapping another day swaps the times.
+- Customers see a compact month-grid **calendar**: days with openings are
+  outlined, the rest are greyed out, and the first open day is preselected with
+  its start times listed underneath (each labelled with roughly when it
+  finishes). Tapping another day swaps the times.
 - **No step scrolls.** Every booking step is sized to fit one screen, down to an
   iPhone SE with the browser toolbars showing (375×553). If you add packages,
   add-ons or form fields, re-check the small-phone layout before shipping.

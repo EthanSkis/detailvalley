@@ -67,7 +67,7 @@
   "@type": "FAQPage",
   "mainEntity": [
     {"@type":"Question","name":"Do I need to provide anything?","acceptedAnswer":{"@type":"Answer","text":"Just access to an outdoor water tap and a power outlet near where the car is parked. We bring everything else — hoses, cords, machines, products and towels."}},
-    {"@type":"Question","name":"How long does a detail take?","acceptedAnswer":{"@type":"Answer","text":"A Maintenance Wash runs about 1.5–2 hours. An Interior Detail takes 3.5–4 hours, a Full Detail around 6, and a Showroom finish 6.5–7.5."}},
+    {"@type":"Question","name":"How long does a detail take?","acceptedAnswer":{"@type":"Answer","text":"A Maintenance Wash runs about 1.5–2 hours. An Interior Detail takes 2–3 hours, a Full Detail around 5, and a Showroom finish around 6."}},
     {"@type":"Question","name":"Do I pay a deposit to book?","acceptedAnswer":{"@type":"Answer","text":"No. You book, we do the work, you look the car over, and then you pay — cash, check, cards, Venmo, PayPal or Cash App."}},
     {"@type":"Question","name":"Which areas do you cover?","acceptedAnswer":{"@type":"Answer","text":"All of Valley County, Idaho — McCall, Cascade, Donnelly, Lake Fork, New Meadows and everywhere in between."}},
     {"@type":"Question","name":"What if the weather turns bad?","acceptedAnswer":{"@type":"Answer","text":"If the forecast won't cooperate, we'll text you and move your booking to the next slot that works — no charge to reschedule."}},
@@ -714,7 +714,7 @@
     </div>
 
     <div class="pkg featured">
-      <div><div class="pkg-top"><h3 class="pkg-name">Full Detail</h3><span class="pkg-badge">Most popular</span></div><p class="pkg-meta">Inside and out · around 6 hours</p></div>
+      <div><div class="pkg-top"><h3 class="pkg-name">Full Detail</h3><span class="pkg-badge">Most popular</span></div><p class="pkg-meta">Inside and out · around 5 hours</p></div>
       <div class="pkg-price">$295</div>
       <ul>
         <li>Everything in the Maintenance Wash</li>
@@ -728,7 +728,7 @@
     </div>
 
     <div class="pkg">
-      <div><h3 class="pkg-name">Showroom</h3><p class="pkg-meta">Full Detail plus clay &amp; wax · 6½ to 7½ hours</p></div>
+      <div><h3 class="pkg-name">Showroom</h3><p class="pkg-meta">Full Detail plus clay &amp; wax · around 6 hours</p></div>
       <div class="pkg-price">$360</div>
       <ul>
         <li>Everything in the Full Detail</li>
@@ -743,7 +743,7 @@
 
     <div class="pkg pkg-inside">
       <div>
-        <h3 class="pkg-name">Interior Detail <span>· inside only · 3½ to 4 hours</span></h3>
+        <h3 class="pkg-name">Interior Detail <span>· inside only · 2 to 3 hours</span></h3>
         <p class="inside-sub">Full vacuum, carpet &amp; upholstery shampoo, surfaces, vents, interior glass and dressed trim. No exterior wash.</p>
       </div>
       <div class="pkg-price">$185</div>
@@ -869,7 +869,7 @@
       </details>
       <details>
         <summary>How long does a detail take?</summary>
-        <p>A Maintenance Wash runs about 1½ to 2 hours. An Interior Detail takes 3½ to 4 hours, a Full Detail around 6, and a Showroom finish 6½ to 7½. You don't need to stay. Most customers just hand us the keys.</p>
+        <p>A Maintenance Wash runs about 1½ to 2 hours. An Interior Detail takes 2 to 3 hours, a Full Detail around 5, and a Showroom finish around 6. You don't need to stay. Most customers just hand us the keys.</p>
       </details>
       <details>
         <summary>Do I pay a deposit to book?</summary>
@@ -1056,7 +1056,7 @@ const START_TIMES = ['08:00','09:00','10:00']; // only arrival times offered
 const BUFFER_MIN = 45;          // travel / cleanup gap kept between jobs
 const MAX_JOBS_PER_DAY = 1;     // never offer more than this many jobs in one day
 // How long each job runs (minutes) — drives how much time a booking blocks off.
-const PKG_MIN   = { maintenance:105, interior:225, full:360, showroom:420 };
+const PKG_MIN   = { maintenance:105, interior:150, full:300, showroom:360 };
 const SIZE_MIN  = { standard:0, midsize:30, oversize:60 };
 const ADDON_MIN = { pet:30, dirt:30, engine:20, intglass:10, wax:20 };
 const DOW = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
@@ -1182,9 +1182,9 @@ async function availableSlots(){
 
 const PACKAGES = [
   {id:'maintenance', name:'Maintenance Wash', price:85, meta:'Exterior wash · ~1½–2 hrs'},
-  {id:'interior',    name:'Interior Detail', price:185, meta:'Inside only · ~3½–4 hrs', includes:['intglass'], excludes:['wax']},
-  {id:'full',        name:'Full Detail', price:295, meta:'Inside & out · ~6 hrs', includes:['intglass']},
-  {id:'showroom',    name:'Showroom', price:360, meta:'Adds clay bar & wax · ~6½–7½ hrs', includes:['intglass']},
+  {id:'interior',    name:'Interior Detail', price:185, meta:'Inside only · ~2–3 hrs', includes:['intglass'], excludes:['wax']},
+  {id:'full',        name:'Full Detail', price:295, meta:'Inside & out · ~5 hrs', includes:['intglass']},
+  {id:'showroom',    name:'Showroom', price:360, meta:'Adds clay bar & wax · ~6 hrs', includes:['intglass']},
 ];
 const ADDONS = [
   {id:'pet', name:'Pet hair removal', price:40},

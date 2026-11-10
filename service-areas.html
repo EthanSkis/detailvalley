@@ -6,7 +6,7 @@
 <title>Mobile Car Detailing in McCall, Cascade &amp; Donnelly | Detail Valley</title>
 <meta name="description" content="Detail Valley brings mobile car detailing to McCall, Cascade, Donnelly and the rest of Valley County, ID. We come to your driveway — hand wash, interior, clay &amp; wax.">
 <link rel="canonical" href="https://detailvalley.com/service-areas">
-<meta name="theme-color" content="#081420">
+<meta name="theme-color" content="#ffffff">
 <link rel="icon" type="image/svg+xml" href="logo.svg">
 <link rel="alternate icon" href="logo.png">
 <link rel="apple-touch-icon" href="logo.png">
@@ -69,6 +69,9 @@
 }
 </script>
 
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
   :root{
     --navy:#0f2c44; --navy-2:#15395a; --blue:#2b6cb0; --blue-dark:#225a93;
@@ -137,6 +140,41 @@
     .wrap{max-width:1000px}
     .section-title{font-size:2.3rem}
   }
+  /* ---------- "DAYLIGHT" THEME ---------- */
+  /* Light restyle matching the homepage: retunes the page tokens above and
+     overrides the handful of rules that hard-coded dark-theme colors. */
+  :root{
+    --bg:#f4f6f8; --bg-2:#ffffff; --card:#ffffff; --card-2:#ffffff;
+    --edge:#dde3e9; --edge-2:#c9d2da;
+    --text:#0b2a45; --mute:#3d566b; --dim:#3d566b; --cop-2:#a4521f;
+  }
+  body{font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif}
+  h1,h2,h3,.brand-word,footer .name{font-family:'Sora',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;font-weight:600;letter-spacing:-.025em}
+  a{color:var(--text)}
+  a:hover{color:var(--cop-2)}
+  header{background:var(--bg-2);color:var(--text)}
+  .sheen{display:none}
+  .brand-logo{border-radius:0}
+  .brand-word,.crumbs a:hover{color:var(--text)}
+  .crumbs,.crumbs a{color:var(--mute)}
+  header h1 .accent{color:inherit}
+  .btn{background:var(--cop-2);box-shadow:none;border-radius:8px;transition:background .12s ease}
+  .btn:hover{filter:none;background:#8c4418;color:#fff}
+  .kicker{letter-spacing:.12em;font-weight:600;font-size:.8rem}
+  .fact,.jump a{background:var(--bg);color:var(--text)}
+  .area{background:#fff;border-radius:14px}
+  .area:hover{box-shadow:0 12px 28px rgba(11,42,69,.1)}
+  .ba{border:none;border-radius:12px;box-shadow:none;background:var(--edge)}
+  .ba-tag{border:none;border-radius:5px;padding:5px 9px;letter-spacing:.08em;-webkit-backdrop-filter:none;backdrop-filter:none}
+  .ba-tag-before{background:#fff;color:var(--text)}
+  .ba-tag-after{background:var(--text);color:#fff}
+  .ba-divider::before{left:-1px;width:2px;background:#fff;box-shadow:0 0 10px rgba(0,0,0,.4)}
+  .ba-knob{background:#fff;border:none;-webkit-backdrop-filter:none;backdrop-filter:none;box-shadow:0 4px 12px rgba(11,42,69,.3)}
+  .ba-knob svg path{stroke:var(--text)}
+  .ba.dragging .ba-knob,.ba.hinting .ba-knob{background:#f0c29e}
+  .final{color:var(--text)}
+  footer{background:#fff}
+  footer .name,.foot-contact a{color:var(--text)}
 </style>
 </head>
 <body>

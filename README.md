@@ -41,7 +41,7 @@ command and no publish directory beyond the root are needed.
 | **Name** | Detail Valley |
 | **Domain** | detailvalley.com |
 | **Handle** | @detailvalleyid (Instagram / Facebook / TikTok) |
-| **Colors** | navy `#0f2c44`, copper `#b8632c`, mist white |
+| **Colors** | navy `#0b2a45`, copper `#a4521f` (buttons &amp; accents), mist `#f4f6f8` background |
 | **Fonts** | Sora (headings) + Inter (body), via Google Fonts |
 | **Logo** | `logo.png` (1254×1254) |
 

@@ -162,6 +162,8 @@
   .row4{display:grid;grid-template-columns:1.4fr 1fr 1fr;gap:8px;align-items:center;margin-bottom:8px}
   .row4 .rl{font-size:.86rem;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   .row4 input{padding:9px 10px;font-size:.9rem;text-align:right}
+  .row4 .ro{padding:9px 10px;font-size:.9rem;text-align:right;font-variant-numeric:tabular-nums;color:var(--text-2)}
+  .locked{font-weight:500;font-size:.72rem;color:var(--text-3);margin-left:6px;white-space:nowrap}
   .row-head{display:grid;grid-template-columns:1.4fr 1fr 1fr;gap:8px;font-size:.66rem;font-weight:700;
     text-transform:uppercase;letter-spacing:.05em;color:var(--text-3);margin-bottom:6px}
   .row-head span:not(:first-child){text-align:right}
@@ -236,8 +238,11 @@
     <div class="card">
       <h2>Your numbers</h2>
       <p style="font-size:.86rem;color:var(--text-2);margin-bottom:14px">
-        Everything here is saved on this device only. Changing a price here does
-        <b>not</b> change the public site — update <code>index.html</code> for that.
+        Your own numbers (target rate, supplies, condition and drive times) are
+        saved on this device only. Package, size and add-on prices and times are
+        the same ones customers see when they book — they're shown here but can't
+        be changed here. To change them, edit <code>dv-pricing.js</code>, which
+        changes the public site and this tool together.
       </p>
       <div class="set-grid">
         <div>
@@ -258,15 +263,15 @@
         </div>
       </div>
 
-      <div class="subhead">Packages — price &amp; base minutes</div>
+      <div class="subhead">Packages — price &amp; base minutes <span class="locked">same as the booking site</span></div>
       <div class="row-head"><span>Package</span><span>Price $</span><span>Minutes</span></div>
       <div id="s-pkgs"></div>
 
-      <div class="subhead">Vehicle size — surcharge &amp; extra minutes</div>
+      <div class="subhead">Vehicle size — surcharge &amp; extra minutes <span class="locked">same as the booking site</span></div>
       <div class="row-head"><span>Size class</span><span>Extra $</span><span>Extra min</span></div>
       <div id="s-sizes"></div>
 
-      <div class="subhead">Add-ons</div>
+      <div class="subhead">Add-ons <span class="locked">same as the booking site</span></div>
       <div class="row-head"><span>Add-on</span><span>Price $</span><span>Minutes</span></div>
       <div id="s-addons"></div>
 
@@ -282,7 +287,7 @@
       </p>
 
       <div class="btn-row">
-        <button class="btn alt" onclick="resetCfg()">Reset to site defaults</button>
+        <button class="btn alt" onclick="resetCfg()">Reset my numbers</button>
       </div>
     </div>
   </div>
@@ -293,6 +298,9 @@
 </main>
 
 <div class="toast" id="toast"></div>
+
+<!-- The one price list, shared with the public booking flow (index.html) -->
+<script src="dv-pricing.js"></script>
 
 <script>
 /* =========================================================================
@@ -374,7 +382,33 @@ const VEHICLES = {
   'Volvo':        {s:['S60','S90'], m:['C40','EX30','V60','V90','XC40','XC60'], o:['EX90','XC90']}
 };
 
-/* ---------- Defaults, straight from index.html ---------- */
+/* ---------- The site's price list ----------
+   Packages, vehicle sizes and add-ons — names, prices, minutes and the
+   include/exclude rules — come from dv-pricing.js, the same file the public
+   booking flow reads. They are not editable here and nothing saved on this
+   device can override them, so a quote always matches what a customer would be
+   charged booking online. Only the bits below are this tool's own. */
+const SITE = window.DV_PRICING;
+/* condWeight = how much a filthy vehicle drags THIS package out. The condition
+   tiers describe the inside of the car, so an exterior-only wash only feels a
+   fraction of it (a mud-caked truck is slower to wash, but a wrecked interior
+   costs you nothing if you're never opening the door). */
+const PKG_EXTRA = {
+  maintenance:{condWeight:0.4, blurb:'Exterior wash, wheels, tires, glass'},
+  interior:   {condWeight:1,   blurb:'Inside only — vacuum, shampoo, surfaces & glass'},
+  full:       {condWeight:1,   blurb:'Adds full interior clean & shampoo'},
+  showroom:   {condWeight:1,   blurb:'Adds clay bar & wax protection'}
+};
+const SIZE_SHORT  = {standard:'Standard', midsize:'Midsize', oversize:'Oversize'};
+const ADDON_SHORT = {pet:'Pet hair', dirt:'Heavy dirt / mud', engine:'Engine bay', intglass:'Interior glass', wax:'Extra wax coat'};
+function sitePkgs(){
+  return SITE.packages.map(p => Object.assign({condWeight:1, blurb:p.meta}, PKG_EXTRA[p.id],
+    {id:p.id, name:p.name, price:p.price, min:p.min, includes:p.includes||[], excludes:p.excludes||[]}));
+}
+function siteSizes(){ return SITE.sizes.map(z => ({id:z.id, name:z.name, short:SIZE_SHORT[z.id]||z.name, price:z.price, min:z.min})); }
+function siteAddons(){ return SITE.addons.map(a => ({id:a.id, name:ADDON_SHORT[a.id]||a.name.split(' — ')[0], price:a.price, min:a.min})); }
+
+/* ---------- Defaults ---------- */
 const DEFAULTS = {
   /* What you want to clear per hour, door to door — not just while you're
      scrubbing. Starts at 45 because the current price list only ever lands
@@ -385,33 +419,7 @@ const DEFAULTS = {
   supplyPerJob: 6,        // towels, bags, the stuff you burn every job regardless
   supplyPerHr:  2.5,      // chemicals, pads, water
   costPerMile:  0.60,     // gas + wear on the rig
-  /* condWeight = how much a filthy vehicle drags THIS package out. The condition
-     tiers below describe the inside of the car, so an exterior-only wash only
-     feels a fraction of it (a mud-caked truck is slower to wash, but a wrecked
-     interior costs you nothing if you're never opening the door). */
-  pkgs: [
-    {id:'maintenance', name:'Maintenance Wash', price:85,  min:105, condWeight:0.4,
-     blurb:'Exterior wash, wheels, tires, glass', excludes:['pet']},
-    {id:'interior',    name:'Interior Detail',  price:185, min:225, condWeight:1,
-     blurb:'Inside only — vacuum, shampoo, surfaces & glass',
-     includes:['intglass'], excludes:['wax']},
-    {id:'full',        name:'Full Detail',      price:295, min:360, condWeight:1,
-     blurb:'Adds full interior clean & shampoo', includes:['intglass']},
-    {id:'showroom',    name:'Showroom',         price:360, min:420, condWeight:1,
-     blurb:'Adds clay bar & wax protection', includes:['intglass']}
-  ],
-  sizes: [
-    {id:'standard', name:'Sedan / coupe',                    short:'Standard', price:0,  min:0},
-    {id:'midsize',  name:'SUV / crossover / small truck',    short:'Midsize',  price:30, min:30},
-    {id:'oversize', name:'Large truck / 3-row SUV / van',    short:'Oversize', price:60, min:60}
-  ],
-  addons: [
-    {id:'pet',      name:'Pet hair',        price:40, min:30},
-    {id:'dirt',     name:'Heavy dirt / mud', price:30, min:30},
-    {id:'engine',   name:'Engine bay',      price:25, min:20},
-    {id:'intglass', name:'Interior glass',  price:15, min:10},
-    {id:'wax',      name:'Extra wax coat',  price:30, min:20}
-  ],
+  pkgs: sitePkgs(), sizes: siteSizes(), addons: siteAddons(),   // always the site's — see above
   cond: [
     {id:'clean',   name:'Just detailed',   mult:0.85, fee:0,   note:'kept up, light soil'},
     {id:'normal',  name:'Daily driver',    mult:1.00, fee:0,   note:'normal for around here'},
@@ -441,9 +449,10 @@ let state = {
 };
 
 /* ---------- Storage ---------- */
-/* Merge saved settings over the defaults *by id*, so a package, add-on or town
-   added to DEFAULTS later still appears for someone with older saved settings —
-   and their tuned numbers survive. */
+/* Merge saved settings over the defaults *by id*, so a town or condition added
+   to DEFAULTS later still appears for someone with older saved settings — and
+   their tuned numbers survive. Package, size and add-on prices and minutes are
+   never restored from the device: those are always the site's price list. */
 function loadCfg(){
   let saved_;
   try{ saved_ = JSON.parse(localStorage.getItem(CFG_KEY)); }catch(e){}
@@ -453,23 +462,26 @@ function loadCfg(){
   ['targetHourly','supplyPerJob','supplyPerHr','costPerMile'].forEach(k=>{
     if(typeof saved_[k] === 'number') out[k] = saved_[k];
   });
-  ['pkgs','sizes','addons','cond','towns'].forEach(group=>{
+  ['cond','towns'].forEach(group=>{
     if(!Array.isArray(saved_[group])) return;
     out[group].forEach(item=>{
       const was = saved_[group].find(x => x && x.id === item.id);
       if(!was) return;
-      // Only the tunable numbers come back — names, blurbs and the include/exclude
-      // rules always come from the code so they can be fixed by an update.
-      ['price','min','mult','fee','miles'].forEach(f=>{
+      // Only the tunable numbers come back — names always come from the code.
+      ['min','mult','fee','miles'].forEach(f=>{
         if(typeof was[f] === 'number') item[f] = was[f];
       });
     });
   });
   return out;
 }
-function saveCfg(){ try{ localStorage.setItem(CFG_KEY, JSON.stringify(cfg)); }catch(e){} }
+function saveCfg(){
+  // Only this tool's own numbers are stored; the site's price list never is.
+  const {targetHourly, supplyPerJob, supplyPerHr, costPerMile, cond, towns} = cfg;
+  try{ localStorage.setItem(CFG_KEY, JSON.stringify({targetHourly, supplyPerJob, supplyPerHr, costPerMile, cond, towns})); }catch(e){}
+}
 function resetCfg(){
-  if(!confirm('Put every price, time and drive back to the site defaults?')) return;
+  if(!confirm('Put your target rate, supplies, condition and drive numbers back to their defaults?')) return;
   cfg = clone(DEFAULTS); saveCfg(); renderSettings(); render(); toast('Back to defaults');
 }
 function loadSaved(){ try{ return JSON.parse(localStorage.getItem(SAVE_KEY)) || []; }catch(e){ return []; } }
@@ -925,22 +937,22 @@ function renderSettings(){
   $('s-pkgs').innerHTML = cfg.pkgs.map((p,i)=>`
     <div class="row4">
       <div class="rl">${esc(p.name)}</div>
-      <input type="number" inputmode="decimal" step="5" value="${p.price}" oninput="setCfg('pkgs',${i},'price',this.value)">
-      <input type="number" inputmode="numeric" step="15" value="${p.min}" oninput="setCfg('pkgs',${i},'min',this.value)">
+      <div class="ro">$${p.price}</div>
+      <div class="ro">${p.min}</div>
     </div>`).join('');
 
   $('s-sizes').innerHTML = cfg.sizes.map((s,i)=>`
     <div class="row4">
       <div class="rl">${esc(s.short)}</div>
-      <input type="number" inputmode="decimal" step="5" value="${s.price}" oninput="setCfg('sizes',${i},'price',this.value)">
-      <input type="number" inputmode="numeric" step="15" value="${s.min}" oninput="setCfg('sizes',${i},'min',this.value)">
+      <div class="ro">$${s.price}</div>
+      <div class="ro">${s.min}</div>
     </div>`).join('');
 
   $('s-addons').innerHTML = cfg.addons.map((a,i)=>`
     <div class="row4">
       <div class="rl">${esc(a.name)}</div>
-      <input type="number" inputmode="decimal" step="5" value="${a.price}" oninput="setCfg('addons',${i},'price',this.value)">
-      <input type="number" inputmode="numeric" step="5" value="${a.min}" oninput="setCfg('addons',${i},'min',this.value)">
+      <div class="ro">$${a.price}</div>
+      <div class="ro">${a.min}</div>
     </div>`).join('');
 
   $('s-cond').innerHTML = cfg.cond.map((c,i)=>`

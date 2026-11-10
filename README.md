@@ -23,9 +23,10 @@ covering the towns we serve (McCall · Cascade · Donnelly), and
 `sitemap.xml` help search engines crawl the site (the sitemap lists the public
 pages; `admin.html` is disallowed).
 
-> `index.html`, `service-areas.html`, `before-after.html`, `dv-compare.js`,
-> `logo.svg`, `logo.png` and the `gallery/` folder must live in the **same
-> folder** — the pages reference them by relative path.
+> `index.html`, `quote.html`, `service-areas.html`, `before-after.html`,
+> `dv-pricing.js`, `dv-compare.js`, `logo.svg`, `logo.png` and the `gallery/`
+> folder must live in the **same folder** — the pages reference them by relative
+> path. Without `dv-pricing.js` the booking flow and the quoting tool won't run.
 
 ### Deploy on GitHub Pages
 1. Repo **Settings → Pages**
@@ -56,6 +57,7 @@ command and no publish directory beyond the root are needed.
 | `admin.html` | Private **owner job board** — sign in to manage bookings on your phone. See [Owner dashboard](#owner-dashboard-adminhtml). |
 | `quote.html` | Private **quoting tool** — pick a make &amp; model, get the price, the plans and what the job actually pays. See [Quoting tool](#quoting-tool-quotehtml). |
 | `before-after.html` | Before &amp; after gallery — one chapter per vehicle, 10 drag-to-compare sliders each. See [Before &amp; after](#before--after-photos). |
+| `dv-pricing.js` | **The one price list**: packages, vehicle sizes and add-ons, with their prices and minutes. Read by both the booking flow and the quoting tool, so they always agree. |
 | `dv-compare.js` | Drag / tap / keyboard behavior for the compare sliders. Shared by the homepage and the gallery page. |
 | `gallery/<vehicle>/` | The before &amp; after photos, one folder per vehicle, two widths each (`-sm` = 560px, plain = 900px) for `srcset`. |
 | `CNAME` | Custom domain for GitHub Pages (`detailvalley.com`). |
@@ -144,8 +146,10 @@ slot back up, or `confirmed` / `completed` to track it.
   - `START_TIMES` — the only arrival times offered (currently 8, 9, 10am)
   - `BUFFER_MIN` — travel/cleanup gap kept between jobs (default 45 min)
   - `MAX_JOBS_PER_DAY` — daily job cap (currently **1** — one booking per day)
-  - `PKG_MIN` / `SIZE_MIN` / `ADDON_MIN` — how long each job runs, which drives
-    how much time it blocks. Tune these to your real time-per-car.
+  - How long each job runs (which drives how much time it blocks) is the `min`
+    on each package, size and add-on in **`dv-pricing.js`**, next to its price.
+    Tune these to your real time-per-car. The homepage cards and FAQ state the
+    package prices and times as plain text, so update that text to match.
   - `OPEN_FROM` — closed until this date (currently `2026-07-01`; `''` to remove)
   - `MIN_LEAD_DAYS` — minimum lead time (currently **3** days out)
   - `DAYS_AHEAD` — how big a window to show, starting from the first bookable day
@@ -250,16 +254,18 @@ the model name into the right array — that's the whole job. Anything not in th
 list still quotes fine through *"Not listed — enter it by hand."*
 
 **Tune it under the Rates tab.** Target $/hr, supplies (per job and per hour),
-vehicle cost per mile, every package price and duration, size surcharges,
-add-ons, condition multipliers, and per-town miles/minutes. It all saves to that
-device's `localStorage`.
+vehicle cost per mile, condition multipliers, and per-town miles/minutes. Those
+save to that device's `localStorage`.
 
-> Two things worth knowing. **The Rates tab does not change the public site** —
-> it's a private what-if. To change what customers actually pay, edit `PACKAGES`,
-> `ADDONS` and `SIZES` in `index.html` (and `PKG_MIN` / `SIZE_MIN` / `ADDON_MIN`
-> so the calendar blocks off the right amount of time). And the **town drive
-> times start as guesses** — drive each one, watch the odometer, and put the real
-> numbers in, because they're what decides whether a Cascade job is worth taking.
+> Two things worth knowing. **Package, size and add-on prices and minutes are
+> not editable in the tool.** It reads them from `dv-pricing.js`, the same file
+> the public booking flow uses, and ignores anything saved on the device — so a
+> quote always matches what a customer would be charged booking online. The
+> Rates tab shows them read-only; to change them, edit `dv-pricing.js`. (The
+> condition surcharge and drive costs are the tool's own and have no equivalent
+> in online booking.) And the **town drive times start as guesses** — drive each
+> one, watch the odometer, and put the real numbers in, because they're what
+> decides whether a Cascade job is worth taking.
 
 **What it'll tell you.** At the current price list, a job nets roughly **$18–47
 an hour** door to door. The Maintenance Wash is the weak spot: on a sedan out in

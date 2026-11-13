@@ -4,190 +4,228 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="robots" content="noindex,nofollow">
-<meta name="theme-color" content="#000000">
+<meta name="theme-color" content="#0f0f10">
 <meta name="color-scheme" content="dark">
-<title>Detail Valley — Jobs</title>
+<title>Detail Valley · Jobs</title>
 <link rel="icon" type="image/svg+xml" href="logo.svg">
 <link rel="alternate icon" href="logo.png">
 <style>
-  /* Apple dark-mode palette — iOS/macOS system colors + elevated surfaces */
+  /* Graphite ramp for every surface, three text roles, copper brand accent.
+     Green / amber / red only where they carry a status. 4px spacing grid. */
   :root{
-    --bg:#000; --card:#1c1c1e; --card-2:#2c2c2e; --fill:#3a3a3c;
-    --text:#fff; --text-2:rgba(235,235,245,.6); --text-3:rgba(235,235,245,.3);
-    --sep:rgba(84,84,88,.65); --grid:rgba(84,84,88,.45);
-    --blue:#0a84ff; --green:#30d158; --orange:#ff9f0a; --red:#ff453a; --gray:#8e8e93;
-    --blue-tint:rgba(10,132,255,.16); --green-tint:rgba(48,209,88,.16);
-    --orange-tint:rgba(255,159,10,.16); --red-tint:rgba(255,69,58,.16);
-    --gray-tint:rgba(120,120,128,.24);
+    --bg:#141415; --deep:#0f0f10; --card:#19191b; --card-2:#232325; --hover:#2b2b2e;
+    --text:#ededed; --text-2:#a1a1a6; --text-3:#85858b;
+    --sep:rgba(237,237,237,.08);
+    --accent:#a4521f; --accent-hover:#8c4418; --accent-ink:#f0c29e;
+    --green:#4cc38a; --amber:#e0a23a; --red:#e5484d;
+    --ease:cubic-bezier(0.22,1,0.36,1);
   }
   *{margin:0;padding:0;box-sizing:border-box}
   [hidden]{display:none!important}
   body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text','SF Pro Display','Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;
     color:var(--text);background:var(--bg);line-height:1.5;-webkit-font-smoothing:antialiased}
-  h1,h2,h3{font-weight:700;letter-spacing:-.02em}
-  a{color:var(--blue);text-decoration:none}
+  h1,h2,h3{font-weight:500;letter-spacing:0}
+  a{color:var(--accent-ink);text-decoration:none}
   .wrap{max-width:680px;margin:0 auto;padding:0 16px}
 
-  /* Header — translucent blurred bar, iOS style */
-  header{background:rgba(28,28,30,.9);backdrop-filter:blur(20px) saturate(1.6);
-    -webkit-backdrop-filter:blur(20px) saturate(1.6);padding:13px 0;
-    border-bottom:.5px solid var(--sep);position:sticky;top:0;z-index:30}
-  .head-row{display:flex;align-items:center;gap:12px}
-  .brand{display:flex;align-items:center;gap:10px;flex:1;min-width:0}
-  .brand img{width:36px;height:36px;border-radius:50%;display:block}
-  .brand b{font-weight:700;font-size:1.02rem;letter-spacing:-.01em}
-  .brand span{display:block;font-size:.72rem;color:var(--text-2);font-weight:500}
-  .ghost{background:var(--gray-tint);border:none;color:var(--text);
-    padding:7px 14px;border-radius:999px;font:inherit;font-size:.82rem;font-weight:600;cursor:pointer}
-  .ghost:hover{background:var(--fill)}
+  /* One line-icon size and stroke everywhere; icons take the color of their label */
+  .ico{width:16px;height:16px;flex:0 0 16px;fill:none;stroke:currentColor;stroke-width:1.5;
+    stroke-linecap:round;stroke-linejoin:round}
 
-  main{padding:18px 0 60px}
+  /* Header: deepest surface with a hairline, 60px tall */
+  header{background:var(--deep);padding:12px 0;box-shadow:inset 0 -1px 0 var(--sep);position:sticky;top:0;z-index:30}
+  .head-row{display:flex;align-items:center;gap:12px}
+  .brand{display:flex;align-items:center;gap:12px;flex:1;min-width:0}
+  .brand img{width:36px;height:36px;border-radius:50%;display:block}
+  .brand div{line-height:1.25}
+  .brand b{font-weight:600;font-size:1rem}
+  .brand span{display:block;font-size:.75rem;line-height:1.3333;color:var(--text-2)}
+  .ghost{position:relative;background:var(--card-2);border:none;box-shadow:inset 0 0 0 1px var(--sep);color:var(--text);
+    padding:8px 12px;border-radius:8px;font:inherit;font-size:.8125rem;line-height:1.5385;font-weight:500;cursor:pointer}
+
+  main.wrap{padding-bottom:24px}
 
   /* Login */
-  .card{background:var(--card);border:none;border-radius:16px;padding:22px}
+  .card{background:var(--card);border:1px solid var(--sep);border-radius:16px;padding:19px}
   .login{max-width:420px;margin:24px auto}
-  .login h2{font-size:1.3rem;margin-bottom:6px}
-  .login p.sub{color:var(--text-2);font-size:.92rem;margin-bottom:18px}
-  label{display:block;font-size:.8rem;font-weight:600;color:var(--text-2);margin:14px 0 6px}
-  input{width:100%;padding:13px 14px;border:1px solid transparent;border-radius:10px;
+  .login h2{font-size:1.25rem;line-height:1.4;margin-bottom:4px}
+  .login p.sub{color:var(--text-2);font-size:.9375rem;margin-bottom:16px}
+  label{display:block;font-size:.8125rem;font-weight:500;color:var(--text-2);margin:12px 0 8px}
+  input{width:100%;padding:11px;border:1px solid var(--sep);border-radius:8px;
     font:inherit;font-size:1rem;color:var(--text);background:var(--card-2)}
   input::placeholder{color:var(--text-3)}
-  input:focus{outline:none;border-color:var(--blue)}
-  .btn{display:block;width:100%;margin-top:16px;padding:14px;border:none;border-radius:12px;
-    background:var(--blue);color:#fff;font:inherit;font-size:1rem;font-weight:600;cursor:pointer}
-  .btn:hover{filter:brightness(1.1)}
+  input:focus{outline:none;border-color:var(--accent-ink)}
+  .btn{display:block;width:100%;margin-top:16px;padding:12px 16px;border:none;border-radius:8px;
+    background:var(--accent);color:#fff;font:inherit;font-size:1rem;font-weight:500;cursor:pointer}
   .btn:disabled{opacity:.5;cursor:default}
-  .btn.alt{background:var(--blue-tint);color:var(--blue)}
-  .btn.alt:hover{background:rgba(10,132,255,.26);filter:none}
-  .linkbtn{background:none;border:none;color:var(--blue);font:inherit;font-size:.86rem;
-    font-weight:600;cursor:pointer;padding:10px 0;display:block;margin:6px auto 0}
-  .note{font-size:.86rem;color:var(--text-2);text-align:center;margin-top:14px}
-  .msg{font-size:.88rem;padding:11px 13px;border-radius:10px;margin-top:14px;display:none}
-  .msg.show{display:block}
-  .msg.ok{background:var(--green-tint);color:var(--green)}
-  .msg.err{background:var(--red-tint);color:var(--red)}
+  .btn.alt{background:var(--card-2);color:var(--text);box-shadow:inset 0 0 0 1px var(--sep)}
+  .linkbtn{background:none;border:none;color:var(--accent-ink);font:inherit;font-size:.875rem;
+    font-weight:500;cursor:pointer;padding:12px 0;display:block;margin:4px auto 0}
+  .note{font-size:.875rem;color:var(--text-2);text-align:center;margin-top:12px}
+  /* Messages: quiet raised row, the status lives in a small dot */
+  .msg{font-size:.875rem;line-height:1.4286;padding:12px;border-radius:8px;margin-top:12px;display:none;
+    gap:8px;align-items:flex-start;background:var(--card-2);color:var(--text)}
+  .msg.show{display:flex}
+  .msg::before{content:'';flex:0 0 8px;height:8px;border-radius:50%;margin-top:6px;background:var(--text-3)}
+  .msg.ok::before{background:var(--green)}
+  .msg.err::before{background:var(--red)}
 
   /* Summary */
-  .summary{display:flex;gap:10px;margin-top:18px;margin-bottom:14px}
-  .stat{flex:1;background:var(--card);border:none;border-radius:14px;padding:12px 8px;text-align:center}
-  .stat b{display:block;font-size:1.5rem;font-weight:700;letter-spacing:-.02em;line-height:1.15;color:var(--text)}
-  .stat span{font-size:.7rem;color:var(--text-2);font-weight:600;text-transform:uppercase;letter-spacing:.05em}
+  .summary{display:flex;gap:8px;margin:16px 0 12px}
+  .stat{flex:1;background:var(--card);border:1px solid var(--sep);border-radius:12px;padding:11px 7px;text-align:center}
+  .stat b{display:block;font-size:1.5rem;font-weight:500;line-height:1.1667;color:var(--text);font-variant-numeric:tabular-nums}
+  .stat span{display:block;font-size:.75rem;line-height:1.3333;color:var(--text-2)}
 
-  /* View switch — iOS segmented control */
-  .viewswitch{display:flex;background:var(--gray-tint);border-radius:9px;padding:2px;gap:2px;margin-bottom:12px}
-  .vw{flex:1;padding:8px;border:none;border-radius:7px;background:transparent;font:inherit;
-    font-size:.88rem;font-weight:600;color:var(--text);cursor:pointer}
-  .vw.on{background:#636366;box-shadow:0 2px 6px rgba(0,0,0,.35)}
+  /* View switch: segmented control, 44px tall, active = raised step with a top highlight */
+  .viewswitch{display:flex;background:var(--deep);box-shadow:inset 0 0 0 1px var(--sep);border-radius:10px;
+    padding:2px;gap:2px;margin-bottom:12px}
+  .vw{flex:1;display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:10px 8px;border:none;
+    border-radius:8px;background:transparent;font:inherit;font-size:.875rem;line-height:1.4286;font-weight:500;
+    color:var(--text-2);cursor:pointer}
+  .vw.on{background:var(--card-2);color:var(--text);box-shadow:inset 0 1px 0 rgba(255,255,255,.08)}
 
   /* Calendar */
-  .cal{padding:14px 14px 12px;margin-bottom:14px}
-  .cal-head{display:flex;align-items:center;gap:6px;margin-bottom:12px}
+  .cal{padding:11px;margin-bottom:12px}
+  .cal-head{display:flex;align-items:center;gap:8px;margin-bottom:12px}
   .cal-title{flex:1;min-width:0}
-  .cal-title b{font-size:1.1rem;font-weight:700;letter-spacing:-.02em;color:var(--text);display:block;line-height:1.2}
-  .cal-title span{display:block;font-size:.78rem;color:var(--text-2);font-weight:500}
-  .cal-nav{flex:0 0 auto;width:36px;height:36px;border:none;background:transparent;border-radius:9px;
-    font-size:1.5rem;line-height:1;color:var(--red);cursor:pointer;font-weight:500;padding-bottom:3px}
-  .cal-nav:hover{background:rgba(255,255,255,.06)}
-  .cal-today{flex:0 0 auto;height:36px;padding:0 12px;border:none;background:transparent;
-    border-radius:9px;font:inherit;font-size:.9rem;font-weight:600;color:var(--red);cursor:pointer}
-  .cal-today:hover{background:rgba(255,255,255,.06)}
-  .cal-dow{display:grid;grid-template-columns:repeat(7,1fr);text-align:center;font-size:.68rem;font-weight:700;
-    color:var(--text-3);text-transform:uppercase;letter-spacing:.05em;padding-bottom:6px;border-bottom:1px solid var(--grid)}
-  .cal-grid{display:grid;grid-template-columns:repeat(7,1fr);border-left:1px solid var(--grid)}
-  .cal-cell{min-height:86px;border:none;border-bottom:1px solid var(--grid);border-right:1px solid var(--grid);
-    padding:4px;background:transparent;font:inherit;text-align:left;vertical-align:top;cursor:pointer;overflow:hidden}
-  .cal-cell:hover:not(.out){background:rgba(255,255,255,.04)}
+  .cal-title b{font-size:1.125rem;font-weight:500;color:var(--text);display:block;line-height:1.3333}
+  .cal-title span{display:block;font-size:.8125rem;line-height:1.2308;color:var(--text-2);font-variant-numeric:tabular-nums}
+  .cal-nav{position:relative;flex:0 0 auto;width:36px;height:36px;display:inline-flex;align-items:center;justify-content:center;
+    border:none;background:transparent;border-radius:8px;color:var(--text-2);cursor:pointer}
+  .cal-today{position:relative;flex:0 0 auto;height:36px;padding:0 12px;border:none;background:var(--card-2);
+    box-shadow:inset 0 0 0 1px var(--sep);border-radius:8px;font:inherit;font-size:.875rem;font-weight:500;
+    color:var(--text);cursor:pointer}
+  .cal-dow{display:grid;grid-template-columns:repeat(7,1fr);text-align:center;font-size:.75rem;
+    color:var(--text-3);padding-bottom:8px;border-bottom:1px solid var(--sep)}
+  .cal-grid{display:grid;grid-template-columns:repeat(7,1fr);border-left:1px solid var(--sep)}
+  .cal-cell{display:flex;flex-direction:column;align-items:stretch;min-width:0;min-height:88px;border:none;
+    border-bottom:1px solid var(--sep);border-right:1px solid var(--sep);
+    padding:4px;background:transparent;color:inherit;font:inherit;text-align:left;cursor:pointer;overflow:hidden}
   .cal-cell.out{cursor:default}
-  .cal-cell.out .cal-num{color:var(--text-3)}
-  .cal-cell.sel{background:rgba(255,255,255,.07)}
-  .cal-cell.sel .cal-num{background:#fff;color:#000}
-  .cal-num{font-size:.8rem;font-weight:600;color:var(--text-2);width:24px;height:24px;
-    display:inline-flex;align-items:center;justify-content:center;border-radius:50%}
-  .cal-cell.today .cal-num{background:var(--red);color:#fff}
-  .cal-chip{display:block;font-size:.68rem;font-weight:600;border-radius:4px;padding:2px 5px;margin-top:2px;
-    white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  .c-pending{background:var(--orange-tint);color:var(--orange)}
-  .c-confirmed{background:var(--blue-tint);color:var(--blue)}
-  .c-completed{background:var(--green-tint);color:var(--green)}
-  .c-cancelled{background:var(--gray-tint);color:var(--gray);text-decoration:line-through;opacity:.8}
-  .cal-more{display:block;font-size:.66rem;color:var(--text-2);font-weight:600;margin-top:2px;padding-left:2px}
-  .cal-dots{display:none;flex-wrap:wrap;gap:3px;margin-top:3px;padding-left:2px}
+  .cal-cell.out .cal-num{color:var(--text-3);opacity:.6}
+  .cal-cell.sel{background:var(--card-2)}
+  .cal-cell.sel .cal-num{background:var(--text);color:var(--bg)}
+  .cal-num{align-self:flex-start;font-size:.8125rem;font-weight:500;color:var(--text-2);width:24px;height:24px;
+    display:inline-flex;align-items:center;justify-content:center;border-radius:50%;font-variant-numeric:tabular-nums}
+  .cal-cell.today .cal-num{background:var(--accent);color:#fff}
+  /* Day entries: quiet text with a status dot, no tinted pills */
+  .cal-chip{display:block;font-size:.75rem;line-height:1.3333;color:var(--text);padding-left:2px;margin-top:2px;
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-variant-numeric:tabular-nums}
+  .cal-chip::before{content:'';display:inline-block;width:6px;height:6px;border-radius:50%;margin-right:4px;
+    vertical-align:1px;background:var(--text-3)}
+  .c-pending::before{background:var(--amber)}
+  .c-confirmed::before{background:var(--text)}
+  .c-completed::before{background:var(--green)}
+  .c-cancelled{color:var(--text-3);text-decoration:line-through}
+  .c-cancelled::before{background:transparent;box-shadow:inset 0 0 0 1.5px var(--text-3)}
+  .cal-more{display:block;font-size:.75rem;line-height:1.3333;color:var(--text-3);margin-top:2px;padding-left:2px}
+  .cal-dots{display:none;flex-wrap:wrap;gap:4px;margin-top:4px;padding-left:2px}
   .cal-dots i,.cal-legend i{width:8px;height:8px;border-radius:50%;display:inline-block}
-  .d-pending{background:var(--orange)}
-  .d-confirmed{background:var(--blue)}
+  .d-pending{background:var(--amber)}
+  .d-confirmed{background:var(--text)}
   .d-completed{background:var(--green)}
-  .d-cancelled{background:var(--gray)}
-  .cal-legend{display:flex;gap:14px;flex-wrap:wrap;padding-top:10px;font-size:.72rem;font-weight:600;color:var(--text-2)}
-  .cal-legend span{display:inline-flex;align-items:center;gap:5px}
+  .d-cancelled{background:transparent;box-shadow:inset 0 0 0 1.5px var(--text-3)}
+  .cal-legend{display:flex;gap:16px;flex-wrap:wrap;padding-top:12px;font-size:.75rem;color:var(--text-2)}
+  .cal-legend span{display:inline-flex;align-items:center;gap:6px}
   @media(max-width:560px){
-    .cal{padding:10px 8px 10px}
-    .cal-cell{min-height:58px;padding:3px 2px}
-    .cal-num{width:20px;height:20px;font-size:.72rem}
+    .cal{padding:7px}
+    .cal-cell{min-height:56px;padding:4px 2px}
+    .cal-num{width:20px;height:20px;font-size:.75rem}
     .cal-chip,.cal-more{display:none}
     .cal-dots{display:flex}
   }
 
-  /* Filters */
-  .filters{display:flex;gap:8px;overflow-x:auto;padding-bottom:10px;margin-bottom:6px;-webkit-overflow-scrolling:touch}
-  .chip{flex:0 0 auto;background:var(--card);border:none;color:var(--text-2);
-    padding:8px 14px;border-radius:999px;font:inherit;font-size:.84rem;font-weight:600;cursor:pointer;white-space:nowrap}
-  .chip.on{background:#fff;color:#000}
-  .chip i{font-style:normal;opacity:.6;font-weight:600}
+  /* Filters: 36px rows with a 44px tap area; the selected one is the off-white fill */
+  .filters{display:flex;gap:8px;overflow-x:auto;padding:4px 0 8px;margin:-4px 0 4px;-webkit-overflow-scrolling:touch}
+  .chip{position:relative;flex:0 0 auto;background:var(--card);box-shadow:inset 0 0 0 1px var(--sep);border:none;color:var(--text-2);
+    padding:8px 12px;border-radius:8px;font:inherit;font-size:.875rem;line-height:1.4286;font-weight:500;cursor:pointer;white-space:nowrap}
+  .chip.on{background:var(--text);color:var(--bg);box-shadow:none}
+  .chip i{font-style:normal;font-weight:400;color:var(--text-3);font-variant-numeric:tabular-nums}
+  .chip.on i{color:#55555a}
 
   /* Day groups + cards */
-  .day-h{font-weight:600;font-size:.95rem;color:var(--text);
-    margin:18px 4px 10px;display:flex;align-items:center;gap:8px}
-  .day-h:first-child{margin-top:6px}
-  .day-h em{font-style:normal;color:var(--text-2);font-weight:500;font-size:.82rem}
-  .job{background:var(--card);border:none;border-radius:16px;padding:16px;margin-bottom:12px}
-  .job-top{display:flex;align-items:flex-start;gap:10px;margin-bottom:10px}
-  .time{font-weight:700;font-size:1.05rem;letter-spacing:-.01em;color:var(--text);white-space:nowrap}
+  .day-h{font-weight:500;font-size:.9375rem;color:var(--text);
+    margin:20px 4px 8px;display:flex;align-items:center;gap:8px}
+  .day-h:first-child{margin-top:4px}
+  .day-h em{font-style:normal;color:var(--text-2);font-weight:400;font-size:.8125rem;font-variant-numeric:tabular-nums}
+  .job{background:var(--card);border:1px solid var(--sep);border-radius:16px;padding:15px;margin-bottom:12px}
+  .job-top{display:flex;align-items:flex-start;gap:8px;margin-bottom:8px}
+  .time{min-width:76px;font-weight:500;font-size:1rem;color:var(--text);white-space:nowrap;font-variant-numeric:tabular-nums}
   .who{flex:1;min-width:0}
-  .who b{font-weight:600;font-size:1rem;display:block}
-  .who a.tel{font-size:.9rem;font-weight:600}
-  .badge{flex:0 0 auto;font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.03em;
-    padding:4px 9px;border-radius:7px}
-  .b-pending{background:var(--orange-tint);color:var(--orange)}
-  .b-confirmed{background:var(--blue-tint);color:var(--blue)}
-  .b-completed{background:var(--green-tint);color:var(--green)}
-  .b-cancelled{background:var(--gray-tint);color:var(--gray)}
-  .meta{font-size:.9rem;color:var(--text);margin:2px 0}
+  .who b{font-weight:500;font-size:1rem;display:block}
+  .who a.tel{position:relative;font-size:.9375rem;font-variant-numeric:tabular-nums}
+  /* Status: quiet text with a dot instead of a tinted pill */
+  .badge{flex:0 0 auto;display:inline-flex;align-items:center;gap:6px;font-size:.8125rem;line-height:1.8462;
+    color:var(--text-2);text-transform:capitalize}
+  .badge::before{content:'';width:8px;height:8px;border-radius:50%;background:var(--text-3)}
+  .b-pending::before{background:var(--amber)}
+  .b-confirmed::before{background:var(--text)}
+  .b-completed::before{background:var(--green)}
+  .b-cancelled::before{background:transparent;box-shadow:inset 0 0 0 1.5px var(--text-3)}
+  .meta{font-size:.9375rem;color:var(--text)}
   .meta.addons{color:var(--text-2)}
-  .total{font-weight:700;color:var(--green);font-size:1.05rem;letter-spacing:-.01em;margin-top:4px}
-  .addr{display:inline-flex;align-items:center;gap:5px;font-size:.9rem;font-weight:600;margin-top:6px}
-  .warn{background:var(--orange-tint);border:none;color:var(--orange);font-size:.84rem;
-    padding:7px 10px;border-radius:8px;margin-top:8px;font-weight:600}
-  textarea.notes{width:100%;margin-top:10px;padding:10px 12px;border:1px solid transparent;
-    border-radius:10px;font:inherit;font-size:.9rem;color:var(--text);resize:vertical;min-height:42px;background:var(--card-2)}
+  .total{font-weight:500;color:var(--text);font-size:1rem;margin-top:4px;font-variant-numeric:tabular-nums}
+  .addr{position:relative;display:inline-flex;align-items:flex-start;gap:8px;font-size:.9375rem;line-height:1.6;
+    margin-top:4px}
+  .addr .ico{margin-top:4px}
+  .warn{background:var(--card-2);color:var(--amber);font-size:.875rem;line-height:1.4286;
+    padding:8px 12px;border-radius:8px;margin-top:8px;font-weight:500}
+  textarea.notes{display:block;width:100%;margin-top:12px;padding:11px;border:1px solid var(--sep);
+    border-radius:8px;font:inherit;font-size:.875rem;line-height:1.4286;color:var(--text);resize:vertical;
+    min-height:44px;background:var(--card-2)}
   textarea.notes::placeholder{color:var(--text-3)}
-  textarea.notes:focus{outline:none;border-color:var(--blue)}
+  textarea.notes:focus{outline:none;border-color:var(--accent-ink)}
   .actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
-  .act{flex:1 1 auto;min-width:120px;padding:11px;border:none;border-radius:10px;font:inherit;
-    font-size:.9rem;font-weight:600;cursor:pointer}
-  .act-pri{background:var(--green-tint);color:var(--green)}
-  .act-pri:hover{background:rgba(48,209,88,.26)}
-  .act-blue{background:var(--blue-tint);color:var(--blue)}
-  .act-blue:hover{background:rgba(10,132,255,.26)}
-  .act-ghost{background:var(--gray-tint);border:none;color:var(--text-2)}
-  .act-ghost:hover{background:var(--fill)}
+  .act{flex:1 1 auto;min-width:120px;padding:12px;border:none;border-radius:8px;font:inherit;
+    font-size:.875rem;line-height:1.4286;font-weight:500;cursor:pointer}
+  .act-pri{background:var(--accent);color:#fff}
+  .act-blue{background:var(--card-2);color:var(--accent-ink);box-shadow:inset 0 0 0 1px var(--sep)}
+  .act-ghost{background:var(--card-2);color:var(--text);box-shadow:inset 0 0 0 1px var(--sep)}
   .act:disabled{opacity:.5;cursor:default}
-  .empty{text-align:center;color:var(--text-2);padding:40px 16px;font-size:.95rem}
-  .meta-foot{font-size:.76rem;color:var(--text-3);margin-top:10px}
+  .empty{text-align:center;color:var(--text-2);padding:40px 16px;font-size:.9375rem}
+  .meta-foot{font-size:.75rem;color:var(--text-3);margin-top:8px;font-variant-numeric:tabular-nums}
 
   /* Account / password */
-  .acct{margin-top:24px;background:var(--card);border:none;border-radius:14px;padding:4px 16px 16px}
-  .acct summary{cursor:pointer;font-weight:600;color:var(--text-2);font-size:.92rem;padding:12px 0;list-style:none}
+  .acct{margin-top:24px;background:var(--card);border:1px solid var(--sep);border-radius:16px;padding:0 15px}
+  .acct[open]{padding-bottom:15px}
+  .acct summary{display:flex;align-items:center;gap:8px;cursor:pointer;font-weight:500;color:var(--text-2);
+    font-size:.875rem;line-height:1.4286;padding:12px 0;list-style:none}
   .acct summary::-webkit-details-marker{display:none}
-  .acct summary::before{content:'⚙ ';opacity:.7}
-  .acct .note{text-align:left;margin-top:10px}
-  .acct .msg{margin-bottom:6px}
+  .acct summary .ico{color:var(--text-3)}
+  .acct[open] summary .ico{transform:rotate(90deg)}
+  .acct label{margin-top:4px}
+  .acct .note{text-align:left}
 
-  /* Toast — elevated dark surface */
-  #toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%) translateY(20px);
-    background:var(--fill);color:#fff;padding:11px 18px;border-radius:12px;font-size:.9rem;font-weight:600;
-    box-shadow:0 8px 24px rgba(0,0,0,.55);
-    opacity:0;pointer-events:none;transition:.25s;z-index:50;max-width:90vw;text-align:center}
+  /* Invisible tap-area extensions so the compact controls and text links still give 44px to a thumb */
+  .ghost::after,.chip::after{content:'';position:absolute;inset:-4px 0}
+  .vw{position:relative}
+  .vw::after{content:'';position:absolute;inset:-2px -1px}
+  .cal-nav::after,.cal-today::after{content:'';position:absolute;inset:-4px}
+  .who a.tel::after,.addr::after{content:'';position:absolute;inset:-12px -8px}
+
+  /* Toast: raised surface with a hairline and a neutral shadow */
+  #toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(8px);
+    background:var(--card-2);color:var(--text);padding:12px 16px;border-radius:8px;font-size:.875rem;
+    line-height:1.4286;font-weight:500;box-shadow:inset 0 0 0 1px var(--sep),0 8px 24px rgba(0,0,0,.4);
+    opacity:0;pointer-events:none;transition:opacity 180ms var(--ease),transform 180ms var(--ease);
+    z-index:50;max-width:90vw;text-align:center}
   #toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+  /* States: one easing, named properties, hover only where there is a pointer */
+  .ghost,.btn,.vw,.chip,.act,.cal-nav,.cal-today,.cal-cell{
+    transition:background-color 150ms var(--ease),color 150ms var(--ease),transform 150ms var(--ease)}
+  input,textarea.notes{transition:border-color 150ms var(--ease)}
+  .btn:enabled:active,.act:enabled:active{transform:scale(.98)}
+  button:focus-visible,a:focus-visible,summary:focus-visible{outline:2px solid var(--accent-ink);outline-offset:2px}
+  @media(hover:hover){
+    .btn:enabled:hover,.act-pri:enabled:hover{background:var(--accent-hover)}
+    .ghost:hover,.btn.alt:enabled:hover,.act-ghost:enabled:hover,.act-blue:enabled:hover,.cal-today:hover{background:var(--hover)}
+    .cal-nav:hover{background:var(--card-2);color:var(--text)}
+    .cal-cell:hover:not(.out):not(.sel){background:rgba(237,237,237,.04)}
+    .vw:hover:not(.on),.chip:hover:not(.on){color:var(--text)}
+    a:hover,.linkbtn:hover{text-decoration:underline}
+  }
+  @media(prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
 </head>
 <body>
@@ -205,13 +243,13 @@
   <!-- Login -->
   <section id="login" class="card login" hidden>
     <h2>Owner sign-in</h2>
-    <p class="sub">Private dashboard for managing Detail Valley bookings.</p>
+    <p class="sub">Private dashboard for managing Detail Valley bookings</p>
     <label for="email">Email</label>
     <input id="email" type="email" inputmode="email" autocomplete="username" placeholder="you@detailvalley.com">
 
     <div id="pwPane">
       <label for="pw">Password</label>
-      <input id="pw" type="password" autocomplete="current-password" placeholder="Your password">
+      <input id="pw" type="password" autocomplete="current-password" placeholder="Password">
       <button class="btn" id="pwSignin" onclick="passwordSignIn()">Sign in</button>
       <button class="linkbtn" onclick="togglePw(false)">Email me a sign-in link instead</button>
     </div>
@@ -229,8 +267,8 @@
     <div class="summary" id="summary"></div>
 
     <div class="viewswitch">
-      <button id="vw-list" class="vw on" onclick="setView('list')">☰ List</button>
-      <button id="vw-cal" class="vw" onclick="setView('cal')">▦ Calendar</button>
+      <button id="vw-list" class="vw on" onclick="setView('list')"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>List</button>
+      <button id="vw-cal" class="vw" onclick="setView('cal')"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 2v4M16 2v4M3 10h18"/><rect x="3" y="4" width="18" height="18" rx="2"/></svg>Calendar</button>
     </div>
 
     <div class="filters" id="filters"></div>
@@ -240,9 +278,9 @@
     <div id="calendar" hidden>
       <div class="card cal">
         <div class="cal-head">
-          <button class="cal-nav" onclick="calShift(-1)" aria-label="Previous month">‹</button>
+          <button class="cal-nav" onclick="calShift(-1)" aria-label="Previous month"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg></button>
           <div class="cal-title"><b id="calTitle"></b><span id="calSub"></span></div>
-          <button class="cal-nav" onclick="calShift(1)" aria-label="Next month">›</button>
+          <button class="cal-nav" onclick="calShift(1)" aria-label="Next month"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></button>
           <button class="cal-today" onclick="calToday()">Today</button>
         </div>
         <div class="cal-dow"><span>Sun</span><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span></div>
@@ -258,11 +296,11 @@
     </div>
 
     <details class="acct">
-      <summary>Account &amp; password</summary>
+      <summary><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>Account &amp; password</summary>
       <label for="newpw">Set a new password</label>
-      <input id="newpw" type="password" autocomplete="new-password" placeholder="New password (8+ characters)">
+      <input id="newpw" type="password" autocomplete="new-password" placeholder="At least 8 characters">
       <button class="btn alt" onclick="changePassword()">Save password</button>
-      <p class="note">On iPhone, tap “Save Password” when prompted — next time you can sign in with Face ID.</p>
+      <p class="note">On iPhone, tap “Save Password” when prompted. Next time you can sign in with Face ID.</p>
       <div class="msg" id="acctMsg"></div>
     </details>
   </section>
@@ -342,7 +380,7 @@ function togglePw(showPw){
 
 async function sendLink(){
   const email = $('email').value.trim();
-  if(!email){ loginMsg('Enter your email first.', 'err'); return; }
+  if(!email){ loginMsg('Enter your email first', 'err'); return; }
   const btn = $('sendLink'); btn.disabled = true; btn.textContent = 'Sending…';
   const { error } = await sb.auth.signInWithOtp({
     email,
@@ -356,7 +394,7 @@ async function sendLink(){
 async function passwordSignIn(){
   const email = $('email').value.trim();
   const password = $('pw').value;
-  if(!email || !password){ loginMsg('Enter your email and password.', 'err'); return; }
+  if(!email || !password){ loginMsg('Enter your email and password', 'err'); return; }
   const btn = $('pwSignin'); btn.disabled = true; btn.textContent = 'Signing in…';
   const { error } = await sb.auth.signInWithPassword({ email, password });
   btn.disabled = false; btn.textContent = 'Sign in';
@@ -370,7 +408,7 @@ function acctMsg(text, kind){
 }
 async function changePassword(){
   const pw = $('newpw').value;
-  if(pw.length < 8){ acctMsg('Use at least 8 characters.', 'err'); return; }
+  if(pw.length < 8){ acctMsg('Use at least 8 characters', 'err'); return; }
   const { error } = await sb.auth.updateUser({ password: pw });
   if(error){ acctMsg(error.message, 'err'); return; }
   $('newpw').value = '';
@@ -441,7 +479,7 @@ function drawJobs(){
   // "To do" reads best soonest-first; history reads best newest-first.
   if(FILTER==='completed' || FILTER==='cancelled') list = list.slice().reverse();
 
-  if(!list.length){ $('jobs').innerHTML = '<p class="empty">Nothing here right now.</p>'; return; }
+  if(!list.length){ $('jobs').innerHTML = '<p class="empty">Nothing here right now</p>'; return; }
 
   const tk = todayKey();
   let html = '', lastDay = '';
@@ -480,7 +518,7 @@ function jobCard(j){
   const smsHref = `sms:${phoneDigits}?&body=${encodeURIComponent(confirmText(j))}`;
   // The booking form folds a water/power warning into the package text.
   const warn = /Water\/power/i.test(j.package)
-    ? `<div class="warn">⚠ ${esc(j.package.split('·').pop().trim())}</div>` : '';
+    ? `<div class="warn">${esc(j.package.split('·').pop().trim())}</div>` : '';
   const pkg = esc(j.package.replace(/·\s*⚠[^·]*$/,'').trim());
   const booked = shortDate.format(new Date(j.created_at));
 
@@ -508,9 +546,9 @@ function jobCard(j){
     <p class="meta">${pkg}</p>
     ${addons}
     <p class="total">$${j.total_usd}</p>
-    <a class="addr" href="https://maps.google.com/?q=${mapQ}" target="_blank" rel="noopener">📍 ${esc(j.address)}, ${esc(j.town)}</a>
+    <a class="addr" href="https://maps.google.com/?q=${mapQ}" target="_blank" rel="noopener"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"/><circle cx="12" cy="10" r="3"/></svg>${esc(j.address)}, ${esc(j.town)}</a>
     ${warn}
-    <textarea class="notes" placeholder="Notes — gate code, dog, reminders…"
+    <textarea class="notes" placeholder="Notes (gate code, dog, reminders)"
       data-id="${j.id}" onblur="saveNotes(this)">${esc(j.notes)}</textarea>
     <div class="actions">${actions}</div>
     <div class="meta-foot">Booked ${booked}</div>
@@ -596,7 +634,7 @@ function drawCalDay(byDay){
   const tag = CAL_SEL===todayKey() ? '<em>Today</em>' : '';
   const js = byDay[CAL_SEL] || [];
   if(!js.length){
-    el.innerHTML = `<div class="day-h">${label} ${tag}</div><p class="empty" style="padding:14px 16px">No jobs this day.</p>`;
+    el.innerHTML = `<div class="day-h">${label} ${tag}</div><p class="empty" style="padding:16px">No jobs this day</p>`;
     return;
   }
   const rev = js.filter(j=>j.status!=='cancelled').reduce((s,j)=>s+(j.total_usd||0),0);
@@ -609,7 +647,7 @@ async function setStatus(id, status){
   const { error } = await sb.from('bookings').update({ status }).eq('id', id);
   if(error){ toast('Update failed: '+error.message); if(card) card.querySelectorAll('.act').forEach(b=>b.disabled=false); return; }
   const j = JOBS.find(x=>x.id===id); if(j) j.status = status;
-  toast(status==='confirmed'?'Confirmed ✓':status==='completed'?'Marked done ✓':status==='cancelled'?'Cancelled':'Updated');
+  toast(status==='confirmed'?'Confirmed':status==='completed'?'Marked done':status==='cancelled'?'Cancelled':'Updated');
   redraw();
 }
 

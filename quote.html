@@ -4,177 +4,199 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="robots" content="noindex,nofollow">
-<meta name="theme-color" content="#000000">
+<meta name="theme-color" content="#0f0f10">
 <meta name="color-scheme" content="dark">
-<title>Detail Valley — Quote Tool</title>
+<title>Detail Valley quote tool</title>
 <link rel="icon" type="image/svg+xml" href="logo.svg">
 <link rel="alternate icon" href="logo.png">
 <style>
-  /* Same Apple dark palette as the job board (admin.html) so the two feel like one app. */
+  /* Graphite ramp for the surfaces, copper for the one accent. Kept in step
+     with the job board (admin.html) so the two feel like one app.
+     --accent fills the primary action and the current tab; on a dark surface
+     copper is too dark for text or an outline, so those use --accent-ink. */
   :root{
-    --bg:#000; --card:#1c1c1e; --card-2:#2c2c2e; --fill:#3a3a3c;
-    --text:#fff; --text-2:rgba(235,235,245,.6); --text-3:rgba(235,235,245,.3);
-    --sep:rgba(84,84,88,.65); --grid:rgba(84,84,88,.45);
-    --blue:#0a84ff; --green:#30d158; --orange:#ff9f0a; --red:#ff453a; --gray:#8e8e93;
-    --purple:#bf5af2;
-    --blue-tint:rgba(10,132,255,.16); --green-tint:rgba(48,209,88,.16);
-    --orange-tint:rgba(255,159,10,.16); --red-tint:rgba(255,69,58,.16);
-    --purple-tint:rgba(191,90,242,.16); --gray-tint:rgba(120,120,128,.24);
+    --bg:#141415; --deep:#0f0f10; --card:#19191b; --card-2:#232325; --fill:#2c2c2f;
+    --text:#ededed; --text-2:#a1a1a6; --text-3:#85858b;
+    --sep:rgba(237,237,237,.08);
+    --accent:#a4521f; --accent-hover:#8c4418; --accent-ink:#f0c29e;
+    --green:#4cc38a; --orange:#d9a441; --red:#e5484d;
+    --ease:cubic-bezier(.22,1,.36,1);
   }
   *{margin:0;padding:0;box-sizing:border-box}
   [hidden]{display:none!important}
   body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text','SF Pro Display','Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;
     color:var(--text);background:var(--bg);line-height:1.5;-webkit-font-smoothing:antialiased}
-  h1,h2,h3{font-weight:700;letter-spacing:-.02em}
-  a{color:var(--blue);text-decoration:none}
+  /* Every figure sits on tabular digits so columns of numbers line up. */
+  input,.hint,.chip small,.plan-top .amt,.plan-meta,.line span:last-child,.stat b,
+  .saved .sv span,.saved .amt,.row4 .ro{font-variant-numeric:tabular-nums}
+  h1,h2,h3{font-weight:500;letter-spacing:0}
+  a{color:var(--accent-ink);text-decoration:none}
+  code{white-space:nowrap}
   .wrap{max-width:680px;margin:0 auto;padding:0 16px}
+  button:focus-visible,a:focus-visible{outline:2px solid var(--accent-ink);outline-offset:2px}
 
-  header{background:rgba(28,28,30,.9);backdrop-filter:blur(20px) saturate(1.6);
-    -webkit-backdrop-filter:blur(20px) saturate(1.6);padding:13px 0;
-    border-bottom:.5px solid var(--sep);position:sticky;top:0;z-index:30}
-  .head-row{display:flex;align-items:center;gap:12px}
-  .brand{display:flex;align-items:center;gap:10px;flex:1;min-width:0}
-  .brand img{width:36px;height:36px;border-radius:50%;display:block}
-  .brand b{font-weight:700;font-size:1.02rem;letter-spacing:-.01em;display:block}
-  .brand span{display:block;font-size:.72rem;color:var(--text-2);font-weight:500}
-  .ghost{background:var(--gray-tint);border:none;color:var(--text);
-    padding:7px 14px;border-radius:999px;font:inherit;font-size:.82rem;font-weight:600;cursor:pointer}
-  .ghost:hover{background:var(--fill)}
-  .ghost.on{background:var(--blue);color:#fff}
+  header{background:var(--deep);padding:12px 0;border-bottom:1px solid var(--sep);position:sticky;top:0;z-index:30}
+  .head-row{display:flex;align-items:center;gap:8px}
+  .brand{display:flex;align-items:center;gap:12px;flex:1;min-width:0}
+  .brand img{width:36px;height:36px;border-radius:50%;display:block;flex:0 0 auto}
+  .brand div{min-width:0}
+  .brand b{display:block;font-weight:500;font-size:1rem;line-height:20px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .brand span{display:block;font-size:.75rem;line-height:16px;color:var(--text-2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  /* 36px tall to the eye; the ::after stretches the tap area to 44px. */
+  .ghost{position:relative;flex:0 0 auto;height:36px;padding:0 16px;border:none;border-radius:8px;
+    background:var(--card-2);box-shadow:inset 0 0 0 1px var(--sep);color:var(--text);
+    font:inherit;font-size:.875rem;font-weight:500;cursor:pointer;transition:background-color .15s var(--ease)}
+  .ghost::after{content:'';position:absolute;inset:-4px 0}
+  .ghost.on{background:var(--accent);box-shadow:none;color:#fff}
 
-  main{padding:16px 0 70px}
-  .card{background:var(--card);border-radius:16px;padding:16px;margin-bottom:14px}
-  .card > h2{font-size:.74rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;
-    color:var(--text-2);margin-bottom:12px}
-  .card > h2 .hint{float:right;text-transform:none;letter-spacing:0;font-weight:600;color:var(--text-3)}
+  main.wrap{padding-top:16px;padding-bottom:calc(24px + env(safe-area-inset-bottom))}
+  .card{background:var(--card);box-shadow:inset 0 0 0 1px var(--sep);border-radius:12px;padding:16px;margin-bottom:12px}
+  .card > h2{font-size:.875rem;line-height:20px;font-weight:500;color:var(--text);margin-bottom:12px}
+  .card > h2 .hint{float:right;font-size:.75rem;font-weight:400;color:var(--text-3)}
 
-  label{display:block;font-size:.78rem;font-weight:600;color:var(--text-2);margin:12px 0 6px}
+  label{display:block;font-size:.8125rem;line-height:20px;font-weight:500;color:var(--text-2);margin:12px 0 4px}
   label:first-child{margin-top:0}
-  input,select,textarea{width:100%;padding:12px 13px;border:1px solid transparent;border-radius:10px;
-    font:inherit;font-size:1rem;color:var(--text);background:var(--card-2);appearance:none}
-  input::placeholder{color:var(--text-3)}
-  input:focus,select:focus,textarea:focus{outline:none;border-color:var(--blue)}
-  select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 8' fill='none' stroke='%238e8e93' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M1 1.5 6 6.5 11 1.5'/%3E%3C/svg%3E");
-    background-repeat:no-repeat;background-position:right 13px center;background-size:12px;padding-right:34px}
-  textarea{resize:vertical;min-height:64px;font-size:.9rem;line-height:1.5}
+  #model-wrap label{margin-top:12px}
+  input,select,textarea{width:100%;height:48px;padding:0 12px;border:1px solid var(--sep);border-radius:8px;
+    font:inherit;font-size:1rem;color:var(--text);background:var(--card-2);appearance:none;
+    transition:border-color .15s var(--ease)}
+  input::placeholder,textarea::placeholder{color:var(--text-3)}
+  input:focus,select:focus,textarea:focus{outline:none;border-color:var(--accent-ink)}
+  select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 8' fill='none' stroke='%2385858b' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M1 1.5 6 6.5 11 1.5'/%3E%3C/svg%3E");
+    background-repeat:no-repeat;background-position:right 12px center;background-size:12px;padding-right:36px}
+  textarea{height:auto;min-height:64px;padding:8px 12px;resize:vertical;line-height:1.5}
 
   /* Vehicle search */
   .vsearch{position:relative}
-  .results{position:absolute;left:0;right:0;top:calc(100% + 6px);z-index:20;background:var(--card-2);
-    border-radius:12px;box-shadow:0 14px 40px rgba(0,0,0,.6);max-height:300px;overflow-y:auto;padding:5px}
-  .res{display:flex;align-items:center;gap:10px;width:100%;padding:10px 11px;border:none;background:transparent;
+  .results{position:absolute;left:0;right:0;top:calc(100% + 4px);z-index:20;background:var(--card-2);
+    border-radius:12px;box-shadow:inset 0 0 0 1px var(--sep),0 8px 24px rgba(0,0,0,.4);
+    max-height:300px;overflow-y:auto;padding:4px}
+  .res{display:flex;align-items:center;gap:8px;width:100%;min-height:44px;padding:0 12px;border:none;background:transparent;
     border-radius:8px;font:inherit;color:var(--text);text-align:left;cursor:pointer}
-  .res:hover,.res.cursor{background:var(--fill)}
-  .res b{font-weight:600;font-size:.94rem;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-  .res .mk{color:var(--text-2);font-weight:500}
-  .res-empty{padding:12px;font-size:.88rem;color:var(--text-2);text-align:center}
+  .res.cursor{background:var(--fill);box-shadow:inset 0 0 0 1px var(--accent-ink)}
+  .res b{font-weight:500;font-size:.9375rem;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .res .mk{color:var(--text-2);font-weight:400}
+  .res-empty{padding:12px;font-size:.875rem;color:var(--text-2);text-align:center}
 
-  .tag{flex:0 0 auto;font-size:.66rem;font-weight:700;text-transform:uppercase;letter-spacing:.04em;
-    padding:3px 8px;border-radius:999px}
-  .t-standard{background:var(--gray-tint);color:var(--text-2)}
-  .t-midsize{background:var(--blue-tint);color:var(--blue)}
-  .t-oversize{background:var(--purple-tint);color:var(--purple)}
+  /* Size class: quiet text in a hairline box, the same for all three. */
+  .tag{flex:0 0 auto;font-size:.75rem;line-height:16px;font-weight:400;color:var(--text-2);
+    padding:2px 6px;border-radius:4px;box-shadow:inset 0 0 0 1px var(--sep)}
 
-  /* Chip rows */
+  /* Option rows. 40px tall to the eye; the ::after stretches the tap area to 44px. */
   .chips{display:flex;flex-wrap:wrap;gap:8px}
-  .chip{background:var(--card-2);border:1.5px solid transparent;color:var(--text);
-    padding:9px 13px;border-radius:999px;font:inherit;font-size:.86rem;font-weight:600;cursor:pointer;
-    display:inline-flex;align-items:center;gap:7px}
-  .chip:hover{background:var(--fill)}
-  .chip.on{border-color:var(--blue);background:var(--blue-tint);color:var(--blue)}
-  .chip small{font-weight:600;opacity:.7;font-size:.78rem}
-  .chip.on small{opacity:.85}
+  .chip{position:relative;min-height:40px;padding:0 12px;border:1px solid var(--sep);border-radius:8px;
+    background:var(--card-2);color:var(--text);font:inherit;font-size:.875rem;font-weight:500;cursor:pointer;
+    display:inline-flex;align-items:center;gap:8px;
+    transition:background-color .15s var(--ease),border-color .15s var(--ease)}
+  .chip::after{content:'';position:absolute;inset:-3px -1px}
+  .chip.on{border-color:var(--accent-ink);background:var(--fill)}
+  .chip small{font-weight:400;font-size:.75rem;color:var(--text-2)}
 
   /* The picked vehicle */
-  .picked{display:flex;align-items:center;gap:12px;background:var(--card-2);border-radius:12px;padding:13px 14px}
+  .picked{display:flex;align-items:center;gap:12px;background:var(--card-2);border-radius:8px;padding:12px;
+    box-shadow:inset 0 0 0 1px var(--sep)}
   .picked .pv{flex:1;min-width:0}
-  .picked .pv b{display:block;font-size:1.02rem;font-weight:700;letter-spacing:-.01em}
-  .picked .pv span{display:block;font-size:.78rem;color:var(--text-2);font-weight:500}
-  .picked .x{flex:0 0 auto;width:30px;height:30px;border:none;border-radius:50%;background:var(--fill);
-    color:var(--text-2);font-size:1rem;line-height:1;cursor:pointer}
+  .picked .pv b{display:block;font-size:1rem;line-height:24px;font-weight:500}
+  .picked .pv span{display:block;font-size:.8125rem;line-height:20px;color:var(--text-2)}
+  /* Clear / delete. 32px to the eye, 44px tap area. */
+  .picked .x,.saved .x{position:relative;flex:0 0 auto;width:32px;height:32px;display:grid;place-items:center;
+    border:none;border-radius:8px;background:var(--fill);color:var(--text-2);cursor:pointer;
+    transition:color .15s var(--ease)}
+  .picked .x::after,.saved .x::after{content:'';position:absolute;inset:-6px}
+  .x svg{display:block}
 
   /* Plan cards */
-  .plans{display:grid;gap:10px;padding-top:8px}
-  .plan{text-align:left;width:100%;background:var(--card-2);border:1.5px solid transparent;border-radius:14px;
-    padding:13px 14px;font:inherit;color:var(--text);cursor:pointer;position:relative}
-  .plan:hover{background:var(--fill)}
-  .plan.on{border-color:var(--blue);background:var(--blue-tint)}
-  .plan-top{display:flex;align-items:baseline;gap:10px}
-  .plan-top b{flex:1;min-width:0;font-size:1rem;font-weight:700;letter-spacing:-.01em}
-  .plan-top .amt{font-size:1.28rem;font-weight:700;letter-spacing:-.02em}
-  .plan-meta{display:flex;flex-wrap:wrap;gap:6px 14px;margin-top:6px;font-size:.78rem;
-    color:var(--text-2);font-weight:600}
-  .plan-meta .rate{font-weight:700}
+  .plans{display:grid;gap:8px;padding-top:8px}
+  .plan{text-align:left;width:100%;background:var(--card-2);border:1px solid var(--sep);border-radius:8px;
+    padding:12px;font:inherit;color:var(--text);cursor:pointer;position:relative;
+    transition:background-color .15s var(--ease),border-color .15s var(--ease)}
+  .plan.on{border-color:var(--accent-ink);background:var(--fill)}
+  .plan-top{display:flex;align-items:baseline;gap:8px}
+  .plan-top b{flex:1;min-width:0;font-size:1rem;font-weight:500}
+  .plan-top .amt{font-size:1.25rem;font-weight:500}
+  .plan-meta{display:flex;flex-wrap:wrap;gap:4px 12px;margin-top:4px;font-size:.75rem;line-height:16px;
+    color:var(--text-2)}
+  .plan-meta .rate{font-weight:500}
   .r-good{color:var(--green)} .r-ok{color:var(--orange)} .r-bad{color:var(--red)}
-  .best{position:absolute;top:-8px;right:12px;font-size:.62rem;font-weight:700;text-transform:uppercase;
-    letter-spacing:.05em;background:var(--green);color:#000;padding:2px 8px;border-radius:999px;
-    white-space:nowrap}
+  .best{position:absolute;top:-8px;right:12px;font-size:.75rem;line-height:16px;font-weight:500;
+    background:var(--deep);color:var(--text);padding:0 6px;border-radius:4px;
+    box-shadow:inset 0 0 0 1px var(--sep);white-space:nowrap}
 
   /* Quote breakdown */
-  .line{display:flex;justify-content:space-between;gap:12px;padding:9px 0;border-bottom:.5px solid var(--sep);
-    font-size:.92rem}
+  .line{display:flex;justify-content:space-between;gap:12px;padding:8px 0;border-bottom:1px solid var(--sep);
+    font-size:.9375rem;line-height:24px}
   .line:last-of-type{border-bottom:none}
-  .line span:first-child{color:var(--text-2);font-weight:500}
-  .line span:last-child{font-weight:600;flex:0 0 auto}
-  .line.inc span:last-child{color:var(--green);font-weight:600}
-  .line.total{border-top:1px solid var(--sep);border-bottom:none;margin-top:4px;padding-top:13px;font-size:1.05rem}
-  .line.total span{color:var(--text)!important;font-weight:700}
-  .line.total span:last-child{font-size:1.5rem;letter-spacing:-.02em}
+  .line span:first-child{color:var(--text-2)}
+  .line span:last-child{font-weight:500;flex:0 0 auto}
+  .line.inc span:last-child{color:var(--text-2);font-weight:400}
+  .line.total{align-items:baseline;border-top:1px solid var(--sep);border-bottom:none;margin-top:4px;padding-top:12px;font-size:1rem}
+  .line.total span{color:var(--text)!important;font-weight:500}
+  .line.total span:last-child{font-size:1.75rem;line-height:32px;font-weight:600}
 
-  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
-  .stat{background:var(--card-2);border-radius:12px;padding:12px;text-align:center}
-  .stat b{display:block;font-size:1.32rem;font-weight:700;letter-spacing:-.02em;line-height:1.2}
-  .stat span{display:block;font-size:.68rem;color:var(--text-2);font-weight:700;text-transform:uppercase;
-    letter-spacing:.05em;margin-top:2px}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}
+  .stat{background:var(--card-2);border-radius:8px;padding:12px;text-align:center}
+  .stat b{display:block;font-size:1.25rem;line-height:24px;font-weight:500}
+  .stat span{display:block;font-size:.75rem;line-height:16px;color:var(--text-2);margin-top:4px}
 
-  .verdict{margin-top:12px;border-radius:12px;padding:12px 13px;font-size:.88rem;font-weight:600;line-height:1.45}
-  .v-good{background:var(--green-tint);color:var(--green)}
-  .v-ok{background:var(--orange-tint);color:var(--orange)}
-  .v-bad{background:var(--red-tint);color:var(--red)}
+  /* Verdict: plain text on a raised surface, a dot carries good / close / bad. */
+  .verdict{display:flex;gap:8px;margin-top:12px;border-radius:8px;padding:12px;font-size:.875rem;line-height:20px;
+    background:var(--card-2);color:var(--text)}
+  .verdict::before{content:'';flex:0 0 8px;height:8px;margin-top:6px;border-radius:50%;background:var(--text-3)}
+  .v-good::before{background:var(--green)}
+  .v-ok::before{background:var(--orange)}
+  .v-bad::before{background:var(--red)}
 
-  .btn{display:block;width:100%;margin-top:12px;padding:14px;border:none;border-radius:12px;
-    background:var(--blue);color:#fff;font:inherit;font-size:1rem;font-weight:600;cursor:pointer}
-  .btn:hover{filter:brightness(1.1)}
-  .btn.alt{background:var(--gray-tint);color:var(--text)}
-  .btn.alt:hover{background:var(--fill);filter:none}
-  .btn-row{display:flex;gap:10px}
-  .btn-row .btn{flex:1}
+  .btn{display:block;width:100%;min-height:48px;margin-top:12px;padding:12px 16px;border:none;border-radius:8px;
+    background:var(--accent);color:#fff;font:inherit;font-size:1rem;font-weight:500;cursor:pointer;
+    transition:background-color .15s var(--ease),transform .15s var(--ease)}
+  .btn:active{transform:scale(.98)}
+  .btn.alt{background:var(--card-2);box-shadow:inset 0 0 0 1px var(--sep);color:var(--text)}
+  .btn-row{display:flex;gap:8px}
+  .btn-row .btn{flex:1 1 auto;width:auto}
 
-  .empty{text-align:center;color:var(--text-2);font-size:.92rem;padding:22px 10px}
+  .empty{text-align:center;color:var(--text-2);font-size:.9375rem;padding:20px 12px}
 
   /* Saved quotes */
-  .saved{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:.5px solid var(--sep)}
+  .saved{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--sep)}
   .saved:last-child{border-bottom:none}
   .saved .sv{flex:1;min-width:0}
-  .saved .sv b{display:block;font-size:.94rem;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-  .saved .sv span{display:block;font-size:.76rem;color:var(--text-2);font-weight:500}
-  .saved .amt{flex:0 0 auto;font-weight:700;font-size:1.02rem}
-  .saved .x{flex:0 0 auto;width:28px;height:28px;border:none;border-radius:50%;background:var(--fill);
-    color:var(--text-2);font-size:.95rem;line-height:1;cursor:pointer}
+  .saved .sv b{display:block;font-size:.9375rem;line-height:24px;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .saved .sv span{display:block;font-size:.75rem;line-height:16px;color:var(--text-2)}
+  .saved .amt{flex:0 0 auto;font-weight:500;font-size:1rem}
 
   /* Settings */
-  .set-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px 12px}
-  .set-grid label{margin:0 0 5px}
-  .set-grid input{padding:10px 11px;font-size:.94rem}
-  .subhead{font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;
-    color:var(--text-3);margin:18px 0 10px;padding-top:14px;border-top:.5px solid var(--sep)}
+  .set-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .set-grid label{margin:0 0 4px}
+  .set-grid input{height:44px}
+  .subhead{font-size:.875rem;line-height:20px;font-weight:500;color:var(--text);
+    margin:16px 0 8px;padding-top:16px;border-top:1px solid var(--sep)}
   .subhead:first-of-type{border-top:none;padding-top:0;margin-top:0}
-  .row4{display:grid;grid-template-columns:1.4fr 1fr 1fr;gap:8px;align-items:center;margin-bottom:8px}
-  .row4 .rl{font-size:.86rem;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-  .row4 input{padding:9px 10px;font-size:.9rem;text-align:right}
-  .row4 .ro{padding:9px 10px;font-size:.9rem;text-align:right;font-variant-numeric:tabular-nums;color:var(--text-2)}
-  .locked{font-weight:500;font-size:.72rem;color:var(--text-3);margin-left:6px;white-space:nowrap}
-  .row-head{display:grid;grid-template-columns:1.4fr 1fr 1fr;gap:8px;font-size:.66rem;font-weight:700;
-    text-transform:uppercase;letter-spacing:.05em;color:var(--text-3);margin-bottom:6px}
-  .row-head span:not(:first-child){text-align:right}
+  .row4{display:grid;grid-template-columns:1.4fr 1fr 1fr;gap:8px;align-items:center;margin-bottom:4px}
+  .row4 .rl{font-size:.875rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .row4 input{height:44px;padding:0 10px;text-align:right}
+  /* Read-only figures: same 1px border + 10px inset as the inputs, so every number ends on one line. */
+  .row4 .ro{border:1px solid transparent;padding:8px 10px;font-size:1rem;line-height:22px;text-align:right;color:var(--text-2)}
+  .locked{font-weight:400;font-size:.75rem;color:var(--text-3);margin-left:8px;white-space:nowrap}
+  .row-head{display:grid;grid-template-columns:1.4fr 1fr 1fr;gap:8px;font-size:.75rem;line-height:16px;
+    color:var(--text-3);margin-bottom:4px}
+  .row-head span:not(:first-child){text-align:right;padding-right:11px}
 
-  .toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(20px);opacity:0;
-    background:var(--card-2);color:var(--text);padding:12px 20px;border-radius:999px;font-size:.9rem;
-    font-weight:600;box-shadow:0 10px 34px rgba(0,0,0,.6);pointer-events:none;transition:.22s;z-index:60}
+  .toast{position:fixed;left:50%;bottom:24px;width:max-content;max-width:calc(100vw - 32px);transform:translateX(-50%) translateY(8px);opacity:0;
+    background:var(--fill);color:var(--text);padding:12px 20px;border-radius:8px;font-size:.875rem;
+    font-weight:500;box-shadow:inset 0 0 0 1px var(--sep),0 8px 24px rgba(0,0,0,.4);pointer-events:none;
+    transition:opacity .18s var(--ease),transform .18s var(--ease);z-index:60}
   .toast.show{transform:translateX(-50%) translateY(0);opacity:1}
 
-  .foot{text-align:center;font-size:.78rem;color:var(--text-3);padding:8px 0 0}
-  .foot a{color:var(--text-2)}
+  .foot{text-align:center;font-size:.8125rem;line-height:20px;color:var(--text-3);padding:4px 0 0}
+  .foot a{position:relative;padding:0 8px;color:var(--text-2)}
+  .foot a::after{content:'';position:absolute;inset:-14px -3px}
+
+  /* Hover only where there is a pointer, so a tap never leaves a row stuck lit. */
+  @media(hover:hover){
+    .ghost:not(.on):hover,.chip:not(.on):hover,.plan:not(.on):hover,.btn.alt:hover,.res:hover{background:var(--fill)}
+    .btn:not(.alt):hover{background:var(--accent-hover)}
+    .picked .x:hover,.saved .x:hover,.foot a:hover{color:var(--text)}
+  }
 
   @media(min-width:560px){ .plans{grid-template-columns:1fr 1fr} }
 </style>
@@ -186,8 +208,8 @@
     <div class="brand">
       <img src="logo.svg" alt="" onerror="this.src='logo.png'">
       <div>
-        <b>Quote Tool</b>
-        <span>Internal · not customer facing</span>
+        <b>Quote tool</b>
+        <span>Internal use only</span>
       </div>
     </div>
     <button class="ghost" id="tab-quote" onclick="showTab('quote')">Quote</button>
@@ -206,7 +228,7 @@
     </div>
 
     <div class="card">
-      <h2>Condition <span class="hint">drives time, not just price</span></h2>
+      <h2>Condition <span class="hint">Drives time, not just price</span></h2>
       <div class="chips" id="cond-chips"></div>
     </div>
 
@@ -237,10 +259,10 @@
   <div id="view-set" hidden>
     <div class="card">
       <h2>Your numbers</h2>
-      <p style="font-size:.86rem;color:var(--text-2);margin-bottom:14px">
+      <p style="font-size:.875rem;line-height:20px;color:var(--text-2);margin-bottom:16px">
         Your own numbers (target rate, supplies, condition and drive times) are
         saved on this device only. Package, size and add-on prices and times are
-        the same ones customers see when they book — they're shown here but can't
+        the same ones customers see when they book. They're shown here but can't
         be changed here. To change them, edit <code>dv-pricing.js</code>, which
         changes the public site and this tool together.
       </p>
@@ -263,11 +285,11 @@
         </div>
       </div>
 
-      <div class="subhead">Packages — price &amp; base minutes <span class="locked">same as the booking site</span></div>
+      <div class="subhead">Package price &amp; base minutes <span class="locked">same as the booking site</span></div>
       <div class="row-head"><span>Package</span><span>Price $</span><span>Minutes</span></div>
       <div id="s-pkgs"></div>
 
-      <div class="subhead">Vehicle size — surcharge &amp; extra minutes <span class="locked">same as the booking site</span></div>
+      <div class="subhead">Vehicle size surcharge &amp; extra minutes <span class="locked">same as the booking site</span></div>
       <div class="row-head"><span>Size class</span><span>Extra $</span><span>Extra min</span></div>
       <div id="s-sizes"></div>
 
@@ -275,14 +297,14 @@
       <div class="row-head"><span>Add-on</span><span>Price $</span><span>Minutes</span></div>
       <div id="s-addons"></div>
 
-      <div class="subhead">Condition — time multiplier &amp; surcharge</div>
+      <div class="subhead">Condition time multiplier &amp; surcharge</div>
       <div class="row-head"><span>Condition</span><span>× time</span><span>Extra $</span></div>
       <div id="s-cond"></div>
 
-      <div class="subhead">Towns — round trip from your base</div>
+      <div class="subhead">Town round trips from your base</div>
       <div class="row-head"><span>Town</span><span>RT miles</span><span>RT minutes</span></div>
       <div id="s-towns"></div>
-      <p style="font-size:.8rem;color:var(--text-3);margin-top:8px">
+      <p style="font-size:.875rem;line-height:20px;color:var(--text-2);margin-top:8px">
         These start as rough guesses. Drive each one once, check the odometer, and put the real numbers in.
       </p>
 
@@ -608,9 +630,9 @@ function renderVehicle(){
           <span>${esc(sz.name)}${overridden ? ' · set by hand' : ''}</span>
         </div>
         <span class="tag t-${state.size}">${esc(sz.short)}</span>
-        <button class="x" onclick="clearVehicle()" aria-label="Clear vehicle">✕</button>
+        <button class="x" onclick="clearVehicle()" aria-label="Clear vehicle"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><path d="M4 4l8 8M12 4l-8 8"/></svg></button>
       </div>
-      <label for="yr">Year <span style="font-weight:500;color:var(--text-3)">(optional — just for the quote text)</span></label>
+      <label for="yr">Year <span style="font-weight:400;color:var(--text-3)">optional, only for the quote text</span></label>
       <input id="yr" type="text" inputmode="numeric" maxlength="4" placeholder="2019"
              value="${esc(state.year)}" oninput="state.year=this.value.replace(/[^0-9]/g,'');renderDetail()">
       <label>Size class ${overridden ? '<span style="color:var(--orange)">· overriding '+esc(sizeOf(state.sizeAuto).short)+'</span>' : ''}</label>
@@ -626,18 +648,18 @@ function renderVehicle(){
   box.innerHTML = `
     <div class="vsearch">
       <input id="q" type="text" autocomplete="off" autocapitalize="words" spellcheck="false"
-             placeholder="Search — “tahoe”, “subaru out”, “f-150”…"
+             placeholder="Search make or model"
              value="${esc(state.query)}"
              oninput="onQuery(this.value)" onkeydown="onQueryKey(event)">
       <div class="results" id="results" hidden></div>
     </div>
-    <label for="mk" style="margin-top:14px">…or browse by make</label>
+    <label for="mk" style="margin-top:12px">Or browse by make</label>
     <select id="mk" onchange="onMake(this.value)">
-      <option value="">Pick a make…</option>
+      <option value="">Make</option>
       ${Object.keys(VEHICLES).map(m=>`<option value="${esc(m)}">${esc(m)}</option>`).join('')}
     </select>
     <div id="model-wrap"></div>
-    <button class="btn alt" onclick="manualVehicle()">Not listed — enter it by hand</button>`;
+    <button class="btn alt" onclick="manualVehicle()">Not listed, enter it by hand</button>`;
   renderResults();
 }
 
@@ -667,7 +689,7 @@ function renderResults(){
   if(!state.query.trim()){ el.hidden = true; el.innerHTML = ''; return; }
   el.hidden = false;
   if(!state.results.length){
-    el.innerHTML = `<div class="res-empty">Nothing matches. Use “enter it by hand” below.</div>`;
+    el.innerHTML = `<div class="res-empty">No match, enter it by hand below</div>`;
     return;
   }
   el.innerHTML = state.results.map((v,i)=>`
@@ -689,8 +711,8 @@ function onMake(make){
   wrap.innerHTML = `
     <label for="md">Model</label>
     <select id="md" onchange="onModel(this.value)">
-      <option value="">Pick a model…</option>
-      ${list.map(({v,i})=>`<option value="${i}">${esc(v.model)} — ${esc(sizeOf(v.size).short)}</option>`).join('')}
+      <option value="">Model</option>
+      ${list.map(({v,i})=>`<option value="${i}">${esc(v.model)} · ${esc(sizeOf(v.size).short)}</option>`).join('')}
     </select>`;
 }
 function onModel(idx){
@@ -704,7 +726,7 @@ function pickVehicle(make, model, size){
   render();
 }
 function manualVehicle(){
-  const name = prompt('Year / make / model — however you want it written on the quote:');
+  const name = prompt('Year, make and model, as you want it written on the quote');
   if(!name) return;
   state.make = ''; state.model = name.trim(); state.year = '';
   state.size = state.size || 'midsize'; state.sizeAuto = null;
@@ -757,7 +779,7 @@ function setTown(id){ state.town = id; render(); }
 /* ---------- Render: plans ---------- */
 function renderPlans(){
   if(!state.size){
-    $('plans').innerHTML = `<div class="empty">Pick a vehicle first.</div>`;
+    $('plans').innerHTML = `<div class="empty">Pick a vehicle first</div>`;
     $('plans-hint').textContent = '';
     return;
   }
@@ -789,15 +811,15 @@ function setPkg(id){ state.pkg = id; render(); }
 /* ---------- Render: the picked quote ---------- */
 function renderDetail(){
   const card = $('detail-card');
-  if(!state.size){ card.innerHTML = `<div class="empty">The breakdown shows up once a vehicle is picked.</div>`; return; }
+  if(!state.size){ card.innerHTML = `<div class="empty">The breakdown shows up once a vehicle is picked</div>`; return; }
   const q = quote(state.pkg);
   const veh = [state.year, state.make, state.model].filter(Boolean).join(' ');
   const gap = q.price - q.needed;
 
   const verdict = q.netRate >= num(cfg.targetHourly)
-    ? {cls:'v-good', txt:`Clears ${money(q.netRate)}/hr after supplies and the drive — above your ${money(cfg.targetHourly)} target. Quote it as-is.`}
+    ? {cls:'v-good', txt:`Clears ${money(q.netRate)}/hr after supplies and the drive, above your ${money(cfg.targetHourly)} target. Quote it as-is.`}
     : q.netRate >= num(cfg.targetHourly)*0.8
-    ? {cls:'v-ok',   txt:`${money(q.netRate)}/hr net, a bit under your ${money(cfg.targetHourly)} target. ${money(q.needed)} would get you there — worth it if the day's otherwise empty.`}
+    ? {cls:'v-ok',   txt:`${money(q.netRate)}/hr net, a bit under your ${money(cfg.targetHourly)} target. ${money(q.needed)} would get you there, worth it if the day's otherwise empty.`}
     : {cls:'v-bad',  txt:`Only ${money(q.netRate)}/hr net against a ${money(cfg.targetHourly)} target. You'd need ${money(q.needed)} to make this worth the drive. Upsell, add the condition fee, or pass.`};
 
   card.innerHTML = `
@@ -818,14 +840,14 @@ function renderDetail(){
 
     <div class="verdict ${verdict.cls}">${verdict.txt}</div>
 
-    <div class="line" style="margin-top:14px;border-top:.5px solid var(--sep);padding-top:12px">
+    <div class="line" style="margin-top:12px;border-top:1px solid var(--sep);padding-top:12px">
       <span>Supplies</span><span>−${money2(q.supplies)}</span></div>
     <div class="line"><span>Fuel &amp; wear · ${esc(q.tw.id)}, ${q.tw.miles} mi round trip</span><span>−${money2(q.fuel)}</span></div>
     <div class="line"><span>To hit ${money(cfg.targetHourly)}/hr you'd charge</span>
       <span class="${gap>=0?'r-good':'r-bad'}">${money(q.needed)}</span></div>
 
     <label for="qnotes">Notes for yourself</label>
-    <textarea id="qnotes" placeholder="Gate code, dog in the yard, “wants it before the wedding”…"
+    <textarea id="qnotes" placeholder="Gate code, dog in the yard"
       oninput="state.notes=this.value">${esc(state.notes)}</textarea>
 
     <div class="btn-row">
@@ -864,7 +886,7 @@ function quoteText(){
 }
 function copyQuote(){
   const txt = quoteText();
-  const done = ()=> toast('Copied — paste it in a text');
+  const done = ()=> toast('Copied, paste it in a text');
   if(navigator.clipboard && window.isSecureContext){
     navigator.clipboard.writeText(txt).then(done, ()=>fallbackCopy(txt, done));
   } else fallbackCopy(txt, done);
@@ -912,7 +934,7 @@ function delQuote(id, ev){
 function renderSaved(){
   const card = $('saved-card');
   if(!saved.length){
-    card.innerHTML = `<h2>Saved quotes</h2><div class="empty">Nothing saved yet. Quote a car and tap Save — it stays on this phone.</div>`;
+    card.innerHTML = `<h2>Saved quotes</h2><div class="empty">Nothing saved yet. Quote a car and tap Save. It stays on this phone.</div>`;
     return;
   }
   card.innerHTML = `<h2>Saved quotes <span class="hint">${saved.length}</span></h2>` +
@@ -923,7 +945,7 @@ function renderSaved(){
           <span>${esc(s.pkg)} · ${esc(s.town)} · ${money(s.netRate)}/hr net · ${new Date(s.when).toLocaleDateString('en-US',{month:'short',day:'numeric'})}</span>
         </div>
         <span class="amt">${money(s.price)}</span>
-        <button class="x" onclick="delQuote(${s.id}, event)" aria-label="Delete">✕</button>
+        <button class="x" onclick="delQuote(${s.id}, event)" aria-label="Delete"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><path d="M4 4l8 8M12 4l-8 8"/></svg></button>
       </div>`).join('');
 }
 

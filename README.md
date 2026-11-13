@@ -23,10 +23,11 @@ covering the towns we serve (McCall · Cascade · Donnelly), and
 `sitemap.xml` help search engines crawl the site (the sitemap lists the public
 pages; `admin.html` is disallowed).
 
-> `index.html`, `quote.html`, `service-areas.html`, `before-after.html`,
-> `dv-pricing.js`, `dv-compare.js`, `logo.svg`, `logo.png` and the `gallery/`
-> folder must live in the **same folder** — the pages reference them by relative
-> path. Without `dv-pricing.js` the booking flow and the quoting tool won't run.
+> `index.html`, `quote.html`, `admin.html`, `service-areas.html`,
+> `before-after.html`, `dv-pricing.js`, `dv-compare.js`, `logo.svg`, `logo.png`
+> and the `gallery/` folder must live in the **same folder** — the pages reference
+> them by relative path. Without `dv-pricing.js` the booking flow and the quoting
+> tool won't run, and the job board's booking editor loses its price list.
 
 ### Deploy on GitHub Pages
 1. Repo **Settings → Pages**
@@ -180,6 +181,14 @@ Supabase table. It's deployed alongside the site (e.g. `detailvalley.com/admin.h
 - Tap the phone number to call/text, tap the address to open Google Maps.
 - A per-job **notes** field (gate codes, "big dog in yard", reminders) — saved
   automatically, never visible to customers.
+- **Edit any booking.** *Edit* on the job (the panel on a computer, *Edit
+  booking* on a phone card) opens one form: date and arrival time, package,
+  vehicle, add-ons, water/power, total, hours on the job, customer, phone,
+  address, town and notes. Package, vehicle and add-ons come from
+  `dv-pricing.js`, so changing one refigures the total and the hours the way the
+  booking flow would; type over either for a custom quote. Only what changed is
+  saved. The database still refuses a time that overlaps another live job, and
+  the form says so in plain words.
 - Filter chips (To do · New · Confirmed · Done · Cancelled · All) and a summary
   strip (new count · upcoming count · dollars booked).
 
@@ -193,6 +202,10 @@ switch in the header picks the calendar view:
   whole day looks like it. Cancelled jobs sit under their day.
 - **Month** — the full month grid, every job a block you can open.
 - **Agenda** — the filtered list as a table, grouped by day.
+
+The calendar fills whatever screen it is on: on a wide monitor Work days shows
+more weeks (up to ten) and the side panes widen; on a tall one the hours get
+taller so the day fills the height.
 
 Work days gives a column to every Saturday, plus any other day that has a
 booking. Which weekdays always get a column is `WORK_DOW` near the bottom of

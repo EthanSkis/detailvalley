@@ -20,6 +20,7 @@
     --bg:#141415; --deep:#0f0f10; --card:#19191b; --card-2:#232325; --hover:#2b2b2e;
     --text:#ededed; --text-2:#a1a1a6; --text-3:#85858b;
     --sep:rgba(237,237,237,.08); --sep-2:rgba(237,237,237,.32); --wash:rgba(237,237,237,.04);
+    --scrim:rgba(15,15,16,.6);
     --accent:#a4521f; --accent-hover:#8c4418; --accent-ink:#f0c29e;
     --green:#4cc38a; --amber:#e0a23a; --red:#e5484d;
     --ease:cubic-bezier(0.22,1,0.36,1);
@@ -51,9 +52,22 @@
 
   /* Login */
   .card{background:var(--card);border:1px solid var(--sep);border-radius:16px;padding:19px}
-  .login{max-width:420px;margin:24px auto}
-  .login h2{font-size:1.25rem;line-height:1.4;margin-bottom:4px}
-  .login p.sub{color:var(--text-2);font-size:.9375rem;margin-bottom:16px}
+  /* Sign in. On phones and tablets the form sits straight on the page, no card,
+     with the footer line resting at the bottom of the screen. */
+  .login{display:flex;flex-direction:column;justify-content:center;gap:24px;max-width:420px;margin:0 auto;padding:24px 4px 40px;
+    min-height:calc(100vh - 84px);min-height:calc(100dvh - 84px)}
+  .login-top{display:flex;flex-direction:column;gap:4px}
+  .login h1{font-size:1.75rem;line-height:1.15;font-weight:500}
+  .login p.sub{color:var(--text-2);font-size:.9375rem}
+  .login-fields{display:flex;flex-direction:column;gap:16px}
+  .login label{margin:0 0 8px}
+  .login-acts{display:flex;flex-direction:column;gap:8px}
+  .login .btn{margin-top:0}
+  .login .linkbtn{align-self:flex-start;min-height:44px;margin:0;padding:0;color:var(--text-2)}
+  .login .msg{margin-top:0}
+  .login-foot{display:flex;justify-content:space-between;gap:16px;padding-top:16px;
+    border-top:1px solid var(--sep);font-size:.8125rem;color:var(--text-2)}
+  .login-foot a{color:var(--text-2)}
   label{display:block;font-size:.8125rem;font-weight:500;color:var(--text-2);margin:12px 0 8px}
   input{width:100%;padding:11px;border:1px solid var(--sep);border-radius:8px;
     font:inherit;font-size:1rem;color:var(--text);background:var(--card-2)}
@@ -262,12 +276,12 @@
     body{font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif}
     header .wrap{max-width:none;padding:0 24px}
     body.in main{display:none}
-    body.in .dviews{display:flex;gap:2px;padding:2px;background:var(--bg);box-shadow:inset 0 0 0 1px var(--sep);border-radius:10px}
+    body.in .dviews,body.out .dviews{display:flex;gap:2px;padding:2px;background:var(--bg);box-shadow:inset 0 0 0 1px var(--sep);border-radius:10px}
     .dv{height:32px;padding:0 16px;border:none;border-radius:8px;background:transparent;color:var(--text-2);
       font:inherit;font-size:.875rem;font-weight:500;cursor:pointer}
     .dv.on{background:var(--card-2);color:var(--text);box-shadow:inset 0 1px 0 rgba(255,255,255,.08)}
 
-    body.in #desk{display:flex;align-items:stretch;min-height:calc(100vh - 60px);min-height:calc(100dvh - 60px)}
+    body.in #desk,body.out #desk{display:flex;align-items:stretch;min-height:calc(100vh - 60px);min-height:calc(100dvh - 60px)}
     .d-rail,.d-side{position:sticky;top:60px;align-self:flex-start;height:calc(100vh - 60px);height:calc(100dvh - 60px);
       overflow-y:auto;background:var(--deep);display:flex;flex-direction:column}
     .d-rail{flex:0 0 240px;gap:24px;padding:20px 16px 24px;box-shadow:inset -1px 0 0 var(--sep)}
@@ -410,6 +424,17 @@
     .d-job textarea.notes{margin-top:0;min-height:88px}
     .d-job .actions{margin-top:auto}
     .d-side .empty{margin:auto 0}
+
+    /* Signed out: the empty calendar stays on screen, dimmed, with the sign-in over it */
+    body.out main{position:fixed;inset:0;z-index:35;display:flex;align-items:center;justify-content:center;max-width:none;
+      padding:24px;background:var(--scrim);overflow-y:auto}
+    body.out .login{flex:0 1 400px;min-height:0;margin:0;padding:32px;background:var(--card);border:1px solid var(--sep);
+      border-radius:16px}
+    body.out .login-top{gap:8px}
+    body.out .login h1{font-family:'Sora','Inter',sans-serif}
+    body.out .login-acts{gap:12px}
+    body.out .login-foot{padding-top:20px}
+    body.out .d-rail .acct,.d-stats:empty{display:none}
     .in-head{display:flex;align-items:center;justify-content:space-between;gap:12px}
     .d-side.editing{padding-bottom:0}
     .d-side .ef .actions{background:var(--deep);padding-bottom:24px}
@@ -444,6 +469,7 @@
     .d-q:hover:not(.sel),.wd-job:hover:not(.sel),.mo-chip:hover:not(.sel){background:var(--hover)}
     .ag-row:hover:not(.sel),.d-mday:hover{background:var(--wash)}
     a:hover,.linkbtn:hover,.ef-use:hover,.edit-btn:hover{text-decoration:underline}
+    .login-foot a:hover,.login .linkbtn:hover{color:var(--text)}
     .ef-check:not(.inc):hover{background:var(--hover)}
   }
   @media(prefers-reduced-motion:reduce){*{transition:none!important}}
@@ -466,27 +492,30 @@
 </header>
 
 <main class="wrap">
-  <!-- Login -->
-  <section id="login" class="card login" hidden>
-    <h2>Owner sign-in</h2>
-    <p class="sub">Private dashboard for managing Detail Valley bookings</p>
-    <label for="email">Email</label>
-    <input id="email" type="email" inputmode="email" autocomplete="username" placeholder="you@detailvalley.com">
-
-    <div id="pwPane">
-      <label for="pw">Password</label>
-      <input id="pw" type="password" autocomplete="current-password" placeholder="Password">
-      <button class="btn" id="pwSignin" onclick="passwordSignIn()">Sign in</button>
-      <button class="linkbtn" onclick="togglePw(false)">Email me a sign-in link instead</button>
+  <!-- Sign in. A real form, so Enter submits and the phone's password manager fills it. -->
+  <form id="login" class="login" hidden novalidate onsubmit="loginSubmit(event)">
+    <div class="login-top">
+      <h1>Sign in</h1>
+      <p class="sub">Your bookings, calendar and customer notes</p>
     </div>
-
-    <div id="linkPane" hidden>
-      <button class="btn" id="sendLink" onclick="sendLink()">Email me a sign-in link</button>
-      <button class="linkbtn" onclick="togglePw(true)">Use a password instead</button>
+    <div class="login-fields">
+      <div><label for="email">Email</label>
+        <input id="email" type="email" inputmode="email" autocomplete="username" placeholder="you@detailvalley.com"></div>
+      <div id="pwField"><label for="pw">Password</label>
+        <input id="pw" type="password" autocomplete="current-password"></div>
     </div>
-
-    <div class="msg" id="loginMsg"></div>
-  </section>
+    <div class="login-acts" id="pwPane">
+      <button class="btn" id="pwSignin">Sign in</button>
+      <button type="button" class="linkbtn" onclick="togglePw(false)">Email me a sign-in link instead</button>
+    </div>
+    <div class="login-acts" id="linkPane" hidden>
+      <button class="btn" id="sendLink">Email me a sign-in link</button>
+      <button type="button" class="linkbtn" onclick="togglePw(true)">Use a password instead</button>
+    </div>
+    <div class="msg" id="loginMsg" role="alert"></div>
+    <button type="button" class="btn" id="loginOut" hidden onclick="signOut()">Sign out</button>
+    <p class="login-foot"><span>Owner access only</span><a href="/">detailvalley.com</a></p>
+  </form>
 
   <!-- Board -->
   <section id="board" hidden>
@@ -616,32 +645,68 @@ async function boot(){
 
 async function render(session){
   $('boot').hidden = true;
-  if(!session){
-    document.body.classList.remove('in');
-    $('signout').hidden = true;
-    $('board').hidden = true;
-    $('login').hidden = false;
-    return;
-  }
+  if(!session){ showLogin(false); return; }
   // Confirm this account is actually an admin (RLS-backed).
   const { data:isAdmin, error } = await sb.rpc('is_admin');
   if(error || !isAdmin){
-    document.body.classList.remove('in');
-    $('login').hidden = false; $('board').hidden = true; $('signout').hidden = false;
+    showLogin(true);
     loginMsg('This account isn’t set up as an owner. Sign out and use your owner email, or ask to be added.', 'err');
     return;
   }
   $('login').hidden = true;
   $('board').hidden = false;
   $('signout').hidden = false;
+  document.body.classList.remove('out');
   document.body.classList.add('in');
+  $('desk').inert = false; document.querySelector('.dviews').inert = false;
   layout();
   loadJobs();
 }
 
+/* The signed-out screen (also shown to a signed-in account that is not an owner).
+   Everything loaded for the last session is dropped first, so nothing private
+   is left in the page behind the sign-in. */
+function showLogin(notOwner){
+  JOBS = []; DSEL = null; EDIT = null; EDIT_DIRTY = false;
+  for(const id of ['jobs','calDay','dBody','dPanel','sheet']) $(id).innerHTML = '';
+  $('sheet').hidden = true;
+  document.body.classList.remove('in','sheet-open');
+  document.body.classList.add('out');
+  $('board').hidden = true;
+  $('login').hidden = false;
+  $('signout').hidden = true;                     // the header's own Sign out is for the job board
+  $('loginOut').hidden = !notOwner;
+  document.querySelector('.login-fields').hidden = notOwner;
+  $('pwPane').hidden = notOwner; $('linkPane').hidden = true; $('pwField').hidden = false;
+  $('loginMsg').className = 'msg';
+  drawOut();
+  if(deskOn()) $('email').focus();
+}
+/* Big screens only: the calendar's empty frame behind the sign-in, the working
+   days and the hours with no bookings in them. It cannot be clicked or tabbed into. */
+function drawOut(){
+  $('desk').inert = true; document.querySelector('.dviews').inert = true;
+  if(!deskOn()) return;
+  DVIEW = 'days'; WD_SHIFT = 0;
+  for(const v of ['days','month','agenda']) $('dv-'+v).classList.toggle('on', v==='days');
+  $('dNav').hidden = false; $('dFilters').hidden = true;
+  $('dQueueN').textContent = '';
+  $('dQueue').innerHTML = '';
+  $('dMini').innerHTML = ''; $('dStats').innerHTML = ''; $('dPanel').innerHTML = '';
+  drawDays();
+  $('dSub').textContent = $('dSub').textContent.split(' · ')[0];
+  const legend = $('dBody').querySelector('.d-legend'); if(legend) legend.remove();
+  for(const tag of $('dBody').querySelectorAll('.wd-head span')) tag.textContent = '';   // "Nothing booked" would be a guess
+}
+
+function loginSubmit(ev){
+  ev.preventDefault();
+  if($('linkPane').hidden) passwordSignIn(); else sendLink();
+}
 function togglePw(showPw){
   $('linkPane').hidden = showPw;
   $('pwPane').hidden = !showPw;
+  $('pwField').hidden = !showPw;
 }
 
 async function sendLink(){
@@ -1001,7 +1066,9 @@ function layout(){
 DESK.addEventListener('change', ()=>{
   // The editor lives in a different place in each layout, so a layout change closes it.
   EDIT = null; EDIT_DIRTY = false; $('sheet').hidden = true; $('sheet').innerHTML = ''; document.body.classList.remove('sheet-open');
-  layout(); if(document.body.classList.contains('in')) redraw();
+  layout();
+  if(document.body.classList.contains('in')) redraw();
+  else if(document.body.classList.contains('out')) drawOut();
 });
 /* Resizing the window re-fits Work days. Only the grid is redrawn, and only when
    its size actually changes, so a note being typed in the panel is left alone. */
@@ -1009,8 +1076,9 @@ let wdResizeT = null;
 window.addEventListener('resize', ()=>{
   clearTimeout(wdResizeT);
   wdResizeT = setTimeout(()=>{
-    if(!deskOn() || DVIEW!=='days' || !document.body.classList.contains('in') || !JOBS) return;
-    if(wdWeeks() + 'x' + wdRow(wdHours) !== wdDrawn) drawDays();
+    const out = document.body.classList.contains('out');
+    if(!deskOn() || DVIEW!=='days' || !(out || document.body.classList.contains('in'))) return;
+    if(wdWeeks() + 'x' + wdRow(wdHours) !== wdDrawn){ if(out) drawOut(); else drawDays(); }
   }, 150);
 });
 

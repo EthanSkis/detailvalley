@@ -73,6 +73,12 @@
     font:inherit;font-size:1rem;color:var(--text);background:var(--card-2)}
   input::placeholder{color:var(--text-3)}
   input:focus{outline:none;border-color:var(--accent-ink)}
+  /* Show or hide a password: a 44px button inside the field's right edge */
+  .pw-wrap{position:relative}
+  .pw-wrap input{padding-right:48px}
+  .pw-wrap input::-ms-reveal{display:none}
+  .pw-eye{position:absolute;top:2px;right:2px;width:44px;height:44px;display:flex;align-items:center;justify-content:center;
+    border:none;border-radius:8px;background:transparent;color:var(--text-2);cursor:pointer}
   .btn{display:block;width:100%;margin-top:16px;padding:12px 16px;border:none;border-radius:8px;
     background:var(--accent);color:#fff;font:inherit;font-size:1rem;font-weight:500;cursor:pointer}
   .btn:disabled{opacity:.5;cursor:default}
@@ -455,7 +461,7 @@
   }
 
   /* States: one easing, named properties, hover only where there is a pointer */
-  .ghost,.btn,.vw,.chip,.act,.cal-nav,.cal-today,.cal-cell,.ef-check,.dv,.d-q,.d-mday,.wd-job,.wd-x,.mo-chip,.ag-row{
+  .ghost,.btn,.vw,.chip,.act,.cal-nav,.cal-today,.cal-cell,.ef-check,.pw-eye,.dv,.d-q,.d-mday,.wd-job,.wd-x,.mo-chip,.ag-row{
     transition:background-color 150ms var(--ease),color 150ms var(--ease),transform 150ms var(--ease)}
   input,select,textarea.notes{transition:border-color 150ms var(--ease)}
   .btn:enabled:active,.act:enabled:active{transform:scale(.98)}
@@ -469,7 +475,7 @@
     .d-q:hover:not(.sel),.wd-job:hover:not(.sel),.mo-chip:hover:not(.sel){background:var(--hover)}
     .ag-row:hover:not(.sel),.d-mday:hover{background:var(--wash)}
     a:hover,.linkbtn:hover,.ef-use:hover,.edit-btn:hover{text-decoration:underline}
-    .login-foot a:hover,.login .linkbtn:hover{color:var(--text)}
+    .login-foot a:hover,.login .linkbtn:hover,.pw-eye:hover{color:var(--text)}
     .ef-check:not(.inc):hover{background:var(--hover)}
   }
   @media(prefers-reduced-motion:reduce){*{transition:none!important}}
@@ -502,7 +508,7 @@
       <div><label for="email">Email</label>
         <input id="email" type="email" inputmode="email" autocomplete="username" placeholder="you@detailvalley.com"></div>
       <div id="pwField"><label for="pw">Password</label>
-        <input id="pw" type="password" autocomplete="current-password"></div>
+        <div class="pw-wrap"><input id="pw" type="password" autocomplete="current-password"><button type="button" class="pw-eye" aria-label="Show password" aria-pressed="false" onclick="togglePwEye(this)"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"/><circle cx="12" cy="12" r="3"/></svg></button></div></div>
     </div>
     <div class="login-acts" id="pwPane">
       <button class="btn" id="pwSignin">Sign in</button>
@@ -553,7 +559,7 @@
     <details class="acct" id="acct">
       <summary><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>Account &amp; password</summary>
       <label for="newpw">Set a new password</label>
-      <input id="newpw" type="password" autocomplete="new-password" placeholder="At least 8 characters">
+      <div class="pw-wrap"><input id="newpw" type="password" autocomplete="new-password" placeholder="At least 8 characters"><button type="button" class="pw-eye" aria-label="Show password" aria-pressed="false" onclick="togglePwEye(this)"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"/><circle cx="12" cy="12" r="3"/></svg></button></div>
       <button class="btn alt" onclick="changePassword()">Save password</button>
       <p class="note">On iPhone, tap “Save Password” when prompted. Next time you can sign in with Face ID.</p>
       <div class="msg" id="acctMsg"></div>
@@ -659,6 +665,7 @@ async function render(session){
   document.body.classList.remove('out');
   document.body.classList.add('in');
   $('desk').inert = false; document.querySelector('.dviews').inert = false;
+  hidePws();
   layout();
   loadJobs();
 }
@@ -679,6 +686,7 @@ function showLogin(notOwner){
   document.querySelector('.login-fields').hidden = notOwner;
   $('pwPane').hidden = notOwner; $('linkPane').hidden = true; $('pwField').hidden = false;
   $('loginMsg').className = 'msg';
+  hidePws();
   drawOut();
   if(deskOn()) $('email').focus();
 }
@@ -703,6 +711,19 @@ function loginSubmit(ev){
   ev.preventDefault();
   if($('linkPane').hidden) passwordSignIn(); else sendLink();
 }
+/* Show or hide what is typed in a password field. */
+const EYE = '<svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"/><circle cx="12" cy="12" r="3"/></svg>';
+const EYE_OFF = '<svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M10.733 5.076a10.744 10.744 0 0 1 11.205 6.575 1 1 0 0 1 0 .696 10.747 10.747 0 0 1-1.444 2.49"/><path d="M14.084 14.158a3 3 0 0 1-4.242-4.242"/><path d="M17.479 17.499a10.75 10.75 0 0 1-15.417-5.151 1 1 0 0 1 0-.696 10.75 10.75 0 0 1 4.446-5.143"/><path d="m2 2 20 20"/></svg>';
+function setPwEye(btn, show){
+  btn.previousElementSibling.type = show ? 'text' : 'password';
+  btn.innerHTML = show ? EYE_OFF : EYE;
+  btn.setAttribute('aria-label', show ? 'Hide password' : 'Show password');
+  btn.setAttribute('aria-pressed', show);
+}
+function togglePwEye(btn){ setPwEye(btn, btn.previousElementSibling.type === 'password'); }
+/* Back to hidden, so a password is never left readable on screen. */
+function hidePws(){ for(const b of document.querySelectorAll('.pw-eye')) setPwEye(b, false); }
+
 function togglePw(showPw){
   $('linkPane').hidden = showPw;
   $('pwPane').hidden = !showPw;
@@ -742,7 +763,7 @@ async function changePassword(){
   if(pw.length < 8){ acctMsg('Use at least 8 characters', 'err'); return; }
   const { error } = await sb.auth.updateUser({ password: pw });
   if(error){ acctMsg(error.message, 'err'); return; }
-  $('newpw').value = '';
+  $('newpw').value = ''; hidePws();
   acctMsg('Password updated. Save it to your iPhone Keychain when prompted.', 'ok');
 }
 

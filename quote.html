@@ -6,199 +6,207 @@
 <meta name="robots" content="noindex,nofollow">
 <meta name="theme-color" content="#0f0f10">
 <meta name="color-scheme" content="dark">
-<title>Detail Valley quote tool</title>
+<title>Detail Valley · Quote tool</title>
 <link rel="icon" type="image/svg+xml" href="logo.svg">
 <link rel="alternate icon" href="logo.png">
+<!-- Brand type for the desktop shell only; phones keep the system font and never fetch it -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" media="(min-width:1280px)" href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600&family=Inter:wght@400;500;600&display=swap">
 <style>
-  /* Graphite ramp for the surfaces, copper for the one accent. Kept in step
-     with the job board (admin.html) so the two feel like one app.
-     --accent fills the primary action and the current tab; on a dark surface
-     copper is too dark for text or an outline, so those use --accent-ink. */
+  /* Same graphite ramp, three text roles and copper accent as the job board
+     (admin.html), so the two read as one app. 4px spacing grid. */
   :root{
-    --bg:#141415; --deep:#0f0f10; --card:#19191b; --card-2:#232325; --fill:#2c2c2f;
+    --bg:#141415; --deep:#0f0f10; --card:#19191b; --card-2:#232325; --hover:#2b2b2e;
     --text:#ededed; --text-2:#a1a1a6; --text-3:#85858b;
-    --sep:rgba(237,237,237,.08);
+    --sep:rgba(237,237,237,.08); --sep-2:rgba(237,237,237,.32);
     --accent:#a4521f; --accent-hover:#8c4418; --accent-ink:#f0c29e;
-    --green:#4cc38a; --orange:#d9a441; --red:#e5484d;
-    --ease:cubic-bezier(.22,1,.36,1);
+    --ease:cubic-bezier(0.22,1,0.36,1);
   }
   *{margin:0;padding:0;box-sizing:border-box}
   [hidden]{display:none!important}
   body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text','SF Pro Display','Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;
     color:var(--text);background:var(--bg);line-height:1.5;-webkit-font-smoothing:antialiased}
-  /* Every figure sits on tabular digits so columns of numbers line up. */
-  input,.hint,.chip small,.plan-top .amt,.plan-meta,.line span:last-child,.stat b,
-  .saved .sv span,.saved .amt,.row4 .ro{font-variant-numeric:tabular-nums}
   h1,h2,h3{font-weight:500;letter-spacing:0}
   a{color:var(--accent-ink);text-decoration:none}
-  code{white-space:nowrap}
   .wrap{max-width:680px;margin:0 auto;padding:0 16px}
   button:focus-visible,a:focus-visible{outline:2px solid var(--accent-ink);outline-offset:2px}
 
-  header{background:var(--deep);padding:12px 0;border-bottom:1px solid var(--sep);position:sticky;top:0;z-index:30}
-  .head-row{display:flex;align-items:center;gap:8px}
+  /* Header: deepest surface with a hairline, 60px tall */
+  header{background:var(--deep);padding:12px 0;box-shadow:inset 0 -1px 0 var(--sep);position:sticky;top:0;z-index:30}
+  .head-row{display:flex;align-items:center;gap:16px}
   .brand{display:flex;align-items:center;gap:12px;flex:1;min-width:0}
   .brand img{width:36px;height:36px;border-radius:50%;display:block;flex:0 0 auto}
-  .brand div{min-width:0}
-  .brand b{display:block;font-weight:500;font-size:1rem;line-height:20px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  .brand span{display:block;font-size:.75rem;line-height:16px;color:var(--text-2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  /* 36px tall to the eye; the ::after stretches the tap area to 44px. */
-  .ghost{position:relative;flex:0 0 auto;height:36px;padding:0 16px;border:none;border-radius:8px;
+  .brand div{line-height:1.25}
+  .brand b{font-weight:600;font-size:1rem}
+  .brand span{display:block;font-size:.75rem;line-height:1.3333;color:var(--text-2)}
+  .head-link{display:none;font-size:.875rem;font-weight:500;color:var(--text-2)}
+  /* 36px tall to the eye; the ::after stretches the tap area to 44px */
+  .ghost{position:relative;flex:0 0 auto;display:inline-flex;align-items:center;height:36px;padding:0 12px;border:none;border-radius:8px;
     background:var(--card-2);box-shadow:inset 0 0 0 1px var(--sep);color:var(--text);
-    font:inherit;font-size:.875rem;font-weight:500;cursor:pointer;transition:background-color .15s var(--ease)}
+    font:inherit;font-size:.8125rem;font-weight:500;cursor:pointer}
   .ghost::after{content:'';position:absolute;inset:-4px 0}
-  .ghost.on{background:var(--accent);box-shadow:none;color:#fff}
 
-  main.wrap{padding-top:16px;padding-bottom:calc(24px + env(safe-area-inset-bottom))}
-  .card{background:var(--card);box-shadow:inset 0 0 0 1px var(--sep);border-radius:12px;padding:16px;margin-bottom:12px}
-  .card > h2{font-size:.875rem;line-height:20px;font-weight:500;color:var(--text);margin-bottom:12px}
-  .card > h2 .hint{float:right;font-size:.75rem;font-weight:400;color:var(--text-3)}
+  /* Phones and tablets: one column. The same three blocks become three panes on a big screen. */
+  .shell{display:flex;flex-direction:column;gap:12px;max-width:680px;margin:0 auto;padding:16px 16px calc(24px + env(safe-area-inset-bottom))}
+  .q-main,.q-grid{display:flex;flex-direction:column;gap:12px}
+  .q-side{order:1}
+  .q-rail{order:2}
+  .q-title{font-size:1.5rem;line-height:1.15}
+  .q-sub{display:block;font-size:.8125rem;color:var(--text-2)}
+  .card,.q-side,.q-rail{background:var(--card);box-shadow:inset 0 0 0 1px var(--sep);border-radius:12px;padding:16px}
+  .label{display:flex;align-items:baseline;gap:8px;font-size:.8125rem;line-height:20px;font-weight:500;color:var(--text-2);margin-bottom:8px}
+  .label span{font-weight:400;color:var(--text-3);font-variant-numeric:tabular-nums}
 
-  label{display:block;font-size:.8125rem;line-height:20px;font-weight:500;color:var(--text-2);margin:12px 0 4px}
-  label:first-child{margin-top:0}
-  #model-wrap label{margin-top:12px}
+  label{display:block;font-size:.8125rem;line-height:20px;font-weight:500;color:var(--text-2);margin:12px 0 8px}
   input,select,textarea{width:100%;height:48px;padding:0 12px;border:1px solid var(--sep);border-radius:8px;
-    font:inherit;font-size:1rem;color:var(--text);background:var(--card-2);appearance:none;
-    transition:border-color .15s var(--ease)}
+    font:inherit;font-size:1rem;color:var(--text);background:var(--card-2);appearance:none;-webkit-appearance:none;font-variant-numeric:tabular-nums}
   input::placeholder,textarea::placeholder{color:var(--text-3)}
   input:focus,select:focus,textarea:focus{outline:none;border-color:var(--accent-ink)}
-  select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 8' fill='none' stroke='%2385858b' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M1 1.5 6 6.5 11 1.5'/%3E%3C/svg%3E");
-    background-repeat:no-repeat;background-position:right 12px center;background-size:12px;padding-right:36px}
-  textarea{height:auto;min-height:64px;padding:8px 12px;resize:vertical;line-height:1.5}
+  select{padding-right:40px;text-overflow:ellipsis;background:var(--card-2) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23a1a1a6' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E") no-repeat right 12px center/16px}
+  textarea{height:auto;min-height:88px;padding:12px;resize:vertical;line-height:1.5}
 
   /* Vehicle search */
   .vsearch{position:relative}
   .results{position:absolute;left:0;right:0;top:calc(100% + 4px);z-index:20;background:var(--card-2);
-    border-radius:12px;box-shadow:inset 0 0 0 1px var(--sep),0 8px 24px rgba(0,0,0,.4);
-    max-height:300px;overflow-y:auto;padding:4px}
+    border-radius:12px;box-shadow:inset 0 0 0 1px var(--sep-2);
+    max-height:296px;overflow-y:auto;padding:4px}
   .res{display:flex;align-items:center;gap:8px;width:100%;min-height:44px;padding:0 12px;border:none;background:transparent;
     border-radius:8px;font:inherit;color:var(--text);text-align:left;cursor:pointer}
-  .res.cursor{background:var(--fill);box-shadow:inset 0 0 0 1px var(--accent-ink)}
+  .res.cursor{background:var(--hover);box-shadow:inset 0 0 0 1px var(--sep-2)}
   .res b{font-weight:500;font-size:.9375rem;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   .res .mk{color:var(--text-2);font-weight:400}
   .res-empty{padding:12px;font-size:.875rem;color:var(--text-2);text-align:center}
-
-  /* Size class: quiet text in a hairline box, the same for all three. */
-  .tag{flex:0 0 auto;font-size:.75rem;line-height:16px;font-weight:400;color:var(--text-2);
-    padding:2px 6px;border-radius:4px;box-shadow:inset 0 0 0 1px var(--sep)}
-
-  /* Option rows. 40px tall to the eye; the ::after stretches the tap area to 44px. */
-  .chips{display:flex;flex-wrap:wrap;gap:8px}
-  .chip{position:relative;min-height:40px;padding:0 12px;border:1px solid var(--sep);border-radius:8px;
-    background:var(--card-2);color:var(--text);font:inherit;font-size:.875rem;font-weight:500;cursor:pointer;
-    display:inline-flex;align-items:center;gap:8px;
-    transition:background-color .15s var(--ease),border-color .15s var(--ease)}
-  .chip::after{content:'';position:absolute;inset:-3px -1px}
-  .chip.on{border-color:var(--accent-ink);background:var(--fill)}
-  .chip small{font-weight:400;font-size:.75rem;color:var(--text-2)}
+  .tag{flex:0 0 auto;font-size:.75rem;line-height:16px;color:var(--text-2);padding:2px 8px;border-radius:4px;box-shadow:inset 0 0 0 1px var(--sep)}
 
   /* The picked vehicle */
-  .picked{display:flex;align-items:center;gap:12px;background:var(--card-2);border-radius:8px;padding:12px;
-    box-shadow:inset 0 0 0 1px var(--sep)}
+  .picked{display:flex;align-items:center;gap:12px;background:var(--card-2);border-radius:8px;padding:12px;box-shadow:inset 0 0 0 1px var(--sep)}
   .picked .pv{flex:1;min-width:0}
   .picked .pv b{display:block;font-size:1rem;line-height:24px;font-weight:500}
   .picked .pv span{display:block;font-size:.8125rem;line-height:20px;color:var(--text-2)}
-  /* Clear / delete. 32px to the eye, 44px tap area. */
-  .picked .x,.saved .x{position:relative;flex:0 0 auto;width:32px;height:32px;display:grid;place-items:center;
-    border:none;border-radius:8px;background:var(--fill);color:var(--text-2);cursor:pointer;
-    transition:color .15s var(--ease)}
-  .picked .x::after,.saved .x::after{content:'';position:absolute;inset:-6px}
+  /* Clear / delete: 32px to the eye, 44px tap area */
+  .x{position:relative;flex:0 0 auto;width:32px;height:32px;display:grid;place-items:center;
+    border:none;border-radius:8px;background:transparent;color:var(--text-2);cursor:pointer}
+  .x::after{content:'';position:absolute;inset:-6px}
   .x svg{display:block}
 
-  /* Plan cards */
-  .plans{display:grid;gap:8px;padding-top:8px}
-  .plan{text-align:left;width:100%;background:var(--card-2);border:1px solid var(--sep);border-radius:8px;
-    padding:12px;font:inherit;color:var(--text);cursor:pointer;position:relative;
-    transition:background-color .15s var(--ease),border-color .15s var(--ease)}
-  .plan.on{border-color:var(--accent-ink);background:var(--fill)}
-  .plan-top{display:flex;align-items:baseline;gap:8px}
-  .plan-top b{flex:1;min-width:0;font-size:1rem;font-weight:500}
-  .plan-top .amt{font-size:1.25rem;font-weight:500}
-  .plan-meta{display:flex;flex-wrap:wrap;gap:4px 12px;margin-top:4px;font-size:.75rem;line-height:16px;
-    color:var(--text-2)}
-  .plan-meta .rate{font-weight:500}
-  .r-good{color:var(--green)} .r-ok{color:var(--orange)} .r-bad{color:var(--red)}
-  .best{position:absolute;top:-8px;right:12px;font-size:.75rem;line-height:16px;font-weight:500;
-    background:var(--deep);color:var(--text);padding:0 6px;border-radius:4px;
-    box-shadow:inset 0 0 0 1px var(--sep);white-space:nowrap}
+  /* One selected state everywhere: one surface step and a brighter hairline */
+  .chip.on,.plan.on,.saved.on{background:var(--hover);box-shadow:inset 0 0 0 1px var(--sep-2)}
 
-  /* Quote breakdown */
-  .line{display:flex;justify-content:space-between;gap:12px;padding:8px 0;border-bottom:1px solid var(--sep);
-    font-size:.9375rem;line-height:24px}
-  .line:last-of-type{border-bottom:none}
+  /* Size class */
+  .chips{display:flex;flex-wrap:wrap;gap:8px}
+  .chip{position:relative;display:inline-flex;align-items:center;gap:8px;min-height:40px;padding:0 12px;border:none;border-radius:8px;
+    background:var(--card-2);box-shadow:inset 0 0 0 1px var(--sep);color:var(--text);font:inherit;font-size:.875rem;font-weight:500;cursor:pointer}
+  .chip::after{content:'';position:absolute;inset:-2px 0}
+  .chip small{font-weight:400;font-size:.75rem;color:var(--text-2);font-variant-numeric:tabular-nums}
+
+  /* Packages: rows like the booking flow's first step, each priced for this vehicle */
+  .plans,.checks{display:flex;flex-direction:column;gap:4px}
+  .plan{display:grid;grid-template-columns:20px minmax(0,1fr) auto;gap:12px;align-items:center;width:100%;min-height:56px;padding:8px 12px;
+    border:none;border-radius:8px;background:var(--card-2);box-shadow:inset 0 0 0 1px var(--sep);color:var(--text);font:inherit;text-align:left;cursor:pointer}
+  .plan i{width:20px;height:20px;border-radius:50%;box-shadow:inset 0 0 0 1.5px var(--text-3)}
+  .plan.on i{box-shadow:inset 0 0 0 6px var(--text)}
+  .plan b{display:block;font-size:.9375rem;font-weight:500}
+  .plan small{display:block;font-size:.75rem;line-height:1.3333;color:var(--text-2)}
+  .plan .amt{text-align:right;white-space:nowrap}
+  .plan .amt b{font-size:1rem}
+  .plan .amt b,.plan .amt small{font-variant-numeric:tabular-nums}
+
+  /* Add-ons: the same rows as the job board's booking editor */
+  .check{display:flex;align-items:center;gap:12px;min-height:44px;margin:0;padding:0 12px;border-radius:8px;
+    background:var(--card-2);box-shadow:inset 0 0 0 1px var(--sep);font-size:.875rem;font-weight:400;color:var(--text);cursor:pointer}
+  .check input{flex:0 0 18px;width:18px;height:18px;padding:0;accent-color:var(--accent);appearance:auto;-webkit-appearance:auto}
+  .check span{flex:1;min-width:0}
+  .check em{font-style:normal;color:var(--text-2);font-variant-numeric:tabular-nums}
+  .check:focus-within{box-shadow:inset 0 0 0 1px var(--accent-ink)}
+  .check.off{color:var(--text-2);cursor:default}
+
+  /* The quote */
+  .q-top{display:flex;flex-direction:column;gap:4px;margin-bottom:8px}
+  .q-name{font-size:1.375rem;line-height:1.2}
+  .q-veh{font-size:.875rem;color:var(--text-2);font-variant-numeric:tabular-nums}
+  .line{display:flex;justify-content:space-between;gap:16px;padding:8px 0;font-size:.875rem;line-height:20px}
   .line span:first-child{color:var(--text-2)}
-  .line span:last-child{font-weight:500;flex:0 0 auto}
-  .line.inc span:last-child{color:var(--text-2);font-weight:400}
-  .line.total{align-items:baseline;border-top:1px solid var(--sep);border-bottom:none;margin-top:4px;padding-top:12px;font-size:1rem}
-  .line.total span{color:var(--text)!important;font-weight:500}
-  .line.total span:last-child{font-size:1.75rem;line-height:32px;font-weight:600}
-
-  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}
-  .stat{background:var(--card-2);border-radius:8px;padding:12px;text-align:center}
-  .stat b{display:block;font-size:1.25rem;line-height:24px;font-weight:500}
-  .stat span{display:block;font-size:.75rem;line-height:16px;color:var(--text-2);margin-top:4px}
-
-  /* Verdict: plain text on a raised surface, a dot carries good / close / bad. */
-  .verdict{display:flex;gap:8px;margin-top:12px;border-radius:8px;padding:12px;font-size:.875rem;line-height:20px;
-    background:var(--card-2);color:var(--text)}
-  .verdict::before{content:'';flex:0 0 8px;height:8px;margin-top:6px;border-radius:50%;background:var(--text-3)}
-  .v-good::before{background:var(--green)}
-  .v-ok::before{background:var(--orange)}
-  .v-bad::before{background:var(--red)}
-
-  .btn{display:block;width:100%;min-height:48px;margin-top:12px;padding:12px 16px;border:none;border-radius:8px;
-    background:var(--accent);color:#fff;font:inherit;font-size:1rem;font-weight:500;cursor:pointer;
-    transition:background-color .15s var(--ease),transform .15s var(--ease)}
+  .line span:last-child{flex:0 0 auto;font-weight:500;font-variant-numeric:tabular-nums}
+  .line.inc span:last-child{font-weight:400;color:var(--text-2)}
+  .line.total{align-items:center;margin-top:8px;padding-top:16px;border-top:1px solid var(--sep)}
+  .line.total span:last-child{font-size:1.375rem;line-height:1.2;font-weight:600;color:var(--text)}
+  .actions{display:flex;gap:8px;margin-top:16px}
+  .btn{flex:1 1 auto;min-height:48px;padding:12px 16px;border:none;border-radius:8px;
+    background:var(--accent);color:#fff;font:inherit;font-size:1rem;font-weight:500;cursor:pointer}
   .btn:active{transform:scale(.98)}
   .btn.alt{background:var(--card-2);box-shadow:inset 0 0 0 1px var(--sep);color:var(--text)}
-  .btn-row{display:flex;gap:8px}
-  .btn-row .btn{flex:1 1 auto;width:auto}
-
-  .empty{text-align:center;color:var(--text-2);font-size:.9375rem;padding:20px 12px}
+  .btn.wide{display:block;width:100%;margin-top:12px}
+  .empty{text-align:center;color:var(--text-2);font-size:.9375rem;padding:24px 12px}
 
   /* Saved quotes */
-  .saved{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--sep)}
-  .saved:last-child{border-bottom:none}
-  .saved .sv{flex:1;min-width:0}
-  .saved .sv b{display:block;font-size:.9375rem;line-height:24px;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-  .saved .sv span{display:block;font-size:.75rem;line-height:16px;color:var(--text-2)}
-  .saved .amt{flex:0 0 auto;font-weight:500;font-size:1rem}
-
-  /* Settings */
-  .set-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-  .set-grid label{margin:0 0 4px}
-  .set-grid input{height:44px}
-  .subhead{font-size:.875rem;line-height:20px;font-weight:500;color:var(--text);
-    margin:16px 0 8px;padding-top:16px;border-top:1px solid var(--sep)}
-  .subhead:first-of-type{border-top:none;padding-top:0;margin-top:0}
-  .row4{display:grid;grid-template-columns:1.4fr 1fr 1fr;gap:8px;align-items:center;margin-bottom:4px}
-  .row4 .rl{font-size:.875rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-  .row4 input{height:44px;padding:0 10px;text-align:right}
-  /* Read-only figures: same 1px border + 10px inset as the inputs, so every number ends on one line. */
-  .row4 .ro{border:1px solid transparent;padding:8px 10px;font-size:1rem;line-height:22px;text-align:right;color:var(--text-2)}
-  .locked{font-weight:400;font-size:.75rem;color:var(--text-3);margin-left:8px;white-space:nowrap}
-  .row-head{display:grid;grid-template-columns:1.4fr 1fr 1fr;gap:8px;font-size:.75rem;line-height:16px;
-    color:var(--text-3);margin-bottom:4px}
-  .row-head span:not(:first-child){text-align:right;padding-right:11px}
+  .saved-list{display:flex;flex-direction:column;gap:4px}
+  .saved{display:flex;align-items:center;gap:8px;padding:8px 4px 8px 12px;border-radius:8px;background:var(--card-2);box-shadow:inset 0 0 0 1px var(--sep);cursor:pointer}
+  .saved .sv{flex:1;min-width:0;border:none;background:none;color:var(--text);font:inherit;text-align:left;cursor:pointer}
+  .saved .sv b{display:block;font-size:.875rem;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .saved .sv span{display:block;font-size:.75rem;line-height:1.3333;color:var(--text-2);font-variant-numeric:tabular-nums}
+  .none{font-size:.8125rem;color:var(--text-3)}
 
   .toast{position:fixed;left:50%;bottom:24px;width:max-content;max-width:calc(100vw - 32px);transform:translateX(-50%) translateY(8px);opacity:0;
-    background:var(--fill);color:var(--text);padding:12px 20px;border-radius:8px;font-size:.875rem;
-    font-weight:500;box-shadow:inset 0 0 0 1px var(--sep),0 8px 24px rgba(0,0,0,.4);pointer-events:none;
-    transition:opacity .18s var(--ease),transform .18s var(--ease);z-index:60}
+    background:var(--card-2);color:var(--text);padding:12px 16px;border-radius:8px;font-size:.875rem;
+    font-weight:500;box-shadow:inset 0 0 0 1px var(--sep),0 8px 24px rgba(0,0,0,.4);pointer-events:none;z-index:60}
   .toast.show{transform:translateX(-50%) translateY(0);opacity:1}
 
-  .foot{text-align:center;font-size:.8125rem;line-height:20px;color:var(--text-3);padding:4px 0 0}
-  .foot a{position:relative;padding:0 8px;color:var(--text-2)}
-  .foot a::after{content:'';position:absolute;inset:-14px -3px}
+  .foot{text-align:center;font-size:.8125rem;line-height:20px;padding:0 0 24px}
+  .foot a{position:relative;color:var(--text-2)}
+  .foot a::after{content:'';position:absolute;inset:-12px -8px}
 
-  /* Hover only where there is a pointer, so a tap never leaves a row stuck lit. */
-  @media(hover:hover){
-    .ghost:not(.on):hover,.chip:not(.on):hover,.plan:not(.on):hover,.btn.alt:hover,.res:hover{background:var(--fill)}
-    .btn:not(.alt):hover{background:var(--accent-hover)}
-    .picked .x:hover,.saved .x:hover,.foot a:hover{color:var(--text)}
+  /* ---------- Desktop shell (1280px and up) ----------
+     The job board's three panes: saved quotes in the rail, the choices in the
+     middle, the quote itself in the panel on the right. It fills the window. */
+  @media(min-width:1280px){
+    body{font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif}
+    header .wrap{max-width:none;padding:0 24px}
+    .head-link{display:inline}
+    .foot{display:none}
+    .shell{flex-direction:row;align-items:stretch;gap:0;max-width:none;padding:0;min-height:calc(100vh - 60px);min-height:calc(100dvh - 60px)}
+    .q-rail,.q-side{position:sticky;top:60px;align-self:flex-start;height:calc(100vh - 60px);height:calc(100dvh - 60px);overflow-y:auto;
+      background:var(--deep);border-radius:0}
+    .q-rail{order:0;flex:0 0 240px;padding:20px 16px 24px;box-shadow:inset -1px 0 0 var(--sep)}
+    .q-main{order:1;flex:1 1 0;min-width:0;gap:16px;padding:20px 24px 24px}
+    .q-side{order:2;flex:0 0 320px;display:flex;flex-direction:column;padding:24px;box-shadow:inset 1px 0 0 var(--sep)}
+    .q-grid{gap:16px}
+    .q-bar{display:flex;flex-direction:column;justify-content:center;min-height:56px}
+    .q-title{font-family:'Sora','Inter',sans-serif;font-size:1.75rem}
+    .q-name{font-family:'Sora','Inter',sans-serif}
+    .saved{background:var(--card)}
+    .q-side .actions{margin-top:auto;padding-top:16px}
+    .q-side .empty{margin:auto 0}
+  }
+  /* Wider: the vehicle sits beside the package and add-ons instead of above them */
+  @media(min-width:1440px){
+    .q-rail{flex-basis:264px}
+    .q-side{flex-basis:344px}
+    .q-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));align-items:start}
+    .q-grid>:first-child{grid-row:span 2}
+  }
+  /* Widest: one column each, so no row stretches across half a monitor */
+  @media(min-width:1920px){
+    .q-rail{flex-basis:280px}
+    .q-side{flex-basis:400px}
+    .q-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+    .q-grid>:first-child{grid-row:auto}
+  }
+  @media(min-width:2560px){
+    .q-side{flex-basis:440px}
   }
 
-  @media(min-width:560px){ .plans{grid-template-columns:1fr 1fr} }
+  /* States: one easing, named properties, hover only where there is a pointer */
+  .ghost,.btn,.chip,.plan,.check,.res,.saved,.x{
+    transition:background-color 150ms var(--ease),color 150ms var(--ease),transform 150ms var(--ease)}
+  input,select,textarea{transition:border-color 150ms var(--ease)}
+  .toast{transition:opacity 180ms var(--ease),transform 180ms var(--ease)}
+  @media(hover:hover){
+    .ghost:hover,.chip:not(.on):hover,.plan:not(.on):hover,.check:not(.off):hover,.saved:not(.on):hover,.btn.alt:hover,.res:hover{background:var(--hover)}
+    .btn:not(.alt):hover{background:var(--accent-hover)}
+    .x:hover,.head-link:hover,.foot a:hover{color:var(--text)}
+  }
+  @media(prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
 </head>
 <body>
@@ -207,117 +215,37 @@
   <div class="wrap head-row">
     <div class="brand">
       <img src="logo.svg" alt="" onerror="this.src='logo.png'">
-      <div>
-        <b>Quote tool</b>
-        <span>Internal use only</span>
-      </div>
+      <div><b>Detail Valley</b><span>Quote tool</span></div>
     </div>
-    <button class="ghost" id="tab-quote" onclick="showTab('quote')">Quote</button>
-    <button class="ghost" id="tab-set" onclick="showTab('set')">Rates</button>
+    <a class="head-link" href="index.html">Site</a>
+    <a class="ghost" href="admin.html">Job board</a>
   </div>
 </header>
 
-<main class="wrap">
-
-  <!-- ============ QUOTE ============ -->
-  <div id="view-quote">
-
-    <div class="card">
-      <h2>Vehicle <span class="hint" id="v-count"></span></h2>
-      <div id="vehicle-box"></div>
-    </div>
-
-    <div class="card">
-      <h2>Condition <span class="hint">Drives time, not just price</span></h2>
-      <div class="chips" id="cond-chips"></div>
-    </div>
-
-    <div class="card">
-      <h2>Add-ons</h2>
-      <div class="chips" id="addon-chips"></div>
-    </div>
-
-    <div class="card">
-      <h2>Where</h2>
-      <label for="town">Town</label>
-      <select id="town" onchange="setTown(this.value)"></select>
-      <div class="grid2" id="trip-stats"></div>
-    </div>
-
-    <div class="card">
-      <h2>Plans for this rig <span class="hint" id="plans-hint"></span></h2>
-      <div class="plans" id="plans"></div>
-    </div>
-
-    <div class="card" id="detail-card"></div>
-
-    <div class="card" id="saved-card"></div>
-
-  </div>
-
-  <!-- ============ SETTINGS ============ -->
-  <div id="view-set" hidden>
-    <div class="card">
-      <h2>Your numbers</h2>
-      <p style="font-size:.875rem;line-height:20px;color:var(--text-2);margin-bottom:16px">
-        Your own numbers (target rate, supplies, condition and drive times) are
-        saved on this device only. Package, size and add-on prices and times are
-        the same ones customers see when they book. They're shown here but can't
-        be changed here. To change them, edit <code>dv-pricing.js</code>, which
-        changes the public site and this tool together.
-      </p>
-      <div class="set-grid">
-        <div>
-          <label for="s-target">Target $/hr</label>
-          <input id="s-target" type="number" inputmode="decimal" step="5">
-        </div>
-        <div>
-          <label for="s-supjob">Supplies per job $</label>
-          <input id="s-supjob" type="number" inputmode="decimal" step="1">
-        </div>
-        <div>
-          <label for="s-suphr">Supplies per hr $</label>
-          <input id="s-suphr" type="number" inputmode="decimal" step="0.5">
-        </div>
-        <div>
-          <label for="s-mile">Vehicle cost $/mi</label>
-          <input id="s-mile" type="number" inputmode="decimal" step="0.05">
-        </div>
-      </div>
-
-      <div class="subhead">Package price &amp; base minutes <span class="locked">same as the booking site</span></div>
-      <div class="row-head"><span>Package</span><span>Price $</span><span>Minutes</span></div>
-      <div id="s-pkgs"></div>
-
-      <div class="subhead">Vehicle size surcharge &amp; extra minutes <span class="locked">same as the booking site</span></div>
-      <div class="row-head"><span>Size class</span><span>Extra $</span><span>Extra min</span></div>
-      <div id="s-sizes"></div>
-
-      <div class="subhead">Add-ons <span class="locked">same as the booking site</span></div>
-      <div class="row-head"><span>Add-on</span><span>Price $</span><span>Minutes</span></div>
-      <div id="s-addons"></div>
-
-      <div class="subhead">Condition time multiplier &amp; surcharge</div>
-      <div class="row-head"><span>Condition</span><span>× time</span><span>Extra $</span></div>
-      <div id="s-cond"></div>
-
-      <div class="subhead">Town round trips from your base</div>
-      <div class="row-head"><span>Town</span><span>RT miles</span><span>RT minutes</span></div>
-      <div id="s-towns"></div>
-      <p style="font-size:.875rem;line-height:20px;color:var(--text-2);margin-top:8px">
-        These start as rough guesses. Drive each one once, check the odometer, and put the real numbers in.
-      </p>
-
-      <div class="btn-row">
-        <button class="btn alt" onclick="resetCfg()">Reset my numbers</button>
-      </div>
+<main class="shell">
+  <div class="q-main">
+    <div class="q-bar"><h1 class="q-title" id="qTitle"></h1><span class="q-sub">Priced the same as booking online</span></div>
+    <div class="q-grid">
+      <section class="card" aria-labelledby="vehH">
+        <h2 class="label" id="vehH">Vehicle <span id="v-count"></span></h2>
+        <div id="vehicle-box"></div>
+      </section>
+      <section class="card" aria-labelledby="pkgH">
+        <h2 class="label" id="pkgH">Package <span id="plans-hint"></span></h2>
+        <div class="plans" id="plans"></div>
+      </section>
+      <section class="card" aria-labelledby="addH">
+        <h2 class="label" id="addH">Add-ons</h2>
+        <div class="checks" id="addon-list"></div>
+      </section>
     </div>
   </div>
 
-  <p class="foot">
-    <a href="index.html">Site</a> · <a href="admin.html">Job board</a>
-  </p>
+  <aside class="q-side" id="detail-card" aria-label="The quote"></aside>
+  <aside class="q-rail" id="saved-card" aria-label="Saved quotes"></aside>
 </main>
+
+<p class="foot"><a href="index.html">Site</a></p>
 
 <div class="toast" id="toast"></div>
 
@@ -329,12 +257,10 @@
    Detail Valley — internal quoting tool.
 
    Pick a make + model, it resolves the vehicle's size class, then prices every
-   package for that exact rig and shows what each one actually pays per hour
-   once drive time, supplies and fuel come out. Nothing here is customer-facing
-   and nothing talks to Supabase — it's a calculator, on your phone, in a driveway.
-
-   The defaults mirror index.html. If you change prices on the site, change
-   them here too (or just tap "Reset to site defaults" after editing DEFAULTS).
+   package for that exact rig. The quote is the booking flow's own sum: package
+   + vehicle size + add-ons, with the same include/exclude rules, read from the
+   same price list. Nothing here is customer-facing and nothing talks to
+   Supabase — it's a calculator, on your phone, in a driveway.
    ========================================================================= */
 
 /* ---------- Vehicle database ----------
@@ -407,105 +333,31 @@ const VEHICLES = {
 /* ---------- The site's price list ----------
    Packages, vehicle sizes and add-ons — names, prices, minutes and the
    include/exclude rules — come from dv-pricing.js, the same file the public
-   booking flow reads. They are not editable here and nothing saved on this
-   device can override them, so a quote always matches what a customer would be
-   charged booking online. Only the bits below are this tool's own. */
+   booking flow reads. Nothing saved on this device can override them, so a
+   quote always matches what a customer would be charged booking online. */
 const SITE = window.DV_PRICING;
-/* condWeight = how much a filthy vehicle drags THIS package out. The condition
-   tiers describe the inside of the car, so an exterior-only wash only feels a
-   fraction of it (a mud-caked truck is slower to wash, but a wrecked interior
-   costs you nothing if you're never opening the door). */
-const PKG_EXTRA = {
-  maintenance:{condWeight:0.4, blurb:'Exterior wash, wheels, tires, glass'},
-  interior:   {condWeight:1,   blurb:'Inside only — vacuum, shampoo, surfaces & glass'},
-  full:       {condWeight:1,   blurb:'Adds full interior clean & shampoo'},
-  showroom:   {condWeight:1,   blurb:'Adds clay bar & wax protection'}
+const PKG_BLURB = {
+  maintenance:'Exterior wash, wheels, tires, glass',
+  interior:   'Inside only — vacuum, shampoo, surfaces & glass',
+  full:       'Adds full interior clean & shampoo',
+  showroom:   'Adds clay bar & wax protection'
 };
 const SIZE_SHORT  = {standard:'Standard', midsize:'Midsize', oversize:'Oversize'};
 const ADDON_SHORT = {pet:'Pet hair', dirt:'Heavy dirt / mud', engine:'Engine bay', intglass:'Interior glass', wax:'Extra wax coat'};
-function sitePkgs(){
-  return SITE.packages.map(p => Object.assign({condWeight:1, blurb:p.meta}, PKG_EXTRA[p.id],
-    {id:p.id, name:p.name, price:p.price, min:p.min, includes:p.includes||[], excludes:p.excludes||[]}));
-}
-function siteSizes(){ return SITE.sizes.map(z => ({id:z.id, name:z.name, short:SIZE_SHORT[z.id]||z.name, price:z.price, min:z.min})); }
-function siteAddons(){ return SITE.addons.map(a => ({id:a.id, name:ADDON_SHORT[a.id]||a.name.split(' — ')[0], price:a.price, min:a.min})); }
+const PKGS = SITE.packages.map(p => ({id:p.id, name:p.name, price:p.price, min:p.min, blurb:PKG_BLURB[p.id]||p.meta, includes:p.includes||[], excludes:p.excludes||[]}));
+const SIZES = SITE.sizes.map(z => ({id:z.id, name:z.name, short:SIZE_SHORT[z.id]||z.name, price:z.price, min:z.min}));
+const ADDONS = SITE.addons.map(a => ({id:a.id, name:ADDON_SHORT[a.id]||a.name.split(' — ')[0], price:a.price, min:a.min}));
 
-/* ---------- Defaults ---------- */
-const DEFAULTS = {
-  /* What you want to clear per hour, door to door — not just while you're
-     scrubbing. Starts at 45 because the current price list only ever lands
-     between about $18 and $47/hr net, so this is the line that actually
-     separates the jobs worth taking from the ones that aren't. It's a low bar
-     for a solo detailer — raise it as you raise prices. */
-  targetHourly: 45,
-  supplyPerJob: 6,        // towels, bags, the stuff you burn every job regardless
-  supplyPerHr:  2.5,      // chemicals, pads, water
-  costPerMile:  0.60,     // gas + wear on the rig
-  pkgs: sitePkgs(), sizes: siteSizes(), addons: siteAddons(),   // always the site's — see above
-  cond: [
-    {id:'clean',   name:'Just detailed',   mult:0.85, fee:0,   note:'kept up, light soil'},
-    {id:'normal',  name:'Daily driver',    mult:1.00, fee:0,   note:'normal for around here'},
-    {id:'rough',   name:'Rough',           mult:1.30, fee:45,  note:'kids, dogs, mud season'},
-    {id:'trashed', name:'Trashed',         mult:1.65, fee:110, note:'spills, smoke, heavy pet, mystery smell'}
-  ],
-  towns: [
-    {id:'McCall',    miles:24, min:40},
-    {id:'Donnelly',  miles:10, min:20},
-    {id:'Lake Fork', miles:12, min:24},
-    {id:'Cascade',   miles:40, min:60},
-    {id:'New Meadows', miles:44, min:70},
-    {id:'Other',     miles:30, min:50}
-  ]
-};
-
-const CFG_KEY = 'dv_quote_cfg_v2';
 const SAVE_KEY = 'dv_quotes_v1';
-const clone = o => JSON.parse(JSON.stringify(o));
+// The tool used to keep its own rates (target, supplies, condition, towns) on the device. They are gone.
+try{ localStorage.removeItem('dv_quote_cfg_v2'); }catch(e){}
 
-let cfg = loadCfg();
 let saved = loadSaved();
 let state = {
   make:'', model:'', year:'', size:null, sizeAuto:null,
-  cond:'normal', addons:[], town:'Donnelly', pkg:'full',
-  query:'', results:[], cursor:-1, notes:''
+  addons:[], pkg:'full', query:'', results:[], cursor:-1, notes:'', loaded:null
 };
 
-/* ---------- Storage ---------- */
-/* Merge saved settings over the defaults *by id*, so a town or condition added
-   to DEFAULTS later still appears for someone with older saved settings — and
-   their tuned numbers survive. Package, size and add-on prices and minutes are
-   never restored from the device: those are always the site's price list. */
-function loadCfg(){
-  let saved_;
-  try{ saved_ = JSON.parse(localStorage.getItem(CFG_KEY)); }catch(e){}
-  const out = clone(DEFAULTS);
-  if(!saved_ || typeof saved_ !== 'object') return out;
-
-  ['targetHourly','supplyPerJob','supplyPerHr','costPerMile'].forEach(k=>{
-    if(typeof saved_[k] === 'number') out[k] = saved_[k];
-  });
-  ['cond','towns'].forEach(group=>{
-    if(!Array.isArray(saved_[group])) return;
-    out[group].forEach(item=>{
-      const was = saved_[group].find(x => x && x.id === item.id);
-      if(!was) return;
-      // Only the tunable numbers come back — names always come from the code.
-      ['min','mult','fee','miles'].forEach(f=>{
-        if(typeof was[f] === 'number') item[f] = was[f];
-      });
-    });
-  });
-  return out;
-}
-function saveCfg(){
-  // Only this tool's own numbers are stored; the site's price list never is.
-  const {targetHourly, supplyPerJob, supplyPerHr, costPerMile, cond, towns} = cfg;
-  try{ localStorage.setItem(CFG_KEY, JSON.stringify({targetHourly, supplyPerJob, supplyPerHr, costPerMile, cond, towns})); }catch(e){}
-}
-function resetCfg(){
-  if(!confirm('Put your target rate, supplies, condition and drive numbers back to their defaults?')) return;
-  cfg = clone(DEFAULTS); saveCfg(); renderSettings(); render(); toast('Back to defaults');
-}
 function loadSaved(){ try{ return JSON.parse(localStorage.getItem(SAVE_KEY)) || []; }catch(e){ return []; } }
 function persistSaved(){ try{ localStorage.setItem(SAVE_KEY, JSON.stringify(saved)); }catch(e){} }
 
@@ -537,109 +389,66 @@ function search(q){
 /* ---------- Helpers ---------- */
 const $ = id => document.getElementById(id);
 const money = n => '$' + Math.round(n).toLocaleString('en-US');
-const money2 = n => '$' + (Math.round(n*100)/100).toFixed(2);
 const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const pkgOf = id => cfg.pkgs.find(p=>p.id===id);
-const sizeOf = id => cfg.sizes.find(s=>s.id===id);
-const condOf = id => cfg.cond.find(c=>c.id===id) || cfg.cond[1];
-const townOf = id => cfg.towns.find(t=>t.id===id) || cfg.towns[0];
-const num = v => { const n = parseFloat(v); return isFinite(n) ? n : 0; };
-
-function hrs(min){
-  const h = min/60;
-  if(h < 1) return Math.round(min) + ' min';
-  const whole = Math.floor(h), rest = Math.round((h-whole)*60);
-  return whole + (rest ? ':' + String(rest).padStart(2,'0') : '') + ' hr' + (whole>1||rest?'s':'');
-}
+const pkgOf = id => PKGS.find(p=>p.id===id);
+const sizeOf = id => SIZES.find(s=>s.id===id);
+const vehName = () => [state.year, state.make, state.model].filter(Boolean).join(' ');
+/* Time on the job in hours and minutes: 350 min -> "5 hr 50 min" */
+function dur(min){ const h = Math.floor(min/60), m = min % 60; return [h ? h+' hr' : '', m ? m+' min' : ''].filter(Boolean).join(' ') || '0 min'; }
 function toast(msg){
   const t = $('toast'); t.textContent = msg; t.classList.add('show');
   clearTimeout(toast._t); toast._t = setTimeout(()=>t.classList.remove('show'), 1900);
 }
+const X_ICON = '<svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><path d="M4 4l8 8M12 4l-8 8"/></svg>';
 
 /* An add-on is free when the package already covers it, and unavailable when the
    package rules it out — same logic the booking flow on index.html uses. */
-function addonIncluded(pkg, id){ return (pkg.includes||[]).includes(id); }
-function addonExcluded(pkg, id){ return (pkg.excludes||[]).includes(id); }
+function addonIncluded(pkg, id){ return pkg.includes.includes(id); }
+function addonExcluded(pkg, id){ return pkg.excludes.includes(id); }
 
 /* ---------- The actual math ----------
-   One place computes everything for a given package, so the plan cards, the
-   breakdown and the saved quote can never drift apart. */
-function quote(pkgId){
-  const pkg = pkgOf(pkgId), sz = sizeOf(state.size) || cfg.sizes[0];
-  const cd = condOf(state.cond), tw = townOf(state.town);
-
-  const adds = state.addons
+   One place prices a package for the picked vehicle and add-ons, so the package
+   rows, the breakdown, the copied text and the saved quote can never drift apart.
+   It is the booking flow's sum and nothing else. */
+function quote(pkgId, sizeId, addonIds){
+  const pkg = pkgOf(pkgId) || PKGS[0], sz = sizeOf(sizeId == null ? state.size : sizeId) || SIZES[0];
+  const adds = (addonIds || state.addons)
     .filter(a => !addonExcluded(pkg, a))
     .map(a => {
-      const def = cfg.addons.find(x=>x.id===a);
+      const def = ADDONS.find(x=>x.id===a);
       const inc = addonIncluded(pkg, a);
-      return {id:a, name:def.name, price: inc ? 0 : num(def.price), min: inc ? 0 : num(def.min), inc};
+      return {id:a, name:def.name, price: inc ? 0 : def.price, min: inc ? 0 : def.min, inc};
     });
-
-  const addPrice = adds.reduce((s,a)=>s+a.price, 0);
-  const addMin   = adds.reduce((s,a)=>s+a.min, 0);
-
-  // Condition stretches the work, it doesn't stretch the drive — and it only
-  // bites as hard as this package's condWeight says it should.
-  const w      = pkg.condWeight == null ? 1 : num(pkg.condWeight);
-  const mult   = 1 + (num(cd.mult) - 1) * w;
-  const condFee = Math.round(num(cd.fee) * w / 5) * 5;
-
-  const baseMin  = num(pkg.min) + num(sz.min) + addMin;
-  const workMin  = Math.round(baseMin * mult);
-  const driveMin = num(tw.min);
-  const totalMin = workMin + driveMin;
-
-  const price = num(pkg.price) + num(sz.price) + addPrice + condFee;
-
-  const supplies = num(cfg.supplyPerJob) + num(cfg.supplyPerHr) * (workMin/60);
-  const fuel     = num(tw.miles) * num(cfg.costPerMile);
-  const net      = price - supplies - fuel;
-
-  const paidHrs  = totalMin/60;                     // door to door — the hours the job really costs you
-  const rate     = paidHrs > 0 ? price / paidHrs : 0;
-  const netRate  = paidHrs > 0 ? net / paidHrs : 0;
-
-  // What you'd have to charge for this exact job to hit your target rate.
-  const needed   = num(cfg.targetHourly) * paidHrs + supplies + fuel;
-
-  return {pkg, sz, cd, tw, adds, addPrice, addMin, condFee, workMin, driveMin, totalMin,
-          price, supplies, fuel, net, paidHrs, rate, netRate,
-          needed: Math.ceil(needed/5)*5};
-}
-
-function rateClass(netRate){
-  const t = num(cfg.targetHourly) || 1;
-  if(netRate >= t) return 'r-good';
-  if(netRate >= t*0.8) return 'r-ok';
-  return 'r-bad';
+  return {pkg, sz, adds,
+    price:   pkg.price + sz.price + adds.reduce((s,a)=>s+a.price, 0),
+    workMin: pkg.min   + sz.min   + adds.reduce((s,a)=>s+a.min, 0)};
 }
 
 /* ---------- Render: vehicle ---------- */
 function renderVehicle(){
   const box = $('vehicle-box');
   $('v-count').textContent = INDEX.length + ' models';
+  $('qTitle').textContent = state.model ? vehName() : 'New quote';
 
   if(state.model){
-    const sz = sizeOf(state.size) || cfg.sizes[0];
+    const sz = sizeOf(state.size) || SIZES[0];
     const overridden = state.sizeAuto && state.sizeAuto !== state.size;
     box.innerHTML = `
       <div class="picked">
         <div class="pv">
-          <b>${esc([state.year, state.make, state.model].filter(Boolean).join(' '))}</b>
+          <b>${esc(vehName())}</b>
           <span>${esc(sz.name)}${overridden ? ' · set by hand' : ''}</span>
         </div>
-        <span class="tag t-${state.size}">${esc(sz.short)}</span>
-        <button class="x" onclick="clearVehicle()" aria-label="Clear vehicle"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><path d="M4 4l8 8M12 4l-8 8"/></svg></button>
+        <button class="x" onclick="clearVehicle()" aria-label="Clear vehicle">${X_ICON}</button>
       </div>
-      <label for="yr">Year <span style="font-weight:400;color:var(--text-3)">optional, only for the quote text</span></label>
+      <label for="yr">Year, optional</label>
       <input id="yr" type="text" inputmode="numeric" maxlength="4" placeholder="2019"
-             value="${esc(state.year)}" oninput="state.year=this.value.replace(/[^0-9]/g,'');renderDetail()">
-      <label>Size class ${overridden ? '<span style="color:var(--orange)">· overriding '+esc(sizeOf(state.sizeAuto).short)+'</span>' : ''}</label>
+             value="${esc(state.year)}" oninput="state.year=this.value.replace(/[^0-9]/g,'');$('qTitle').textContent=vehName();renderDetail()">
+      <label>Size class${overridden ? ', overriding '+esc(sizeOf(state.sizeAuto).short) : ''}</label>
       <div class="chips">
-        ${cfg.sizes.map(s=>`
-          <button class="chip ${state.size===s.id?'on':''}" onclick="setSize('${s.id}')">
-            ${esc(s.short)} <small>${s.price ? '+$'+s.price : 'base'}</small>
+        ${SIZES.map(s=>`
+          <button class="chip ${state.size===s.id?'on':''}" aria-pressed="${state.size===s.id}" onclick="setSize('${s.id}')">
+            ${esc(s.short)} <small>${s.price ? '+'+money(s.price) : 'No charge'}</small>
           </button>`).join('')}
       </div>`;
     return;
@@ -648,18 +457,18 @@ function renderVehicle(){
   box.innerHTML = `
     <div class="vsearch">
       <input id="q" type="text" autocomplete="off" autocapitalize="words" spellcheck="false"
-             placeholder="Search make or model"
+             placeholder="Search make or model" aria-label="Search make or model"
              value="${esc(state.query)}"
              oninput="onQuery(this.value)" onkeydown="onQueryKey(event)">
       <div class="results" id="results" hidden></div>
     </div>
-    <label for="mk" style="margin-top:12px">Or browse by make</label>
+    <label for="mk">Or browse by make</label>
     <select id="mk" onchange="onMake(this.value)">
       <option value="">Make</option>
       ${Object.keys(VEHICLES).map(m=>`<option value="${esc(m)}">${esc(m)}</option>`).join('')}
     </select>
     <div id="model-wrap"></div>
-    <button class="btn alt" onclick="manualVehicle()">Not listed, enter it by hand</button>`;
+    <button class="btn alt wide" onclick="manualVehicle()">Not listed, enter it by hand</button>`;
   renderResults();
 }
 
@@ -695,7 +504,7 @@ function renderResults(){
   el.innerHTML = state.results.map((v,i)=>`
     <button class="res ${i===state.cursor?'cursor':''}" onclick="pickResult(${i})">
       <b><span class="mk">${esc(v.make)}</span> ${esc(v.model)}</b>
-      <span class="tag t-${v.size}">${esc(sizeOf(v.size).short)}</span>
+      <span class="tag">${esc(sizeOf(v.size).short)}</span>
     </button>`).join('');
 }
 function pickResult(i){
@@ -722,41 +531,48 @@ function onModel(idx){
 function pickVehicle(make, model, size){
   state.make = make; state.model = model;
   state.size = size; state.sizeAuto = size;
-  state.query = ''; state.results = []; state.cursor = -1;
+  state.query = ''; state.results = []; state.cursor = -1; state.loaded = null;
   render();
 }
 function manualVehicle(){
   const name = prompt('Year, make and model, as you want it written on the quote');
   if(!name) return;
   state.make = ''; state.model = name.trim(); state.year = '';
-  state.size = state.size || 'midsize'; state.sizeAuto = null;
+  state.size = state.size || 'midsize'; state.sizeAuto = null; state.loaded = null;
   render();
   toast('Pick the size class yourself');
 }
 function clearVehicle(){
-  state.make = state.model = state.year = ''; state.size = state.sizeAuto = null;
+  state.make = state.model = state.year = ''; state.size = state.sizeAuto = null; state.loaded = null;
   render();
 }
 function setSize(id){ state.size = id; render(); }
 
-/* ---------- Render: condition, add-ons, town ---------- */
-function renderCond(){
-  $('cond-chips').innerHTML = cfg.cond.map(c=>`
-    <button class="chip ${state.cond===c.id?'on':''}" onclick="setCond('${c.id}')">
-      ${esc(c.name)} <small>×${c.mult}${c.fee ? ' · +$'+c.fee : ''}</small>
-    </button>`).join('');
+/* ---------- Render: packages ---------- */
+function renderPlans(){
+  // Before a vehicle is picked the rows show the standard-size price, the lowest it can be
+  $('plans-hint').textContent = state.size ? sizeOf(state.size).short + ' prices' : '';
+  $('plans').innerHTML = PKGS.map(p=>{
+    const q = quote(p.id), on = state.pkg === p.id;
+    return `
+    <button class="plan ${on?'on':''}" aria-pressed="${on}" onclick="setPkg('${p.id}')">
+      <i aria-hidden="true"></i>
+      <span><b>${esc(p.name)}</b><small>${esc(p.blurb.replace(' — ', ': '))}</small></span>
+      <span class="amt"><b>${state.size ? '' : 'From '}${money(q.price)}</b><small>${dur(q.workMin)}</small></span>
+    </button>`;
+  }).join('');
 }
-function setCond(id){ state.cond = id; render(); }
+function setPkg(id){ state.pkg = id; render(); }
 
+/* ---------- Render: add-ons ---------- */
 function renderAddons(){
   const pkg = pkgOf(state.pkg);
-  $('addon-chips').innerHTML = cfg.addons.map(a=>{
+  $('addon-list').innerHTML = ADDONS.map(a=>{
     const inc = addonIncluded(pkg, a.id), exc = addonExcluded(pkg, a.id);
-    const on = state.addons.includes(a.id);
-    const note = exc ? "n/a" : inc ? 'included' : '+$' + a.price;
-    return `<button class="chip ${on?'on':''}" onclick="toggleAddon('${a.id}')"
-              ${exc ? 'style="opacity:.4"' : ''}>
-              ${esc(a.name)} <small>${note}</small></button>`;
+    const on = inc || (!exc && state.addons.includes(a.id));
+    const note = exc ? 'Not with this package' : inc ? 'Included' : '+' + money(a.price);
+    return `<label class="check${inc||exc?' off':''}"><input type="checkbox" ${on?'checked':''} ${inc||exc?'disabled':''} onchange="toggleAddon('${a.id}')">`+
+           `<span>${esc(a.name)}</span><em>${note}</em></label>`;
   }).join('');
 }
 function toggleAddon(id){
@@ -765,98 +581,30 @@ function toggleAddon(id){
   render();
 }
 
-function renderTown(){
-  const sel = $('town');
-  sel.innerHTML = cfg.towns.map(t=>`<option value="${esc(t.id)}" ${state.town===t.id?'selected':''}>${esc(t.id)}</option>`).join('');
-  const t = townOf(state.town);
-  const fuel = num(t.miles) * num(cfg.costPerMile);
-  $('trip-stats').innerHTML = `
-    <div class="stat"><b>${hrs(num(t.min))}</b><span>Round trip</span></div>
-    <div class="stat"><b>${money2(fuel)}</b><span>Fuel &amp; wear</span></div>`;
-}
-function setTown(id){ state.town = id; render(); }
-
-/* ---------- Render: plans ---------- */
-function renderPlans(){
-  if(!state.size){
-    $('plans').innerHTML = `<div class="empty">Pick a vehicle first</div>`;
-    $('plans-hint').textContent = '';
-    return;
-  }
-  const quotes = cfg.pkgs.map(p=>({id:p.id, q:quote(p.id)}));
-  // Two different "best", and they often disagree: the highest hourly is usually
-  // a short job, but the site only books one job a day — so the plan that fills
-  // the day for the most money is the one that actually pays the bills.
-  const bestRate = quotes.reduce((a,b)=> b.q.netRate > a.q.netRate ? b : a);
-  const bestNet  = quotes.reduce((a,b)=> b.q.net > a.q.net ? b : a);
-  $('plans-hint').textContent = sizeOf(state.size).short + ' · ' + condOf(state.cond).name.toLowerCase();
-
-  $('plans').innerHTML = quotes.map(({id,q})=>{
-    const badge = id === bestNet.id ? 'Most for the day'
-                : id === bestRate.id ? 'Best $/hr' : '';
-    return `
-    <button class="plan ${state.pkg===id?'on':''}" onclick="setPkg('${id}')">
-      ${badge ? `<span class="best">${badge}</span>` : ''}
-      <div class="plan-top"><b>${esc(q.pkg.name)}</b><span class="amt">${money(q.price)}</span></div>
-      <div class="plan-meta">
-        <span>${hrs(q.workMin)} on site</span>
-        <span class="rate ${rateClass(q.netRate)}">${money(q.netRate)}/hr net</span>
-        <span>${money(q.net)} in pocket</span>
-      </div>
-    </button>`;
-  }).join('');
-}
-function setPkg(id){ state.pkg = id; render(); }
-
-/* ---------- Render: the picked quote ---------- */
+/* ---------- Render: the quote ---------- */
 function renderDetail(){
   const card = $('detail-card');
-  if(!state.size){ card.innerHTML = `<div class="empty">The breakdown shows up once a vehicle is picked</div>`; return; }
+  if(!state.size){ card.innerHTML = `<p class="empty">Pick a vehicle to see the quote</p>`; return; }
   const q = quote(state.pkg);
-  const veh = [state.year, state.make, state.model].filter(Boolean).join(' ');
-  const gap = q.price - q.needed;
-
-  const verdict = q.netRate >= num(cfg.targetHourly)
-    ? {cls:'v-good', txt:`Clears ${money(q.netRate)}/hr after supplies and the drive, above your ${money(cfg.targetHourly)} target. Quote it as-is.`}
-    : q.netRate >= num(cfg.targetHourly)*0.8
-    ? {cls:'v-ok',   txt:`${money(q.netRate)}/hr net, a bit under your ${money(cfg.targetHourly)} target. ${money(q.needed)} would get you there, worth it if the day's otherwise empty.`}
-    : {cls:'v-bad',  txt:`Only ${money(q.netRate)}/hr net against a ${money(cfg.targetHourly)} target. You'd need ${money(q.needed)} to make this worth the drive. Upsell, add the condition fee, or pass.`};
-
   card.innerHTML = `
-    <h2>The quote <span class="hint">${esc(q.pkg.name)}</span></h2>
-
-    <div class="line"><span>${esc(q.pkg.name)}${veh ? ' · ' + esc(veh) : ''}</span><span>${money(q.pkg.price)}</span></div>
-    ${q.sz.price ? `<div class="line"><span>${esc(q.sz.name)}</span><span>+${money(q.sz.price)}</span></div>` : ''}
-    ${q.adds.map(a=>`<div class="line ${a.inc?'inc':''}"><span>${esc(a.name)}</span><span>${a.inc?'Included':'+'+money(a.price)}</span></div>`).join('')}
-    ${q.condFee ? `<div class="line"><span>${esc(q.cd.name)} condition</span><span>+${money(q.condFee)}</span></div>` : ''}
-    <div class="line total"><span>Quote</span><span>${money(q.price)}</span></div>
-
-    <div class="grid2">
-      <div class="stat"><b>${hrs(q.workMin)}</b><span>On site</span></div>
-      <div class="stat"><b>${hrs(q.totalMin)}</b><span>Door to door</span></div>
-      <div class="stat"><b class="${rateClass(q.netRate)}">${money(q.netRate)}</b><span>Net per hour</span></div>
-      <div class="stat"><b>${money(q.net)}</b><span>In your pocket</span></div>
+    <div class="q-top">
+      <h2 class="q-name">${esc(q.pkg.name)}</h2>
+      <span class="q-veh">About ${dur(q.workMin)} on site</span>
     </div>
-
-    <div class="verdict ${verdict.cls}">${verdict.txt}</div>
-
-    <div class="line" style="margin-top:12px;border-top:1px solid var(--sep);padding-top:12px">
-      <span>Supplies</span><span>−${money2(q.supplies)}</span></div>
-    <div class="line"><span>Fuel &amp; wear · ${esc(q.tw.id)}, ${q.tw.miles} mi round trip</span><span>−${money2(q.fuel)}</span></div>
-    <div class="line"><span>To hit ${money(cfg.targetHourly)}/hr you'd charge</span>
-      <span class="${gap>=0?'r-good':'r-bad'}">${money(q.needed)}</span></div>
-
+    <div class="line"><span>${esc(q.pkg.name)}</span><span>${money(q.pkg.price)}</span></div>
+    <div class="line${q.sz.price?'':' inc'}"><span>${esc(q.sz.name)}</span><span>${q.sz.price ? '+'+money(q.sz.price) : 'No charge'}</span></div>
+    ${q.adds.map(a=>`<div class="line ${a.inc?'inc':''}"><span>${esc(a.name)}</span><span>${a.inc?'Included':'+'+money(a.price)}</span></div>`).join('')}
+    <div class="line total"><span>Total</span><span>${money(q.price)}</span></div>
     <label for="qnotes">Notes for yourself</label>
     <textarea id="qnotes" placeholder="Gate code, dog in the yard"
       oninput="state.notes=this.value">${esc(state.notes)}</textarea>
-
-    <div class="btn-row">
+    <div class="actions">
       <button class="btn" onclick="copyQuote()">Copy quote to text</button>
       <button class="btn alt" onclick="saveQuote()">Save</button>
     </div>`;
 }
 
-/* "9:45 hrs" reads like a clock time to a customer. Round to the nearest half
+/* "5 hr 50 min" reads oddly in a text to a customer. Round to the nearest half
    hour and say it the way you'd say it out loud. */
 function roughHours(min){
   const half = Math.max(0.5, Math.round(min/30)/2);
@@ -868,7 +616,7 @@ function roughHours(min){
 /* Plain-text quote — short enough to paste into a text message. */
 function quoteText(){
   const q = quote(state.pkg);
-  const veh = [state.year, state.make, state.model].filter(Boolean).join(' ') || 'your vehicle';
+  const veh = vehName() || 'your vehicle';
   const lines = [];
   lines.push(`Detail Valley — quote for ${veh}`);
   lines.push('');
@@ -876,10 +624,9 @@ function quoteText(){
   lines.push(`  ${q.pkg.blurb}`);
   if(q.sz.price) lines.push(`${q.sz.name} — +${money(q.sz.price)}`);
   q.adds.forEach(a=> lines.push(`${a.name} — ${a.inc ? 'included' : '+' + money(a.price)}`));
-  if(q.condFee) lines.push(`Extra time for the condition it's in — +${money(q.condFee)}`);
   lines.push('');
   lines.push(`Total: ${money(q.price)}`);
-  lines.push(`About ${roughHours(q.workMin)} on site — I come to you in ${q.tw.id}.`);
+  lines.push(`About ${roughHours(q.workMin)} on site — I come to you.`);
   lines.push('');
   lines.push('Book any open day at detailvalley.com');
   return lines.join('\n');
@@ -903,130 +650,73 @@ function fallbackCopy(txt, done){
 /* ---------- Saved quotes ---------- */
 function saveQuote(){
   const q = quote(state.pkg);
+  const id = Date.now();
   saved.unshift({
-    id: Date.now(),
-    veh: [state.year, state.make, state.model].filter(Boolean).join(' ') || 'Vehicle',
-    pkg: q.pkg.name, size: state.size, cond: state.cond, town: state.town,
+    id, veh: vehName() || 'Vehicle', year: state.year, make: state.make, model: state.model,
+    pkg: q.pkg.name, pkgId: q.pkg.id, size: state.size,
     addons: state.addons.slice(), notes: state.notes,
-    price: q.price, netRate: Math.round(q.netRate), workMin: q.workMin,
-    when: new Date().toISOString()
+    price: q.price, workMin: q.workMin, when: new Date().toISOString()
   });
   saved = saved.slice(0, 40);
+  state.loaded = id;
   persistSaved(); renderSaved(); toast('Saved');
+}
+/* The package a saved quote was for. Older saves only kept its name. */
+const savedPkg = s => pkgOf(s.pkgId) || PKGS.find(p=>p.name===s.pkg);
+/* What a saved quote costs today: re-added from the price list, so the rail never
+   shows a figure the site would not charge. */
+function savedPrice(s){
+  const p = savedPkg(s);
+  return p ? quote(p.id, s.size, (s.addons||[]).filter(a=>ADDONS.some(x=>x.id===a))).price : s.price;
 }
 function loadQuote(id){
   const s = saved.find(x=>x.id===id); if(!s) return;
-  const parts = s.veh.split(' ');
-  state.year = /^\d{4}$/.test(parts[0]) ? parts.shift() : '';
-  state.make = parts.shift() || '';
-  state.model = parts.join(' ');
-  state.size = s.size; state.sizeAuto = null;
-  state.cond = s.cond; state.town = s.town; state.addons = (s.addons||[]).slice();
+  if('model' in s){ state.year = s.year || ''; state.make = s.make || ''; state.model = s.model || s.veh; }
+  else {            // older saves only kept the full name
+    const parts = s.veh.split(' ');
+    state.year = /^\d{4}$/.test(parts[0]) ? parts.shift() : '';
+    state.make = parts.shift() || '';
+    state.model = parts.join(' ');
+  }
+  state.size = sizeOf(s.size) ? s.size : 'standard'; state.sizeAuto = null;
+  state.addons = (s.addons||[]).filter(a=>ADDONS.some(x=>x.id===a));
   state.notes = s.notes || '';
-  const p = cfg.pkgs.find(p=>p.name===s.pkg); if(p) state.pkg = p.id;
+  const p = savedPkg(s); if(p) state.pkg = p.id;
+  state.loaded = id;
   render();
   window.scrollTo({top:0, behavior:'smooth'});
 }
-function delQuote(id, ev){
-  ev.stopPropagation();
+function delQuote(id){
   saved = saved.filter(x=>x.id!==id); persistSaved(); renderSaved();
 }
 function renderSaved(){
   const card = $('saved-card');
+  const head = `<h2 class="label">Saved quotes <span>${saved.length || ''}</span></h2>`;
   if(!saved.length){
-    card.innerHTML = `<h2>Saved quotes</h2><div class="empty">Nothing saved yet. Quote a car and tap Save. It stays on this phone.</div>`;
+    card.innerHTML = head + `<p class="none">Nothing saved yet. Saved quotes stay on this device.</p>`;
     return;
   }
-  card.innerHTML = `<h2>Saved quotes <span class="hint">${saved.length}</span></h2>` +
+  card.innerHTML = head + `<div class="saved-list">` +
     saved.map(s=>`
-      <div class="saved" onclick="loadQuote(${s.id})" style="cursor:pointer">
-        <div class="sv">
+      <div class="saved${state.loaded===s.id?' on':''}">
+        <button class="sv" onclick="loadQuote(${s.id})">
           <b>${esc(s.veh)}</b>
-          <span>${esc(s.pkg)} · ${esc(s.town)} · ${money(s.netRate)}/hr net · ${new Date(s.when).toLocaleDateString('en-US',{month:'short',day:'numeric'})}</span>
-        </div>
-        <span class="amt">${money(s.price)}</span>
-        <button class="x" onclick="delQuote(${s.id}, event)" aria-label="Delete"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><path d="M4 4l8 8M12 4l-8 8"/></svg></button>
-      </div>`).join('');
-}
-
-/* ---------- Settings ---------- */
-function renderSettings(){
-  $('s-target').value = cfg.targetHourly;
-  $('s-supjob').value = cfg.supplyPerJob;
-  $('s-suphr').value  = cfg.supplyPerHr;
-  $('s-mile').value   = cfg.costPerMile;
-
-  $('s-pkgs').innerHTML = cfg.pkgs.map((p,i)=>`
-    <div class="row4">
-      <div class="rl">${esc(p.name)}</div>
-      <div class="ro">$${p.price}</div>
-      <div class="ro">${p.min}</div>
-    </div>`).join('');
-
-  $('s-sizes').innerHTML = cfg.sizes.map((s,i)=>`
-    <div class="row4">
-      <div class="rl">${esc(s.short)}</div>
-      <div class="ro">$${s.price}</div>
-      <div class="ro">${s.min}</div>
-    </div>`).join('');
-
-  $('s-addons').innerHTML = cfg.addons.map((a,i)=>`
-    <div class="row4">
-      <div class="rl">${esc(a.name)}</div>
-      <div class="ro">$${a.price}</div>
-      <div class="ro">${a.min}</div>
-    </div>`).join('');
-
-  $('s-cond').innerHTML = cfg.cond.map((c,i)=>`
-    <div class="row4">
-      <div class="rl">${esc(c.name)}</div>
-      <input type="number" inputmode="decimal" step="0.05" value="${c.mult}" oninput="setCfg('cond',${i},'mult',this.value)">
-      <input type="number" inputmode="decimal" step="5" value="${c.fee}" oninput="setCfg('cond',${i},'fee',this.value)">
-    </div>`).join('');
-
-  $('s-towns').innerHTML = cfg.towns.map((t,i)=>`
-    <div class="row4">
-      <div class="rl">${esc(t.id)}</div>
-      <input type="number" inputmode="decimal" step="1" value="${t.miles}" oninput="setCfg('towns',${i},'miles',this.value)">
-      <input type="number" inputmode="numeric" step="5" value="${t.min}" oninput="setCfg('towns',${i},'min',this.value)">
-    </div>`).join('');
-}
-function setCfg(group, i, field, val){
-  cfg[group][i][field] = num(val);
-  saveCfg();
-  // Don't re-render settings — that would yank the cursor out of the field being typed in.
-  if(!$('view-quote').hidden) render();
-}
-const SCALARS = {'s-target':'targetHourly','s-supjob':'supplyPerJob','s-suphr':'supplyPerHr','s-mile':'costPerMile'};
-document.addEventListener('input', e=>{
-  const key = SCALARS[e.target.id];
-  if(!key) return;
-  cfg[key] = num(e.target.value);
-  saveCfg();
-});
-
-/* ---------- Tabs ---------- */
-function showTab(which){
-  $('view-quote').hidden = which !== 'quote';
-  $('view-set').hidden   = which !== 'set';
-  $('tab-quote').classList.toggle('on', which === 'quote');
-  $('tab-set').classList.toggle('on', which === 'set');
-  if(which === 'quote') render(); else renderSettings();
-  window.scrollTo({top:0});
+          <span>${esc(s.pkg)} · ${money(savedPrice(s))} · ${new Date(s.when).toLocaleDateString('en-US',{month:'short',day:'numeric'})}</span>
+        </button>
+        <button class="x" onclick="delQuote(${s.id})" aria-label="Delete the saved quote for ${esc(s.veh)}">${X_ICON}</button>
+      </div>`).join('') + `</div>`;
 }
 
 /* ---------- Render everything ---------- */
 function render(){
   renderVehicle();
-  renderCond();
-  renderAddons();
-  renderTown();
   renderPlans();
+  renderAddons();
   renderDetail();
   renderSaved();
 }
 
-showTab('quote');
+render();
 </script>
 </body>
 </html>

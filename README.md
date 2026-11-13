@@ -56,7 +56,7 @@ command and no publish directory beyond the root are needed.
 |------|---------|
 | `index.html` | The live Detail Valley site (final, professional design). |
 | `admin.html` | Private **owner job board** — sign in to manage bookings on your phone. See [Owner dashboard](#owner-dashboard-adminhtml). |
-| `quote.html` | Private **quoting tool** — pick a make &amp; model, get the price, the plans and what the job actually pays. See [Quoting tool](#quoting-tool-quotehtml). |
+| `quote.html` | Private **quoting tool** — pick a make &amp; model, get the same price and time on site the booking flow would charge. See [Quoting tool](#quoting-tool-quotehtml). |
 | `before-after.html` | Before &amp; after gallery — one chapter per vehicle, 10 drag-to-compare sliders each. See [Before &amp; after](#before--after-photos). |
 | `dv-pricing.js` | **The one price list**: packages, vehicle sizes and add-ons, with their prices and minutes. Read by both the booking flow and the quoting tool, so they always agree. |
 | `dv-compare.js` | Drag / tap / keyboard behavior for the compare sliders. Shared by the homepage and the gallery page. |
@@ -251,12 +251,16 @@ once in Supabase → **Authentication → URL Configuration**: set **Site URL** 
 
 `quote.html` is a private calculator for quoting a job on the spot — someone
 texts you a photo of their truck, you pick the make and model, and it tells you
-the price, every package option, and **what the job actually pays you per hour**
-once the drive, the supplies and the fuel come out.
+the price and the time on site for every package. **The number is the booking
+flow's own sum**: package + vehicle size + add-ons, read from `dv-pricing.js`,
+with nothing added on top. Whatever it says is what the customer would be
+charged booking online.
 
 It's the same static-file-plus-vanilla-JS deal as the rest of the site. No
 build step, no sign-in, no Supabase — everything stays on the device, so it
-works in a driveway with one bar of service.
+works in a driveway with one bar of service. On a screen 1280px or wider it
+uses the job board's layout: saved quotes down the left, the choices in the
+middle, the quote on the right.
 
 **How it works**
 1. **Vehicle** — search 440 models across 37 makes ("tahoe", "subaru out",
@@ -265,39 +269,28 @@ works in a driveway with one bar of service.
    *oversize* (full-size truck, 3-row SUV, van) — the same three tiers customers
    see when they book. Tap a size chip to override it, or enter an odd vehicle
    by hand.
-2. **Condition** — *just detailed* through *trashed*. This stretches the time,
-   not just the price, which is the part that actually costs you. Each package
-   carries a `condWeight`, so a wrecked interior barely touches an exterior-only
-   Maintenance Wash but doubles a Full Detail.
-3. **Add-ons and town** — the same add-ons as the booking flow, and the town
-   sets round-trip miles and drive minutes.
-4. **Plans** — all four packages priced for that exact rig, each showing time on
-   site, net $/hr and net dollars. Two badges, because they usually disagree:
-   **Best $/hr** and **Most for the day** (the site books one job a day, so the
-   plan that fills the day for the most money often beats the higher hourly).
-5. **The quote** — full breakdown, door-to-door hours, what lands in your
-   pocket, and what you'd have to charge to hit your target rate. **Copy quote
+2. **Package** — all four packages priced for that exact rig, each with its
+   time on site. Before a vehicle is picked they show the standard-size price
+   as "From".
+3. **Add-ons** — the same add-ons as the booking flow, with the same rules: one
+   a package already covers shows as *Included* and is free, one a package
+   rules out can't be ticked.
+4. **The quote** — the breakdown, the total and the time on site. **Copy quote
    to text** puts a customer-ready version on the clipboard. **Save** keeps it
-   in a local list you can reload later.
+   in a local list you can reload later; a reloaded quote is re-added from
+   today's price list.
 
 **Adding a vehicle.** The list lives in the `VEHICLES` object near the top of
 the `<script>`, grouped by make and then by size class (`s` / `m` / `o`). Drop
 the model name into the right array — that's the whole job. Anything not in the
-list still quotes fine through *"Not listed — enter it by hand."*
+list still quotes fine through *"Not listed, enter it by hand."*
 
-**Tune it under the Rates tab.** Target $/hr, supplies (per job and per hour),
-vehicle cost per mile, condition multipliers, and per-town miles/minutes. Those
-save to that device's `localStorage`.
-
-> Two things worth knowing. **Package, size and add-on prices and minutes are
-> not editable in the tool.** It reads them from `dv-pricing.js`, the same file
-> the public booking flow uses, and ignores anything saved on the device — so a
-> quote always matches what a customer would be charged booking online. The
-> Rates tab shows them read-only; to change them, edit `dv-pricing.js`. (The
-> condition surcharge and drive costs are the tool's own and have no equivalent
-> in online booking.) And the **town drive times start as guesses** — drive each
-> one, watch the odometer, and put the real numbers in, because they're what
-> decides whether a Cascade job is worth taking.
+> **Prices and minutes are not editable in the tool.** It reads them from
+> `dv-pricing.js`, the same file the public booking flow uses, and nothing
+> saved on the device can override them. To change a price, edit
+> `dv-pricing.js` and both the site and the tool pick it up. The tool has no
+> condition surcharge, no travel cost and no profit figures; it used to, and
+> the rates it kept on the device for them are cleared the next time it opens.
 
 **What it'll tell you.** At the current price list, a job nets roughly **$18–47
 an hour** door to door. The Maintenance Wash is the weak spot: on a sedan out in

@@ -5,7 +5,7 @@
 
    price = dollars. min = minutes on the job; it drives the booking flow's
    finish estimate, how much time a booking blocks on the calendar, and the
-   quoting tool's dollars-per-hour maths.
+   time on site the quoting tool shows.
 
    The homepage package cards and FAQ in index.html state prices and times as
    plain text (so they show with JavaScript off and for search engines). If you

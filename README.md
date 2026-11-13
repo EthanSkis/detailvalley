@@ -214,7 +214,10 @@ too. Phones and tablets keep the job board described above.
 
 **Signing in.** The dashboard uses Supabase Auth, so only you can read customer
 details — the page itself is harmless to host publicly. Sign in with your owner
-email (`ethangardner298@gmail.com`) and password.
+email (`ethangardner298@gmail.com`) and password. On a phone the sign-in is a
+plain form; on a computer it sits over the empty calendar (the working days and
+the hours, no bookings — nothing is loaded until you are signed in, and signing
+out drops everything that was). Pressing Enter signs in.
 
 **Face ID on iPhone.** The first time you sign in, iOS offers to **save the
 password to iCloud Keychain** — tap *Save*. After that, the email + password

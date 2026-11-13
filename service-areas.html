@@ -71,7 +71,7 @@
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@500&family=Inter:wght@400;500&display=swap" rel="stylesheet">
 <style>
   :root{
     --navy:#0f2c44; --navy-2:#15395a; --blue:#2b6cb0; --blue-dark:#225a93;
@@ -90,48 +90,44 @@
 
   /* ---------- HERO ---------- */
   header{position:relative;background:var(--bg);color:var(--white);padding:64px 24px 56px;overflow:hidden;border-bottom:1px solid var(--edge)}
-  .sheen{position:absolute;inset:0;background:
-    radial-gradient(120% 80% at 85% 0%, rgba(43,108,176,.28) 0%, transparent 55%),
-    radial-gradient(90% 60% at 0% 100%, rgba(196,120,63,.12) 0%, transparent 60%);
-    pointer-events:none}
   .hero-inner{position:relative;z-index:2;max-width:680px;margin:0 auto}
   .brand-lockup{display:flex;align-items:center;gap:12px;margin-bottom:24px}
   .brand-logo{width:48px;height:48px;border-radius:50%;display:block}
-  .brand-word{font-weight:700;font-size:1.3rem;color:var(--white)}
+  .brand-word{font-weight:500;font-size:1.3rem;color:var(--white)}
   .brand-lockup a{color:inherit;text-decoration:none}
-  .crumbs{font-size:.82rem;color:#9fb2c1;margin-bottom:18px}
+  .crumbs{font-size:.82rem;color:#9fb2c1;margin-bottom:16px}
   .crumbs a{color:#c5d4e1;text-decoration:none}
   .crumbs a:hover{color:var(--white)}
-  header h1{font-size:2.4rem;line-height:1.08;font-weight:700;margin-bottom:18px}
+  header h1{font-size:2.4rem;line-height:1.08;font-weight:500;margin-bottom:16px}
   header h1 .accent{color:var(--cop-2)}
   header p.lead{color:var(--mute);font-size:1.1rem;max-width:560px;margin-bottom:28px}
-  .btn{display:inline-block;background:linear-gradient(135deg,#d08a4a,#b8632c);color:var(--white);border:none;font-size:1rem;font-weight:600;padding:14px 32px;border-radius:14px;cursor:pointer;text-decoration:none;box-shadow:0 10px 26px rgba(184,99,44,.28);transition:filter .12s ease,transform .12s ease}
-  .btn:hover{filter:brightness(1.1)}
+  .btn{display:inline-flex;align-items:center;justify-content:center;background:var(--cop-2);color:#fff;border:none;font-size:1rem;font-weight:500;line-height:1.25;padding:12px 28px;min-height:52px;border-radius:8px;cursor:pointer;text-decoration:none;transition:background-color .12s var(--ease),transform .12s var(--ease)}
+  .btn:hover{background:#8c4418;color:#fff}
+  .btn:active{transform:scale(.98)}
 
   /* ---------- AREAS ---------- */
-  section{padding:58px 0}
-  .kicker{font-weight:700;letter-spacing:.2em;text-transform:uppercase;font-size:.72rem;color:var(--cop-2);margin-bottom:10px}
-  .section-title{font-size:2rem;font-weight:700;margin-bottom:14px}
+  section{padding:56px 0}
+  .kicker{font-weight:500;font-size:.88rem;color:var(--mute);margin-bottom:8px}
+  .section-title{font-size:2rem;font-weight:500;margin-bottom:16px}
   .intro p{color:var(--mute);font-size:1.05rem;margin-bottom:16px;max-width:640px}
-  .areas{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:30px}
+  .areas{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-top:32px}
   @media(max-width:620px){.areas{grid-template-columns:1fr}}
-  .area{border:1px solid var(--edge);border-radius:18px;padding:22px 22px 24px;background:linear-gradient(180deg,var(--card-2),var(--card));transition:border-color .15s ease,transform .15s ease,box-shadow .15s ease}
-  .area:hover{border-color:var(--edge-2);transform:translateY(-3px);box-shadow:0 24px 48px rgba(0,0,0,.4)}
-  .area h2{font-size:1.2rem;font-weight:700;color:var(--text);margin-bottom:8px}
+  .area{border:1px solid var(--edge);border-radius:16px;padding:24px;background:var(--card)}
+  .area h2{font-size:1.2rem;font-weight:500;color:var(--text);margin-bottom:8px}
   .area p{color:var(--mute);font-size:.96rem}
 
   /* ---------- FINAL CTA ---------- */
-  .final{position:relative;background:var(--bg-2);color:var(--white);text-align:center;padding:60px 24px;overflow:hidden;border-top:1px solid var(--edge)}
-  .final h2{font-size:1.8rem;font-weight:700;margin-bottom:12px}
-  .final p{color:var(--mute);margin-bottom:26px;max-width:480px;margin-left:auto;margin-right:auto}
+  .final{position:relative;background:var(--bg-2);color:var(--white);text-align:center;padding:64px 24px;overflow:hidden;border-top:1px solid var(--edge)}
+  .final h2{font-size:1.8rem;font-weight:500;margin-bottom:12px}
+  .final p{color:var(--mute);margin-bottom:24px;max-width:480px;margin-left:auto;margin-right:auto}
 
   /* ---------- FOOTER ---------- */
-  footer{background:#050d16;color:var(--mute);padding:42px 24px 30px;text-align:center;border-top:1px solid var(--edge)}
-  footer .name{font-weight:700;font-size:1.2rem;color:var(--white);display:block;margin-bottom:6px}
-  footer .tag{font-size:.88rem;color:var(--dim);margin-bottom:14px}
+  footer{background:#050d16;color:var(--mute);padding:40px 24px 32px;text-align:center;border-top:1px solid var(--edge)}
+  footer .name{font-weight:500;font-size:1.2rem;color:var(--white);display:block;margin-bottom:8px}
+  footer .tag{font-size:.88rem;color:var(--dim);margin-bottom:16px}
   .foot-contact a{color:var(--white);text-decoration:none;font-weight:500;display:block;margin-bottom:8px;font-size:.92rem}
   .foot-contact a:hover{color:var(--cop-2)}
-  .foot-bottom{max-width:760px;margin:30px auto 0;padding-top:20px;border-top:1px solid var(--edge);font-size:.8rem;color:var(--dim)}
+  .foot-bottom{max-width:760px;margin:32px auto 0;padding-top:20px;border-top:1px solid var(--edge);font-size:.8rem;color:var(--dim)}
 
   @media(min-width:820px){
     header{padding:96px 24px 80px}
@@ -147,23 +143,19 @@
     --bg:#f4f6f8; --bg-2:#ffffff; --card:#ffffff; --card-2:#ffffff;
     --edge:#dde3e9; --edge-2:#c9d2da;
     --text:#0b2a45; --mute:#3d566b; --dim:#3d566b; --cop-2:#a4521f;
+    --ease:cubic-bezier(.22,1,.36,1);
   }
   body{font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif}
-  h1,h2,h3,.brand-word,footer .name{font-family:'Sora',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;font-weight:600;letter-spacing:-.025em}
+  h1,h2,h3,.brand-word,footer .name{font-family:'Sora',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;font-weight:500;letter-spacing:-.02em}
   a{color:var(--text)}
   a:hover{color:var(--cop-2)}
+  :focus-visible{outline:3px solid var(--cop-2);outline-offset:3px}
   header{background:var(--bg-2);color:var(--text)}
-  .sheen{display:none}
   .brand-logo{border-radius:0}
   .brand-word,.crumbs a:hover{color:var(--text)}
   .crumbs,.crumbs a{color:var(--mute)}
   header h1 .accent{color:inherit}
-  .btn{background:var(--cop-2);box-shadow:none;border-radius:8px;transition:background .12s ease}
-  .btn:hover{filter:none;background:#8c4418;color:#fff}
-  .kicker{letter-spacing:.12em;font-weight:600;font-size:.8rem}
   .fact,.jump a{background:var(--bg);color:var(--text)}
-  .area{background:#fff;border-radius:14px}
-  .area:hover{box-shadow:0 12px 28px rgba(11,42,69,.1)}
   .ba{border:none;border-radius:12px;box-shadow:none;background:var(--edge)}
   .ba-tag{border:none;border-radius:5px;padding:5px 9px;letter-spacing:.08em;-webkit-backdrop-filter:none;backdrop-filter:none}
   .ba-tag-before{background:#fff;color:var(--text)}
@@ -180,7 +172,6 @@
 <body>
 
 <header>
-  <div class="sheen"></div>
   <div class="hero-inner">
     <div class="brand-lockup">
       <a href="/"><img src="logo.svg" alt="Detail Valley logo" class="brand-logo"></a>
@@ -231,7 +222,6 @@
 </section>
 
 <div class="final">
-  <div class="sheen"></div>
   <div class="hero-inner" style="max-width:560px;margin:0 auto">
     <h2>Ready for a spotless car?</h2>
     <p>Booking takes under a minute and there's no deposit. Pick your package, choose a time, and we'll come to you.</p>
@@ -241,7 +231,7 @@
 
 <footer>
   <span class="name">Detail Valley</span>
-  <p class="tag">Mobile car detailing across Valley County, ID.</p>
+  <p class="tag">Mobile car detailing across Valley County, ID</p>
   <div class="foot-contact">
     <a href="tel:+12083151420">Call or text (208) 315-1420</a>
     <a href="mailto:ethan@detailvalley.com">ethan@detailvalley.com</a>

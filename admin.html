@@ -215,6 +215,44 @@
     z-index:50;max-width:90vw;text-align:center}
   #toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 
+  /* ---------- Edit a booking ----------
+     One form, used in the desktop job panel and in the phone sheet. */
+  select{width:100%;height:48px;padding:0 40px 0 11px;border:1px solid var(--sep);border-radius:8px;
+    font:inherit;font-size:1rem;color:var(--text);appearance:none;-webkit-appearance:none;text-overflow:ellipsis;
+    background:var(--card-2) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23a1a1a6' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E") no-repeat right 12px center/16px}
+  select:focus{outline:none;border-color:var(--accent-ink)}
+  .ef{display:flex;flex-direction:column;gap:16px}
+  .ef-title{font-size:1.25rem;line-height:1.4}
+  .ef fieldset{border:none;min-width:0}
+  .ef label,.ef legend{display:block;margin:0 0 8px;padding:0;font-size:.8125rem;font-weight:500;color:var(--text-2)}
+  .ef-row{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+  .ef-row.wide{grid-template-columns:minmax(0,1.6fr) minmax(0,1fr)}
+  .ef-group{display:flex;flex-direction:column;gap:8px}
+  .ef input[type=number],.ef input[type=date],.ef input[type=time]{font-variant-numeric:tabular-nums}
+  .ef-checks{display:flex;flex-direction:column;gap:4px}
+  .ef label.ef-check{display:flex;align-items:center;gap:12px;min-height:44px;margin:0;padding:0 12px;border-radius:8px;
+    background:var(--card-2);box-shadow:inset 0 0 0 1px var(--sep);font-size:.875rem;font-weight:400;color:var(--text);cursor:pointer}
+  .ef-check input{flex:0 0 18px;width:18px;height:18px;padding:0;accent-color:var(--accent)}
+  .ef label.ef-check:focus-within{box-shadow:inset 0 0 0 1px var(--accent-ink)}
+  .ef label.ef-check.inc{color:var(--text-2);cursor:default}
+  .ef-check span{flex:1;min-width:0}
+  .ef-check em{font-style:normal;color:var(--text-2);font-variant-numeric:tabular-nums}
+  .ef-hint{font-size:.75rem;line-height:1.3333;color:var(--text-2);font-variant-numeric:tabular-nums}
+  .ef-hint:empty{display:none}
+  .ef-use,.edit-btn{position:relative;background:none;border:none;padding:0;color:var(--accent-ink);font:inherit;font-weight:500;cursor:pointer}
+  .ef-use{margin-left:8px}
+  .ef-use::after,.edit-btn::after{content:'';position:absolute;inset:-14px -8px}
+  .ef textarea.notes{margin-top:0;min-height:88px}
+  .ef .msg{margin-top:0}
+  /* Save stays in reach however far the form is scrolled */
+  .ef .actions{position:sticky;bottom:0;margin-top:0;padding:12px 0;background:var(--bg);box-shadow:0 -1px 0 var(--sep)}
+  #sheet{position:fixed;inset:0;z-index:40;overflow-y:auto;background:var(--bg);padding:20px 16px 0}
+  #sheet .ef{max-width:648px;margin:0 auto}
+  #sheet .actions{padding-bottom:calc(12px + env(safe-area-inset-bottom))}
+  body.sheet-open{overflow:hidden}
+  .meta-foot{display:flex;align-items:center;justify-content:space-between;gap:12px}
+  .edit-btn{font-size:.8125rem}
+
   /* ---------- Desktop shell (1280px and up) ----------
      Three panes under the header: a rail (what needs a reply, the month at a
      glance, the totals), the calendar itself, and a panel for the selected job.
@@ -222,14 +260,14 @@
   #desk,.dviews{display:none}
   @media(min-width:1280px){
     body{font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif}
-    header .wrap{max-width:1600px;padding:0 24px}
+    header .wrap{max-width:none;padding:0 24px}
     body.in main{display:none}
     body.in .dviews{display:flex;gap:2px;padding:2px;background:var(--bg);box-shadow:inset 0 0 0 1px var(--sep);border-radius:10px}
     .dv{height:32px;padding:0 16px;border:none;border-radius:8px;background:transparent;color:var(--text-2);
       font:inherit;font-size:.875rem;font-weight:500;cursor:pointer}
     .dv.on{background:var(--card-2);color:var(--text);box-shadow:inset 0 1px 0 rgba(255,255,255,.08)}
 
-    body.in #desk{display:flex;align-items:stretch;max-width:1600px;margin:0 auto;min-height:calc(100vh - 60px);min-height:calc(100dvh - 60px)}
+    body.in #desk{display:flex;align-items:stretch;min-height:calc(100vh - 60px);min-height:calc(100dvh - 60px)}
     .d-rail,.d-side{position:sticky;top:60px;align-self:flex-start;height:calc(100vh - 60px);height:calc(100dvh - 60px);
       overflow-y:auto;background:var(--deep);display:flex;flex-direction:column}
     .d-rail{flex:0 0 240px;gap:24px;padding:20px 16px 24px;box-shadow:inset -1px 0 0 var(--sep)}
@@ -288,14 +326,14 @@
     .wd-in{display:flex}
     /* 56 + half the 16px label = 64, the header height, so each label centres on its hour line */
     .wd-hours{flex:0 0 60px;padding-top:56px;font-size:.75rem;line-height:16px;color:var(--text-3);text-align:right;font-variant-numeric:tabular-nums}
-    .wd-hours div{height:52px;padding-right:12px}
+    .wd-hours div{height:var(--row,52px);padding-right:12px}
     .wd-col{flex:1 1 0;min-width:112px;display:flex;flex-direction:column;border-left:1px solid var(--sep)}
     .wd-head{height:64px;display:flex;flex-direction:column;justify-content:center;padding:0 12px;border-bottom:1px solid var(--sep)}
     .wd-head b{font-weight:500;font-variant-numeric:tabular-nums}
     .wd-head span{font-size:.75rem;line-height:1.3333;color:var(--text-2)}
     .wd-col.today .wd-head span{color:var(--accent-ink)}
     .wd-body{position:relative}
-    .wd-ln{height:52px;box-shadow:inset 0 1px 0 var(--sep)}
+    .wd-ln{height:var(--row,52px);box-shadow:inset 0 1px 0 var(--sep)}
     .wd-ln:first-child{box-shadow:none}
     .wd-job{position:absolute;display:flex;flex-direction:column;gap:2px;padding:8px;border:none;border-radius:8px;
       background:var(--card-2);box-shadow:inset 0 0 0 1px var(--sep);color:var(--text);font:inherit;text-align:left;
@@ -372,16 +410,29 @@
     .d-job textarea.notes{margin-top:0;min-height:88px}
     .d-job .actions{margin-top:auto}
     .d-side .empty{margin:auto 0}
+    .in-head{display:flex;align-items:center;justify-content:space-between;gap:12px}
+    .d-side.editing{padding-bottom:0}
+    .d-side .ef .actions{background:var(--deep);padding-bottom:24px}
+    .d-side .ef-title{font-family:'Sora','Inter',sans-serif;font-size:1.375rem;line-height:1.2}
   }
+  /* The shell fills whatever screen it is on: the side panes widen in steps and
+     the calendar takes the rest (Work days also adds weeks and taller hours). */
   @media(min-width:1440px){
     .d-rail{flex-basis:264px}
     .d-side{flex-basis:344px}
   }
+  @media(min-width:1920px){
+    .d-rail{flex-basis:280px}
+    .d-side{flex-basis:400px}
+  }
+  @media(min-width:2560px){
+    .d-side{flex-basis:440px}
+  }
 
   /* States: one easing, named properties, hover only where there is a pointer */
-  .ghost,.btn,.vw,.chip,.act,.cal-nav,.cal-today,.cal-cell,.dv,.d-q,.d-mday,.wd-job,.wd-x,.mo-chip,.ag-row{
+  .ghost,.btn,.vw,.chip,.act,.cal-nav,.cal-today,.cal-cell,.ef-check,.dv,.d-q,.d-mday,.wd-job,.wd-x,.mo-chip,.ag-row{
     transition:background-color 150ms var(--ease),color 150ms var(--ease),transform 150ms var(--ease)}
-  input,textarea.notes{transition:border-color 150ms var(--ease)}
+  input,select,textarea.notes{transition:border-color 150ms var(--ease)}
   .btn:enabled:active,.act:enabled:active{transform:scale(.98)}
   button:focus-visible,a:focus-visible,summary:focus-visible{outline:2px solid var(--accent-ink);outline-offset:2px}
   @media(hover:hover){
@@ -392,7 +443,8 @@
     .vw:hover:not(.on),.chip:hover:not(.on),.dv:hover:not(.on),.wd-x:hover{color:var(--text)}
     .d-q:hover:not(.sel),.wd-job:hover:not(.sel),.mo-chip:hover:not(.sel){background:var(--hover)}
     .ag-row:hover:not(.sel),.d-mday:hover{background:var(--wash)}
-    a:hover,.linkbtn:hover{text-decoration:underline}
+    a:hover,.linkbtn:hover,.ef-use:hover,.edit-btn:hover{text-decoration:underline}
+    .ef-check:not(.inc):hover{background:var(--hover)}
   }
   @media(prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
@@ -510,9 +562,14 @@
   <aside class="d-side" id="dPanel" aria-label="Selected job"></aside>
 </div>
 
+<!-- Phone editor: a full-screen sheet over the job board -->
+<div id="sheet" hidden></div>
+
 <div id="toast"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<!-- The one price list, shared with the booking flow and the quoting tool. The editor reads it. -->
+<script src="dv-pricing.js"></script>
 <script>
 /* ---------- Supabase (same project + publishable key as the site) ---------- */
 const SUPABASE_URL = 'https://utybbdrthxgsijplowup.supabase.co';
@@ -774,7 +831,7 @@ function jobCard(j){
     <textarea class="notes" placeholder="Notes (gate code, dog, reminders)"
       data-id="${j.id}" onblur="saveNotes(this)">${esc(j.notes)}</textarea>
     <div class="actions">${actions}</div>
-    <div class="meta-foot">Booked ${booked}</div>
+    <div class="meta-foot"><span>Booked ${booked}</span><button class="edit-btn" onclick="startEdit('${j.id}')">Edit booking</button></div>
   </div>`;
 }
 
@@ -896,8 +953,20 @@ let WD_SHIFT = 0;        // Work days: pages forward (+) or back (-) from the cu
 // Weekdays that always get a column in Work days (0=Sun … 6=Sat). Keep this in
 // step with HOURS in index.html. Any other day that has a booking gets one too.
 const WORK_DOW = [6];
-const WD_WEEKS = 5;      // weeks covered by one Work days window
-const WD_ROW = 52;       // px per hour
+/* Work days sizes itself to the screen. Wider: more weeks, about one per 190px
+   of calendar, between 5 and 10. Taller: taller hours, so the day fills the
+   height instead of leaving it empty, between 52px and 160px each. */
+const wdWeeks = () => {
+  const room = $('dBody').clientWidth - 60;                       // minus the hours gutter
+  return Math.max(5, Math.min(10, Math.floor(room / 190 / WORK_DOW.length)));
+};
+const wdRow = hours => {
+  const top = $('dBody').getBoundingClientRect().top + window.scrollY;
+  const room = window.innerHeight - top - 64 - 44 - 60;           // day header, cancelled row, legend and padding
+  return Math.max(52, Math.min(160, Math.floor(room / hours / 4) * 4));
+};
+let wdHours = 11;        // hours on the grid as last drawn
+let wdDrawn = '';        // weeks x hour height it was last drawn at
 
 /* Day maths on 'YYYY-MM-DD' keys, done at UTC noon so DST can never shift a date. */
 const keyDate = k => new Date(k + 'T12:00:00Z');
@@ -929,25 +998,40 @@ function layout(){
     $('dBody').innerHTML = ''; $('dPanel').innerHTML = '';
   }
 }
-DESK.addEventListener('change', ()=>{ layout(); if(document.body.classList.contains('in')) redraw(); });
+DESK.addEventListener('change', ()=>{
+  // The editor lives in a different place in each layout, so a layout change closes it.
+  EDIT = null; EDIT_DIRTY = false; $('sheet').hidden = true; $('sheet').innerHTML = ''; document.body.classList.remove('sheet-open');
+  layout(); if(document.body.classList.contains('in')) redraw();
+});
+/* Resizing the window re-fits Work days. Only the grid is redrawn, and only when
+   its size actually changes, so a note being typed in the panel is left alone. */
+let wdResizeT = null;
+window.addEventListener('resize', ()=>{
+  clearTimeout(wdResizeT);
+  wdResizeT = setTimeout(()=>{
+    if(!deskOn() || DVIEW!=='days' || !document.body.classList.contains('in') || !JOBS) return;
+    if(wdWeeks() + 'x' + wdRow(wdHours) !== wdDrawn) drawDays();
+  }, 150);
+});
 
 function setDView(v){ DVIEW = v; redraw(); }
 function dShift(n){ if(DVIEW==='days'){ WD_SHIFT += n; redraw(); } else calShift(n); }
 function dToday(){ WD_SHIFT = 0; calToday(); }
 
-/* Work days window: five weeks, starting the Sunday before last, so the most
-   recent working day stays in view beside the ones coming up. */
+/* Work days window: starts the Sunday before last, so the most recent working
+   day stays in view beside the ones coming up. */
 const wdBase = () => { const tk = todayKey(); return addDays(tk, -keyDow(tk) - 7); };
-const WD_PAGE = 7 * (WD_WEEKS - 1);   // one page forward keeps a week of overlap
+const wdPage = () => 7 * (wdWeeks() - 1);   // one page forward keeps a week of overlap
 
 /* Bring a day into view in every calendar view. */
 function dReveal(k){
-  WD_SHIFT = Math.floor(Math.round((keyDate(k) - keyDate(wdBase())) / 86400000) / WD_PAGE);
+  WD_SHIFT = Math.floor(Math.round((keyDate(k) - keyDate(wdBase())) / 86400000) / wdPage());
   const [y,m] = k.split('-').map(Number);
   CAL_REF = { y, m: m-1 }; CAL_SEL = k;
 }
 function dSelect(id, reveal){
   const j = JOBS.find(x=>x.id===id); if(!j) return;
+  if(EDIT && EDIT !== id && !closeEdit()) return;
   const from = document.activeElement && document.activeElement.closest('#dQueue,#dBody');
   DSEL = id;
   if(reveal) dReveal(dayKey(j.slot_start));
@@ -958,6 +1042,7 @@ function dSelect(id, reveal){
   if(again) again.focus({preventScroll:true});
 }
 function dDay(k){
+  if(EDIT && !closeEdit()) return;
   dReveal(k);
   const js = JOBS.filter(j=>dayKey(j.slot_start)===k);
   const j = js.find(x=>x.status!=='cancelled') || js[0];
@@ -1026,7 +1111,8 @@ function drawRail(){
    has a booking), hours down the side, each live job as tall as it takes. */
 function drawDays(){
   const tk = todayKey();
-  const start = addDays(wdBase(), WD_SHIFT * WD_PAGE), end = addDays(start, WD_WEEKS*7 - 1);
+  const WD_WEEKS = wdWeeks();
+  const start = addDays(wdBase(), WD_SHIFT * wdPage()), end = addDays(start, WD_WEEKS*7 - 1);
   const byDay = {};
   for(const j of JOBS){ const k = dayKey(j.slot_start); if(k>=start && k<=end) (byDay[k] = byDay[k] || []).push(j); }
   const keys = new Set(Object.keys(byDay));
@@ -1041,6 +1127,9 @@ function drawDays(){
     h0 = Math.min(h0, Math.floor(s)); h1 = Math.max(h1, Math.ceil(s + jobMins(j)/60));
   }
   h1 = Math.min(h1, 24);
+  wdHours = h1 - h0;
+  const WD_ROW = wdRow(wdHours);
+  wdDrawn = WD_WEEKS + 'x' + WD_ROW;
 
   const md = { month:'short', day:'numeric' };
   $('dTitle').textContent = days.length ? `${keyFmt(days[0], md)} to ${keyFmt(days[days.length-1], md)}` : 'No work days';
@@ -1082,7 +1171,7 @@ function drawDays(){
       `<div class="wd-foot">${cancelled}</div></section>`;
   }).join('');
 
-  $('dBody').innerHTML = `<div class="wd"><div class="wd-in"><div class="wd-hours" aria-hidden="true">${hours}</div>${cols}</div></div>`+
+  $('dBody').innerHTML = `<div class="wd" style="--row:${WD_ROW}px"><div class="wd-in"><div class="wd-hours" aria-hidden="true">${hours}</div>${cols}</div></div>`+
     LEGEND.replace('</div>', '<span>A block is as tall as the job is long, cancelled jobs sit under the day</span></div>');
 }
 
@@ -1152,13 +1241,21 @@ function drawAgenda(){
 /* The selected job: everything the phone's job card shows, with the same actions. */
 function drawPanel(){
   const el = $('dPanel'), j = JOBS.find(x=>x.id===DSEL);
+  el.classList.toggle('editing', !!j && EDIT === j.id);
   if(!j){ el.innerHTML = '<p class="empty">Pick a job to see its details</p>'; return; }
+  if(EDIT === j.id){
+    // Drawn once; later redraws leave it alone so nothing typed is lost.
+    const f = $('editForm');
+    if(!(f && f.dataset.id === j.id && el.contains(f))) el.innerHTML = editFormHtml(j);
+    return;
+  }
   const start = new Date(j.slot_start), hrs = Math.round(jobMins(j) / 6) / 10;
   const warn = warnText(j)
     ? `<div class="warn"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><path d="M12 9v4M12 17h.01"/></svg><span>${esc(warnText(j))}</span></div>` : '';
   el.innerHTML = `<div class="d-job" id="job-${j.id}">
     <div class="in-top">
-      <span class="badge b-${j.status}">${STATUS[j.status]||esc(j.status)}</span>
+      <div class="in-head"><span class="badge b-${j.status}">${STATUS[j.status]||esc(j.status)}</span>
+        <button class="ghost" onclick="startEdit('${j.id}')">Edit</button></div>
       <h2 class="in-name">${esc(j.customer_name)}</h2>
       <a href="${esc(smsHref(j))}">${esc(j.customer_phone)} · Text to confirm</a>
     </div>
@@ -1176,6 +1273,174 @@ function drawPanel(){
       <textarea class="notes" id="dNotes" placeholder="Gate code, dog, reminders" data-id="${j.id}" onblur="saveNotes(this)">${esc(j.notes)}</textarea></div>
     <div class="actions">${actionsHtml(j)}</div>
   </div>`;
+}
+
+/* ---------- Edit a booking ----------
+   One form for any job: when, what, the price, who, where, notes. On a computer
+   it takes over the job panel; on a phone it opens as a full-screen sheet.
+   Package, vehicle and add-ons come from the shared price list (dv-pricing.js),
+   so changing any of them refigures the total and the hours the same way the
+   booking flow would. Both can still be typed over for a custom quote. */
+const PRICING = window.DV_PRICING || { packages:[], sizes:[], addons:[] };
+const TOWNS = ['McCall','Cascade','Donnelly','Other'];
+let EDIT = null;          // id of the booking being edited
+let EDIT_DIRTY = false;   // something was typed since the form opened
+const tzFmt = new Intl.DateTimeFormat('en-US',{timeZone:TZ,hourCycle:'h23',
+  year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',second:'2-digit'});
+/* A Mountain-Time wall clock ('YYYY-MM-DD', 'HH:MM') -> the real instant, DST included. */
+function boiseISO(date, time){
+  const [y,m,d] = date.split('-').map(Number), [hh,mm] = time.split(':').map(Number);
+  const guess = Date.UTC(y, m-1, d, hh, mm);
+  const p = {}; for(const x of tzFmt.formatToParts(new Date(guess))) p[x.type] = x.value;
+  const asUTC = Date.UTC(+p.year, +p.month-1, +p.day, +p.hour, +p.minute, +p.second);
+  return new Date(guess - (asUTC - guess)).toISOString();
+}
+const clock24 = iso => { const h = hourOf(new Date(iso)); return pad2(Math.floor(h)) + ':' + pad2(Math.round((h % 1) * 60)); };
+const waterOf = j => { const w = warnText(j); return !w ? 'yes' : /NOT/i.test(w) ? 'no' : 'unsure'; };
+const optHtml = (value, label, on) => `<option value="${esc(value)}"${on?' selected':''}>${esc(label)}</option>`;
+const editPkg = () => PRICING.packages.find(p=>p.id===$('e-pkg').value) || null;
+const editSize = () => PRICING.sizes.find(s=>s.id===$('e-size').value) || null;
+const editChecked = () => [...document.querySelectorAll('#e-addons input:checked:not(:disabled)')].map(i=>i.value);
+
+/* Add-on rows for the chosen package: bundled ones show as included, ones that
+   do not apply are left out, and any name not on the price list is kept as is. */
+function addonsHtml(pkg, names){
+  const rows = PRICING.addons.filter(a => !(pkg && pkg.excludes && pkg.excludes.includes(a.id))).map(a=>{
+    const inc = !!(pkg && pkg.includes && pkg.includes.includes(a.id));
+    return `<label class="ef-check${inc?' inc':''}"><input type="checkbox" value="${esc(a.name)}"${inc?' checked disabled':names.includes(a.name)?' checked':''} onchange="editReprice()">`+
+      `<span>${esc(a.name.split(' — ')[0])}</span><em>${inc?'Included':'+'+money(a.price)}</em></label>`;
+  });
+  const extra = names.filter(n => !PRICING.addons.some(a=>a.name===n)).map(n=>
+    `<label class="ef-check"><input type="checkbox" value="${esc(n)}" checked><span>${esc(n)}</span><em></em></label>`);
+  return rows.concat(extra).join('') || '<p class="ef-hint">No add-ons on the price list</p>';
+}
+/* What the price list says for the form as it stands, or null for a package it does not know. */
+function editQuote(){
+  const pkg = editPkg(); if(!pkg) return null;
+  const sz = editSize(), picked = editChecked();
+  const ads = PRICING.addons.filter(a => picked.includes(a.name));
+  return { total: pkg.price + (sz ? sz.price : 0) + ads.reduce((s,a)=>s+a.price,0),
+           mins:  pkg.min   + (sz ? sz.min   : 0) + ads.reduce((s,a)=>s+a.min,0) };
+}
+function editHint(){
+  const q = editQuote(), el = $('e-hint');
+  if(!q){ el.textContent = ''; return; }
+  const same = +$('e-total').value === q.total && Math.round(+$('e-hours').value * 60) === q.mins;
+  el.innerHTML = `Price list: ${money(q.total)} · ${q.mins / 60} hrs` + (same ? '' : ` <button type="button" class="ef-use" onclick="editUseQuote()">Use these</button>`);
+}
+function editUseQuote(){
+  const q = editQuote(); if(!q) return;
+  $('e-total').value = q.total; $('e-hours').value = q.mins / 60; EDIT_DIRTY = true; editHint();
+}
+/* Package, vehicle or an add-on changed: redo the add-on rows and refigure the price and the time. */
+function editReprice(packageChanged){
+  if(packageChanged) $('e-addons').innerHTML = addonsHtml(editPkg(), editChecked());
+  editUseQuote(); editHint();
+}
+
+function editFormHtml(j){
+  const pkg = PRICING.packages.find(p=>p.name===pkgName(j)), sz = PRICING.sizes.find(s=>s.name===pkgSize(j));
+  const water = waterOf(j), names = j.addons || [];
+  const pkgOpts = (pkg ? '' : optHtml('', pkgName(j) || 'Not set', true)) + PRICING.packages.map(p=>optHtml(p.id, `${p.name} · ${money(p.price)}`, pkg && p.id===pkg.id)).join('');
+  const sizeOpts = (sz ? '' : optHtml('', pkgSize(j) || 'Not set', true)) + PRICING.sizes.map(s=>optHtml(s.id, s.name, sz && s.id===sz.id)).join('');
+  const towns = TOWNS.includes(j.town) || !j.town ? TOWNS : [j.town].concat(TOWNS);
+  return `<form class="ef" id="editForm" data-id="${j.id}" novalidate oninput="EDIT_DIRTY=true" onsubmit="saveEdit(event)" onkeydown="if(event.key==='Escape')closeEdit()">
+    <h2 class="ef-title">Edit booking</h2>
+    <div class="ef-row">
+      <div><label for="e-date">Date</label><input id="e-date" type="date" value="${dayKey(j.slot_start)}" required></div>
+      <div><label for="e-time">Arrival time</label><input id="e-time" type="time" step="900" value="${clock24(j.slot_start)}" required></div>
+    </div>
+    <div><label for="e-pkg">Package</label><select id="e-pkg" onchange="editReprice(true)">${pkgOpts}</select></div>
+    <div><label for="e-size">Vehicle</label><select id="e-size" onchange="editReprice()">${sizeOpts}</select></div>
+    <fieldset><legend>Add-ons</legend><div class="ef-checks" id="e-addons">${addonsHtml(pkg, names)}</div></fieldset>
+    <div><label for="e-water">Water tap and power outlet</label><select id="e-water">
+      ${optHtml('yes','Both on site',water==='yes')}${optHtml('unsure','Not sure yet',water==='unsure')}${optHtml('no','Not available',water==='no')}</select></div>
+    <div class="ef-group"><div class="ef-row">
+      <div><label for="e-total">Total ($)</label><input id="e-total" type="number" inputmode="numeric" min="0" max="100000" step="1" value="${j.total_usd||0}" oninput="editHint()"></div>
+      <div><label for="e-hours">Hours on the job</label><input id="e-hours" type="number" inputmode="decimal" min="0.5" max="10" step="0.25" value="${jobMins(j)/60}" oninput="editHint()"></div>
+    </div>
+    <p class="ef-hint" id="e-hint"></p></div>
+    <div class="ef-row">
+      <div><label for="e-name">Customer</label><input id="e-name" value="${esc(j.customer_name)}" autocomplete="off" maxlength="120"></div>
+      <div><label for="e-phone">Phone</label><input id="e-phone" type="tel" inputmode="tel" value="${esc(j.customer_phone)}" autocomplete="off" maxlength="40"></div>
+    </div>
+    <div class="ef-row wide">
+      <div><label for="e-address">Address</label><input id="e-address" value="${esc(j.address)}" autocomplete="off" maxlength="200"></div>
+      <div><label for="e-town">Town</label><select id="e-town">${towns.map(t=>optHtml(t, t, t===j.town)).join('')}</select></div>
+    </div>
+    <div><label for="e-notes">Notes</label><textarea class="notes" id="e-notes" placeholder="Gate code, dog, reminders">${esc(j.notes)}</textarea></div>
+    <div class="msg" id="editMsg" role="alert"></div>
+    <div class="actions">
+      <button class="act act-pri" id="editSave">Save changes</button>
+      <button type="button" class="act act-ghost" onclick="closeEdit()">Discard</button>
+    </div>
+  </form>`;
+}
+
+function startEdit(id){
+  if(EDIT && EDIT!==id && !closeEdit()) return;
+  const j = JOBS.find(x=>x.id===id); if(!j) return;
+  EDIT = id; EDIT_DIRTY = false;
+  if(deskOn()){ DSEL = id; redraw(); }
+  else { $('sheet').innerHTML = editFormHtml(j); $('sheet').hidden = false; document.body.classList.add('sheet-open'); $('sheet').scrollTop = 0; }
+  editHint();
+  $('e-date').focus({preventScroll:true});
+}
+/* Leave the editor. Returns false if there were unsaved changes and the owner chose to keep editing. */
+function closeEdit(saved){
+  if(!EDIT) return true;
+  if(!saved && EDIT_DIRTY && !confirm('Discard your changes to this booking?')) return false;
+  EDIT = null; EDIT_DIRTY = false;
+  $('sheet').hidden = true; $('sheet').innerHTML = ''; document.body.classList.remove('sheet-open');
+  redraw();
+  return true;
+}
+function editMsg(text){ const m = $('editMsg'); m.textContent = text; m.className = 'msg show err'; m.scrollIntoView({block:'nearest'}); }
+
+async function saveEdit(ev){
+  ev.preventDefault();
+  const j = JOBS.find(x=>x.id===EDIT); if(!j) return;
+  const v = id => $(id).value.trim();
+  const name = v('e-name'), phone = v('e-phone'), date = v('e-date'), time = v('e-time');
+  const total = Number(v('e-total')), mins = Math.round(Number(v('e-hours')) * 60);
+  // The same limits the database enforces, said in plain words before it has to.
+  if(!date || !time) return editMsg('Pick a date and an arrival time');
+  if(!name) return editMsg('Enter the customer’s name');
+  if(phone.length < 7) return editMsg('Enter a phone number');
+  if(!Number.isInteger(total) || total < 0 || total > 100000) return editMsg('Total must be a whole dollar amount');
+  if(!(mins >= 30 && mins <= 600)) return editMsg('Hours on the job must be between 0.5 and 10');
+
+  // Rebuilt in the same shape the booking flow stores: "Package · Vehicle · ⚠ Water/power: …"
+  const pkg = editPkg(), sz = editSize(), water = v('e-water');
+  const parts = [pkg ? pkg.name : pkgName(j), sz ? sz.name : pkgSize(j)].filter(Boolean);
+  if(water !== 'yes') parts.push(`⚠ Water/power: ${water==='no' ? 'NOT available' : 'unsure'}`);
+  const next = {
+    slot_start: boiseISO(date, time), duration_min: mins, package: parts.join(' · '), addons: editChecked(),
+    total_usd: total, customer_name: name, customer_phone: phone, address: v('e-address'), town: v('e-town'), notes: $('e-notes').value
+  };
+  if(next.package.length > 140) return editMsg('Package and vehicle are too long to save');
+  // Send only what changed.
+  const same = (a, b) => Array.isArray(a) ? JSON.stringify(a) === JSON.stringify(b || []) : a === (b == null ? '' : b);
+  const patch = {};
+  for(const k in next){
+    const before = k === 'slot_start' ? new Date(j.slot_start).toISOString() : k === 'duration_min' ? jobMins(j) : j[k];
+    if(!same(next[k], before)) patch[k] = next[k];
+  }
+  if(!Object.keys(patch).length){ closeEdit(true); toast('Nothing changed'); return; }
+
+  const btn = $('editSave'); btn.disabled = true; btn.textContent = 'Saving…';
+  const { data, error } = await sb.from('bookings').update(patch).eq('id', j.id).select('id');
+  btn.disabled = false; btn.textContent = 'Save changes';
+  if(error){
+    return editMsg(error.code === '23P01' ? 'That time overlaps another job. Pick another day or time, or cancel the other job first.'
+      : 'Couldn’t save: ' + error.message);
+  }
+  if(!data || !data.length) return editMsg('Nothing was saved. Sign out, sign back in and try again.');
+  Object.assign(j, patch);
+  JOBS.sort((a,b)=> new Date(a.slot_start) - new Date(b.slot_start));
+  if(deskOn()) dReveal(dayKey(j.slot_start));   // follow the job if it moved
+  closeEdit(true);
+  toast('Saved');
 }
 
 boot();

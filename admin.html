@@ -9,13 +9,17 @@
 <title>Detail Valley · Jobs</title>
 <link rel="icon" type="image/svg+xml" href="logo.svg">
 <link rel="alternate icon" href="logo.png">
+<!-- Brand type for the desktop shell only; phones keep the system font and never fetch it -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" media="(min-width:1280px)" href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600&family=Inter:wght@400;500;600&display=swap">
 <style>
   /* Graphite ramp for every surface, three text roles, copper brand accent.
      Green / amber / red only where they carry a status. 4px spacing grid. */
   :root{
     --bg:#141415; --deep:#0f0f10; --card:#19191b; --card-2:#232325; --hover:#2b2b2e;
     --text:#ededed; --text-2:#a1a1a6; --text-3:#85858b;
-    --sep:rgba(237,237,237,.08);
+    --sep:rgba(237,237,237,.08); --sep-2:rgba(237,237,237,.32); --wash:rgba(237,237,237,.04);
     --accent:#a4521f; --accent-hover:#8c4418; --accent-ink:#f0c29e;
     --green:#4cc38a; --amber:#e0a23a; --red:#e5484d;
     --ease:cubic-bezier(0.22,1,0.36,1);
@@ -156,7 +160,7 @@
   .who a.tel{position:relative;font-size:.9375rem;font-variant-numeric:tabular-nums}
   /* Status: quiet text with a dot instead of a tinted pill */
   .badge{flex:0 0 auto;display:inline-flex;align-items:center;gap:6px;font-size:.8125rem;line-height:1.8462;
-    color:var(--text-2);text-transform:capitalize}
+    color:var(--text-2)}
   .badge::before{content:'';width:8px;height:8px;border-radius:50%;background:var(--text-3)}
   .b-pending::before{background:var(--amber)}
   .b-confirmed::before{background:var(--text)}
@@ -211,8 +215,171 @@
     z-index:50;max-width:90vw;text-align:center}
   #toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 
+  /* ---------- Desktop shell (1280px and up) ----------
+     Three panes under the header: a rail (what needs a reply, the month at a
+     glance, the totals), the calendar itself, and a panel for the selected job.
+     The calendar has three views: Work days (the default), Month and Agenda. */
+  #desk,.dviews{display:none}
+  @media(min-width:1280px){
+    body{font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif}
+    header .wrap{max-width:1600px;padding:0 24px}
+    body.in main{display:none}
+    body.in .dviews{display:flex;gap:2px;padding:2px;background:var(--bg);box-shadow:inset 0 0 0 1px var(--sep);border-radius:10px}
+    .dv{height:32px;padding:0 16px;border:none;border-radius:8px;background:transparent;color:var(--text-2);
+      font:inherit;font-size:.875rem;font-weight:500;cursor:pointer}
+    .dv.on{background:var(--card-2);color:var(--text);box-shadow:inset 0 1px 0 rgba(255,255,255,.08)}
+
+    body.in #desk{display:flex;align-items:stretch;max-width:1600px;margin:0 auto;min-height:calc(100vh - 60px);min-height:calc(100dvh - 60px)}
+    .d-rail,.d-side{position:sticky;top:60px;align-self:flex-start;height:calc(100vh - 60px);height:calc(100dvh - 60px);
+      overflow-y:auto;background:var(--deep);display:flex;flex-direction:column}
+    .d-rail{flex:0 0 240px;gap:24px;padding:20px 16px 24px;box-shadow:inset -1px 0 0 var(--sep)}
+    .d-side{flex:0 0 320px;padding:24px;box-shadow:inset 1px 0 0 var(--sep)}
+    .d-main{flex:1 1 0;min-width:0;display:flex;flex-direction:column;gap:16px;padding:20px 24px 24px}
+
+    /* Rail */
+    .d-label{display:flex;align-items:baseline;gap:8px;font-size:.8125rem;font-weight:500;color:var(--text-2);margin-bottom:8px}
+    .d-label span{color:var(--amber);font-variant-numeric:tabular-nums}
+    .d-q{display:block;width:100%;margin-bottom:4px;padding:8px 12px;border:none;border-radius:8px;background:var(--card);
+      box-shadow:inset 0 0 0 1px var(--sep);color:var(--text);font:inherit;text-align:left;cursor:pointer}
+    .d-q span{display:block;font-size:.75rem;line-height:1.3333;color:var(--text-2);font-variant-numeric:tabular-nums}
+    .d-q b{display:block;font-size:.875rem;font-weight:500}
+    .d-none{font-size:.8125rem;color:var(--text-3);padding:8px 0}
+    .d-mini-head{display:flex;align-items:center;gap:4px;margin-bottom:4px}
+    .d-mini-head .d-label{flex:1;margin:0}
+    .d-mini-head .cal-nav{width:28px;height:28px}
+    .d-mini-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:2px;text-align:center;
+      font-size:.75rem;font-variant-numeric:tabular-nums}
+    .d-mini-grid>span{color:var(--text-3);padding-bottom:4px}
+    .d-mday{position:relative;height:32px;padding:0;border:none;border-radius:8px;background:transparent;color:var(--text-2);
+      font:inherit;cursor:pointer}
+    .d-mday i{display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:12px;font-style:normal}
+    .d-mday.today i{background:var(--accent);color:#fff;font-weight:500}
+    .d-mday::after{content:'';position:absolute;left:50%;bottom:0;width:4px;height:4px;margin-left:-2px;border-radius:2px}
+    .d-mday.m-pending::after{background:var(--amber)}
+    .d-mday.m-confirmed::after{background:var(--text)}
+    .d-mday.m-completed::after{background:var(--green)}
+    .d-stats{display:flex;flex-direction:column;gap:8px;padding-top:20px;border-top:1px solid var(--sep);font-size:.875rem}
+    .d-stats div{display:flex;justify-content:space-between;gap:16px}
+    .d-stats dt{color:var(--text-2)}
+    .d-stats dd{font-weight:500;font-variant-numeric:tabular-nums}
+    .d-rail .acct{margin-top:auto;background:transparent;border:none;border-top:1px solid var(--sep);border-radius:0;padding:8px 0 0}
+
+    /* Toolbar */
+    .d-bar{display:flex;flex-wrap:wrap;align-items:center;gap:12px 16px;min-height:56px}
+    .d-nav{display:flex;align-items:center;gap:4px}
+    .d-title{font-family:'Sora','Inter',sans-serif;font-size:1.75rem;line-height:1.15;font-weight:500}
+    .d-sub{display:block;font-size:.8125rem;color:var(--text-2);font-variant-numeric:tabular-nums}
+    .d-main .filters{margin:0;padding:0;overflow:visible;flex-wrap:wrap}
+    #dBody{flex:1;display:flex;flex-direction:column;gap:16px}
+
+    /* One status dot, used in every view */
+    .dot{flex:0 0 8px;width:8px;height:8px;border-radius:50%;background:var(--text-3)}
+    .dot.s-pending{background:var(--amber)}
+    .dot.s-confirmed{background:var(--text)}
+    .dot.s-completed{background:var(--green)}
+    .dot.s-cancelled{background:transparent;box-shadow:inset 0 0 0 1.5px var(--text-3)}
+    /* Selection, the same everywhere: one surface step and a brighter hairline */
+    .d-q.sel,.wd-job.sel,.mo-chip.sel,.ag-row.sel{background:var(--hover);box-shadow:inset 0 0 0 1px var(--sep-2)}
+    .wd-x.sel{color:var(--text)}
+
+    /* Work days: one column per working day, a job is as tall as it takes */
+    .wd,.mo,.ag{background:var(--card);border:1px solid var(--sep);border-radius:12px}
+    .wd,.ag{overflow-x:auto}
+    .wd-in{display:flex}
+    /* 56 + half the 16px label = 64, the header height, so each label centres on its hour line */
+    .wd-hours{flex:0 0 60px;padding-top:56px;font-size:.75rem;line-height:16px;color:var(--text-3);text-align:right;font-variant-numeric:tabular-nums}
+    .wd-hours div{height:52px;padding-right:12px}
+    .wd-col{flex:1 1 0;min-width:112px;display:flex;flex-direction:column;border-left:1px solid var(--sep)}
+    .wd-head{height:64px;display:flex;flex-direction:column;justify-content:center;padding:0 12px;border-bottom:1px solid var(--sep)}
+    .wd-head b{font-weight:500;font-variant-numeric:tabular-nums}
+    .wd-head span{font-size:.75rem;line-height:1.3333;color:var(--text-2)}
+    .wd-col.today .wd-head span{color:var(--accent-ink)}
+    .wd-body{position:relative}
+    .wd-ln{height:52px;box-shadow:inset 0 1px 0 var(--sep)}
+    .wd-ln:first-child{box-shadow:none}
+    .wd-job{position:absolute;display:flex;flex-direction:column;gap:2px;padding:8px;border:none;border-radius:8px;
+      background:var(--card-2);box-shadow:inset 0 0 0 1px var(--sep);color:var(--text);font:inherit;text-align:left;
+      overflow:hidden;cursor:pointer}
+    .wd-t{display:flex;flex-wrap:wrap;align-items:center;gap:0 4px;font-size:.75rem;line-height:1.3333;color:var(--text-2);font-variant-numeric:tabular-nums}
+    .wd-t span{display:inline-flex;align-items:center;gap:8px;white-space:nowrap}
+    .wd-n{font-size:.875rem;font-weight:500}
+    .wd-m{font-size:.75rem;line-height:1.3333;color:var(--text-2)}
+    .wd-total{margin-top:auto;font-size:1rem;font-weight:500;font-variant-numeric:tabular-nums}
+    .wd-job.sm .wd-m,.wd-job.xs .wd-total{display:none}
+    .wd-foot{min-height:44px;display:flex;flex-direction:column;justify-content:center;padding:4px 8px;border-top:1px solid var(--sep)}
+    .wd-x{min-height:32px;padding:0 4px;border:none;border-radius:8px;background:transparent;color:var(--text-3);font:inherit;
+      font-size:.75rem;text-align:left;text-decoration:line-through;cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+      font-variant-numeric:tabular-nums}
+    .d-legend{display:flex;flex-wrap:wrap;gap:8px 20px;font-size:.75rem;color:var(--text-2)}
+    .d-legend span{display:inline-flex;align-items:center;gap:8px}
+
+    /* Month */
+    .mo{flex:1;display:flex;flex-direction:column;overflow:hidden}
+    .mo-dow{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));border-bottom:1px solid var(--sep);font-size:.75rem;color:var(--text-2)}
+    .mo-dow span{padding:8px 12px}
+    .mo-grid{flex:1;display:grid;grid-template-columns:repeat(7,minmax(0,1fr));grid-auto-rows:minmax(124px,1fr);gap:1px;background:var(--sep)}
+    .mo-cell{display:flex;flex-direction:column;gap:4px;min-width:0;padding:8px 4px 4px;background:var(--card)}
+    .mo-num{align-self:flex-start;margin-left:4px;min-width:24px;height:24px;display:inline-flex;align-items:center;justify-content:center;border-radius:12px;
+      font-size:.8125rem;font-weight:500;color:var(--text-2);font-variant-numeric:tabular-nums}
+    .mo-cell.out .mo-num{color:var(--text-3)}
+    .mo-cell.today .mo-num{background:var(--accent);color:#fff}
+    .mo-chip{display:flex;flex-direction:column;gap:2px;width:100%;min-width:0;padding:8px;border:none;border-radius:8px;
+      background:var(--card-2);box-shadow:inset 0 0 0 1px var(--sep);color:var(--text);font:inherit;text-align:left;cursor:pointer}
+    .mo-chip span{font-size:.75rem;line-height:1.3333;color:var(--text-2);font-variant-numeric:tabular-nums;
+      white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .mo-chip span:first-child{display:flex;flex-wrap:wrap;align-items:center;gap:0 8px}
+    .mo-chip span span{display:inline-flex;align-items:center;gap:4px}
+    .mo-chip em{margin-left:auto;font-style:normal;color:var(--text)}
+    .mo-chip b{font-size:.8125rem;font-weight:500;overflow-wrap:anywhere}
+    .is-cancelled{opacity:.6}
+    .is-cancelled b{text-decoration:line-through}
+    .mo-more{font-size:.75rem;color:var(--text-3);padding-left:4px}
+
+    /* Agenda */
+    .ag-in{min-width:620px}
+    .ag-head,.ag-row{display:grid;grid-template-columns:84px minmax(0,1.2fr) minmax(0,1.5fr) 96px 72px 128px;gap:16px;align-items:center;padding:8px 16px}
+    .ag-head{font-size:.75rem;color:var(--text-2);border-bottom:1px solid var(--sep)}
+    .ag-day{display:flex;align-items:baseline;gap:8px;padding:16px 16px 8px;font-weight:500}
+    .ag-day em{font-style:normal;font-weight:400;font-size:.75rem;color:var(--text-2)}
+    .ag-row{width:100%;min-height:60px;border:none;border-top:1px solid var(--sep);background:transparent;color:var(--text);
+      font:inherit;font-size:.875rem;text-align:left;cursor:pointer}
+    .ag-row b{display:block;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .ag-row small{display:block;font-size:.75rem;line-height:1.3333;color:var(--text-2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+      font-variant-numeric:tabular-nums}
+    .ag-pk{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .ag-time,.ag-total{font-weight:500;font-variant-numeric:tabular-nums}
+    .ag-total,.ag-head span:nth-child(5){text-align:right}
+    .ag-town{color:var(--text-2)}
+    .ag-status{display:flex;align-items:center;gap:8px;font-size:.8125rem;color:var(--text-2)}
+
+    /* Selected job */
+    .d-job{flex:1;display:flex;flex-direction:column;gap:20px}
+    .in-top{display:flex;flex-direction:column;gap:8px}
+    .in-top .badge{align-self:flex-start;line-height:1.5}
+    .in-name{font-family:'Sora','Inter',sans-serif;font-size:1.375rem;line-height:1.2;font-weight:500}
+    .in-top a{align-self:flex-start;font-size:.875rem}
+    .in-when{display:flex;flex-direction:column;gap:4px;padding:16px;background:var(--card);border:1px solid var(--sep);border-radius:12px;font-size:.875rem}
+    .in-when b{font-weight:500}
+    .in-when span{color:var(--text-2);font-variant-numeric:tabular-nums}
+    .in-dl{display:grid;grid-template-columns:88px minmax(0,1fr);gap:8px 16px;font-size:.875rem}
+    .in-dl dt{color:var(--text-2)}
+    .in-dl dd{min-width:0;overflow-wrap:anywhere;font-variant-numeric:tabular-nums}
+    .in-dl dt.tot{align-self:center}
+    .in-total{font-size:1.375rem;line-height:1.2;font-weight:600}
+    .d-job .warn{display:flex;align-items:flex-start;gap:8px;margin-top:0}
+    .d-job .warn .ico{margin-top:2px}
+    .d-job label{margin:0 0 8px}
+    .d-job textarea.notes{margin-top:0;min-height:88px}
+    .d-job .actions{margin-top:auto}
+    .d-side .empty{margin:auto 0}
+  }
+  @media(min-width:1440px){
+    .d-rail{flex-basis:264px}
+    .d-side{flex-basis:344px}
+  }
+
   /* States: one easing, named properties, hover only where there is a pointer */
-  .ghost,.btn,.vw,.chip,.act,.cal-nav,.cal-today,.cal-cell{
+  .ghost,.btn,.vw,.chip,.act,.cal-nav,.cal-today,.cal-cell,.dv,.d-q,.d-mday,.wd-job,.wd-x,.mo-chip,.ag-row{
     transition:background-color 150ms var(--ease),color 150ms var(--ease),transform 150ms var(--ease)}
   input,textarea.notes{transition:border-color 150ms var(--ease)}
   .btn:enabled:active,.act:enabled:active{transform:scale(.98)}
@@ -221,8 +388,10 @@
     .btn:enabled:hover,.act-pri:enabled:hover{background:var(--accent-hover)}
     .ghost:hover,.btn.alt:enabled:hover,.act-ghost:enabled:hover,.act-blue:enabled:hover,.cal-today:hover{background:var(--hover)}
     .cal-nav:hover{background:var(--card-2);color:var(--text)}
-    .cal-cell:hover:not(.out):not(.sel){background:rgba(237,237,237,.04)}
-    .vw:hover:not(.on),.chip:hover:not(.on){color:var(--text)}
+    .cal-cell:hover:not(.out):not(.sel){background:var(--wash)}
+    .vw:hover:not(.on),.chip:hover:not(.on),.dv:hover:not(.on),.wd-x:hover{color:var(--text)}
+    .d-q:hover:not(.sel),.wd-job:hover:not(.sel),.mo-chip:hover:not(.sel){background:var(--hover)}
+    .ag-row:hover:not(.sel),.d-mday:hover{background:var(--wash)}
     a:hover,.linkbtn:hover{text-decoration:underline}
   }
   @media(prefers-reduced-motion:reduce){*{transition:none!important}}
@@ -235,6 +404,11 @@
       <img src="logo.svg" alt="Detail Valley">
       <div><b>Detail Valley</b><span>Job board</span></div>
     </div>
+    <nav class="dviews" aria-label="Calendar view">
+      <button class="dv" id="dv-days" aria-pressed="true" onclick="setDView('days')">Work days</button>
+      <button class="dv" id="dv-month" aria-pressed="false" onclick="setDView('month')">Month</button>
+      <button class="dv" id="dv-agenda" aria-pressed="false" onclick="setDView('agenda')">Agenda</button>
+    </nav>
     <button class="ghost" id="signout" hidden onclick="signOut()">Sign out</button>
   </div>
 </header>
@@ -295,7 +469,7 @@
       <div id="calDay"></div>
     </div>
 
-    <details class="acct">
+    <details class="acct" id="acct">
       <summary><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>Account &amp; password</summary>
       <label for="newpw">Set a new password</label>
       <input id="newpw" type="password" autocomplete="new-password" placeholder="At least 8 characters">
@@ -307,6 +481,34 @@
 
   <p class="empty" id="boot">Loading…</p>
 </main>
+
+<!-- Desktop shell (1280px and up, signed in): rail | calendar | selected job.
+     Phones and tablets keep the job board above. -->
+<div id="desk">
+  <div class="d-rail" id="dRail">
+    <section aria-labelledby="dQueueH">
+      <h2 class="d-label" id="dQueueH">Needs your reply <span id="dQueueN"></span></h2>
+      <div id="dQueue"></div>
+    </section>
+    <section id="dMini" aria-label="Month at a glance"></section>
+    <dl class="d-stats" id="dStats"></dl>
+  </div>
+
+  <div class="d-main">
+    <div class="d-bar">
+      <div class="d-nav" id="dNav">
+        <button class="cal-nav" onclick="dShift(-1)" aria-label="Earlier"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg></button>
+        <button class="cal-nav" onclick="dShift(1)" aria-label="Later"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></button>
+        <button class="cal-today" onclick="dToday()">Today</button>
+      </div>
+      <div class="d-head"><h1 class="d-title" id="dTitle"></h1><span class="d-sub" id="dSub"></span></div>
+    </div>
+    <div class="filters" id="dFilters" hidden></div>
+    <div id="dBody"></div>
+  </div>
+
+  <aside class="d-side" id="dPanel" aria-label="Selected job"></aside>
+</div>
 
 <div id="toast"></div>
 
@@ -333,6 +535,9 @@ const shortDate = new Intl.DateTimeFormat('en-US',{month:'short',day:'numeric',t
 const esc = s => (s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const dayKey = iso => dateKeyFmt.format(new Date(iso));
 const todayKey = () => dateKeyFmt.format(new Date());
+const money = n => '$' + Number(n||0).toLocaleString('en-US');
+/* One name per status, used by the filters, the badges and the legends. */
+const STATUS = { pending:'New', confirmed:'Confirmed', completed:'Done', cancelled:'Cancelled' };
 
 function toast(msg){
   const t = $('toast'); t.textContent = msg; t.classList.add('show');
@@ -355,6 +560,7 @@ async function boot(){
 async function render(session){
   $('boot').hidden = true;
   if(!session){
+    document.body.classList.remove('in');
     $('signout').hidden = true;
     $('board').hidden = true;
     $('login').hidden = false;
@@ -363,6 +569,7 @@ async function render(session){
   // Confirm this account is actually an admin (RLS-backed).
   const { data:isAdmin, error } = await sb.rpc('is_admin');
   if(error || !isAdmin){
+    document.body.classList.remove('in');
     $('login').hidden = false; $('board').hidden = true; $('signout').hidden = false;
     loginMsg('This account isn’t set up as an owner. Sign out and use your owner email, or ask to be added.', 'err');
     return;
@@ -370,6 +577,8 @@ async function render(session){
   $('login').hidden = true;
   $('board').hidden = false;
   $('signout').hidden = false;
+  document.body.classList.add('in');
+  layout();
   loadJobs();
 }
 
@@ -417,15 +626,18 @@ async function changePassword(){
 
 /* ---------- Jobs ---------- */
 async function loadJobs(){
-  $('jobs').innerHTML = '<p class="empty">Loading jobs…</p>';
+  // The message goes wherever jobs are drawn in the layout that is on.
+  const say = html => { $(deskOn() ? 'dBody' : 'jobs').innerHTML = html; };
+  say('<p class="empty">Loading jobs…</p>');
   const { data, error } = await sb.from('bookings').select('*').order('slot_start',{ascending:true});
-  if(error){ $('jobs').innerHTML = '<p class="empty">Couldn’t load jobs: '+esc(error.message)+'</p>'; return; }
+  if(error){ say('<p class="empty">Couldn’t load jobs: '+esc(error.message)+'</p>'); return; }
   JOBS = data || [];
   redraw();
 }
 
 /* Repaint whichever view is active (plus the shared summary + filter counts). */
 function redraw(){
+  if(deskOn()){ drawDesk(); return; }
   drawSummary();
   drawFilters();
   if(VIEW==='cal') drawCalendar(); else drawJobs();
@@ -460,18 +672,19 @@ function drawSummary(){
   $('summary').innerHTML =
     `<div class="stat"><b>${newCount}</b><span>New</span></div>`+
     `<div class="stat"><b>${upcoming.length}</b><span>Upcoming</span></div>`+
-    `<div class="stat"><b>$${booked}</b><span>Booked</span></div>`;
+    `<div class="stat"><b>${money(booked)}</b><span>Booked</span></div>`;
 }
 
-function drawFilters(){
-  $('filters').innerHTML = FILTERS.map(f=>{
+function filtersHtml(){
+  return FILTERS.map(f=>{
     const n = JOBS.filter(f.match).length;
-    return `<button class="chip ${FILTER===f.id?'on':''}" onclick="setFilter('${f.id}')">`+
+    return `<button class="chip ${FILTER===f.id?'on':''}" aria-pressed="${FILTER===f.id}" onclick="setFilter('${f.id}')">`+
            `${f.label} <i>${n}</i></button>`;
   }).join('');
 }
+function drawFilters(){ $('filters').innerHTML = filtersHtml(); }
 
-function setFilter(id){ FILTER = id; drawFilters(); drawJobs(); }
+function setFilter(id){ FILTER = id; redraw(); }
 
 function drawJobs(){
   const f = FILTERS.find(x=>x.id===FILTER);
@@ -509,44 +722,54 @@ function confirmText(j){
   return `Hey ${first}, confirming your ${MONTHS[m-1]} ${nth(d)} booking at ${chipTime(j.slot_start)}. See you then!`;
 }
 
+/* Tap-to-text link. "?&body=" is deliberate — iOS Messages wants "&body=",
+   Android wants "?body="; the combined form opens with the draft filled in on both. */
+function smsHref(j){
+  const phoneDigits = (j.customer_phone||'').replace(/[^\d+]/g,'');
+  return `sms:${phoneDigits}?&body=${encodeURIComponent(confirmText(j))}`;
+}
+const mapHref = j => 'https://maps.google.com/?q=' + encodeURIComponent(`${j.address}, ${j.town}, Idaho`);
+/* The booking form folds a water/power warning into the package text, after a
+   warning sign. These split the two apart again. */
+const warnText = j => /Water\/power/i.test(j.package||'') ? j.package.split('·').pop().replace('⚠','').trim() : '';
+const pkgText = j => (j.package||'').replace(/·\s*⚠[^·]*$/,'').trim();
+const pkgName = j => pkgText(j).split('·')[0].trim();
+const pkgSize = j => pkgText(j).split('·').slice(1).join('·').trim();
+
+function actionsHtml(j){
+  if(j.status==='pending')
+    return `<button class="act act-pri" onclick="setStatus('${j.id}','confirmed')">Confirm</button>`+
+           `<button class="act act-ghost" onclick="setStatus('${j.id}','cancelled')">Cancel</button>`;
+  if(j.status==='confirmed')
+    return `<button class="act act-pri" onclick="setStatus('${j.id}','completed')">Mark done</button>`+
+           `<button class="act act-ghost" onclick="setStatus('${j.id}','cancelled')">Cancel</button>`;
+  if(j.status==='completed')
+    return `<button class="act act-ghost" onclick="setStatus('${j.id}','confirmed')">Reopen</button>`;
+  if(j.status==='cancelled')
+    return `<button class="act act-blue" onclick="setStatus('${j.id}','pending')">Restore</button>`;
+  return '';
+}
+
 function jobCard(j){
   const addons = (j.addons && j.addons.length) ? `<p class="meta addons">+ ${esc(j.addons.join(', '))}</p>` : '';
-  const mapQ = encodeURIComponent(`${j.address}, ${j.town}, Idaho`);
-  const phoneDigits = (j.customer_phone||'').replace(/[^\d+]/g,'');
-  // "?&body=" is deliberate — iOS Messages wants "&body=", Android wants
-  // "?body="; the combined form opens with the draft filled in on both.
-  const smsHref = `sms:${phoneDigits}?&body=${encodeURIComponent(confirmText(j))}`;
-  // The booking form folds a water/power warning into the package text.
-  const warn = /Water\/power/i.test(j.package)
-    ? `<div class="warn">${esc(j.package.split('·').pop().trim())}</div>` : '';
-  const pkg = esc(j.package.replace(/·\s*⚠[^·]*$/,'').trim());
+  const warn = warnText(j) ? `<div class="warn">${esc(warnText(j))}</div>` : '';
+  const pkg = esc(pkgText(j));
   const booked = shortDate.format(new Date(j.created_at));
-
-  let actions = '';
-  if(j.status==='pending')
-    actions = `<button class="act act-pri" onclick="setStatus('${j.id}','confirmed')">Confirm</button>`+
-              `<button class="act act-ghost" onclick="setStatus('${j.id}','cancelled')">Cancel</button>`;
-  else if(j.status==='confirmed')
-    actions = `<button class="act act-pri" onclick="setStatus('${j.id}','completed')">Mark done</button>`+
-              `<button class="act act-ghost" onclick="setStatus('${j.id}','cancelled')">Cancel</button>`;
-  else if(j.status==='completed')
-    actions = `<button class="act act-ghost" onclick="setStatus('${j.id}','confirmed')">Reopen</button>`;
-  else if(j.status==='cancelled')
-    actions = `<button class="act act-blue" onclick="setStatus('${j.id}','pending')">Restore</button>`;
+  const actions = actionsHtml(j);
 
   return `<div class="job" id="job-${j.id}">
     <div class="job-top">
       <div class="time">${timeFmt.format(new Date(j.slot_start))}</div>
       <div class="who">
         <b>${esc(j.customer_name)}</b>
-        <a class="tel" href="${esc(smsHref)}">${esc(j.customer_phone)}</a>
+        <a class="tel" href="${esc(smsHref(j))}">${esc(j.customer_phone)}</a>
       </div>
-      <span class="badge b-${j.status}">${j.status}</span>
+      <span class="badge b-${j.status}">${STATUS[j.status]||esc(j.status)}</span>
     </div>
     <p class="meta">${pkg}</p>
     ${addons}
-    <p class="total">$${j.total_usd}</p>
-    <a class="addr" href="https://maps.google.com/?q=${mapQ}" target="_blank" rel="noopener"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"/><circle cx="12" cy="10" r="3"/></svg>${esc(j.address)}, ${esc(j.town)}</a>
+    <p class="total">${money(j.total_usd)}</p>
+    <a class="addr" href="${mapHref(j)}" target="_blank" rel="noopener"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"/><circle cx="12" cy="10" r="3"/></svg>${esc(j.address)}, ${esc(j.town)}</a>
     ${warn}
     <textarea class="notes" placeholder="Notes (gate code, dog, reminders)"
       data-id="${j.id}" onblur="saveNotes(this)">${esc(j.notes)}</textarea>
@@ -572,15 +795,15 @@ function calShift(n){
   let m = CAL_REF.m + n, y = CAL_REF.y;
   if(m < 0){ m = 11; y--; } if(m > 11){ m = 0; y++; }
   CAL_REF = { y, m };
-  drawCalendar();
+  redraw();
 }
 function calToday(){
   const [y,m] = todayKey().split('-').map(Number);
   CAL_REF = { y, m: m-1 };
   CAL_SEL = todayKey();
-  drawCalendar();
+  redraw();
 }
-function calSelect(k){ CAL_SEL = k; drawCalendar(); }
+function calSelect(k){ CAL_SEL = k; redraw(); }
 
 function drawCalendar(){
   calInit();
@@ -595,7 +818,7 @@ function drawCalendar(){
   const mJobs = JOBS.filter(j => dayKey(j.slot_start).startsWith(mPrefix) && j.status!=='cancelled');
   const mRev = mJobs.reduce((s,j)=>s+(j.total_usd||0),0);
   $('calTitle').textContent = `${MONTHS[m]} ${y}`;
-  $('calSub').textContent = mJobs.length ? `${mJobs.length} job${mJobs.length===1?'':'s'} · $${mRev}` : 'No jobs this month';
+  $('calSub').textContent = mJobs.length ? `${mJobs.length} job${mJobs.length===1?'':'s'} · ${money(mRev)}` : 'No jobs this month';
 
   const startDow = new Date(y, m, 1).getDay();
   const daysIn = new Date(y, m+1, 0).getDate();
@@ -638,7 +861,7 @@ function drawCalDay(byDay){
     return;
   }
   const rev = js.filter(j=>j.status!=='cancelled').reduce((s,j)=>s+(j.total_usd||0),0);
-  el.innerHTML = `<div class="day-h">${label} ${tag}<em style="margin-left:auto">$${rev}</em></div>` + js.map(jobCard).join('');
+  el.innerHTML = `<div class="day-h">${label} ${tag}<em style="margin-left:auto">${money(rev)}</em></div>` + js.map(jobCard).join('');
 }
 
 async function setStatus(id, status){
@@ -659,6 +882,300 @@ async function saveNotes(el){
   const { error } = await sb.from('bookings').update({ notes: val }).eq('id', id);
   if(error){ toast('Couldn’t save note'); return; }
   j.notes = val; toast('Note saved');
+}
+
+/* ---------- Desktop shell (1280px and up) ----------
+   Rail (what needs a reply, the month at a glance, the totals), the calendar in
+   one of three views, and a panel for the selected job. Phones and tablets keep
+   the job board above; only one of the two is ever drawn, so element ids stay unique. */
+const DESK = window.matchMedia('(min-width:1280px)');
+const deskOn = () => DESK.matches;
+let DVIEW = 'days';      // 'days' | 'month' | 'agenda'. Work days is the default.
+let DSEL = null;         // id of the job open in the right-hand panel
+let WD_SHIFT = 0;        // Work days: pages forward (+) or back (-) from the current window
+// Weekdays that always get a column in Work days (0=Sun … 6=Sat). Keep this in
+// step with HOURS in index.html. Any other day that has a booking gets one too.
+const WORK_DOW = [6];
+const WD_WEEKS = 5;      // weeks covered by one Work days window
+const WD_ROW = 52;       // px per hour
+
+/* Day maths on 'YYYY-MM-DD' keys, done at UTC noon so DST can never shift a date. */
+const keyDate = k => new Date(k + 'T12:00:00Z');
+const addDays = (k, n) => new Date(keyDate(k).getTime() + n*86400000).toISOString().slice(0,10);
+const keyDow = k => keyDate(k).getUTCDay();
+const keyFmt = (k, opts) => new Intl.DateTimeFormat('en-US', Object.assign({timeZone:'UTC'}, opts)).format(keyDate(k));
+const hmFmt = new Intl.DateTimeFormat('en-US',{hour:'2-digit',minute:'2-digit',hourCycle:'h23',timeZone:TZ});
+/* Hour of the day in Mountain Time, as a decimal: 9:30 AM -> 9.5 */
+function hourOf(d){ const p = {}; for(const x of hmFmt.formatToParts(d)) p[x.type] = x.value; return (+p.hour) + (+p.minute)/60; }
+const jobMins = j => j.duration_min || 180;
+const jobEnd = j => new Date(new Date(j.slot_start).getTime() + jobMins(j)*60000);
+const hourLabel = h => `${((h + 11) % 12) + 1} ${h % 24 >= 12 ? 'PM' : 'AM'}`;
+const plural = (n, word) => `${n} ${word}${n===1?'':'s'}`;
+const longDay = new Intl.DateTimeFormat('en-US',{weekday:'long',month:'long',day:'numeric',timeZone:TZ});
+const CHEV_L = '<svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg>';
+const CHEV_R = '<svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>';
+const LEGEND = '<div class="d-legend"><span><i class="dot s-pending"></i>New</span><span><i class="dot s-confirmed"></i>Confirmed</span>'+
+  '<span><i class="dot s-completed"></i>Done</span><span><i class="dot s-cancelled"></i>Cancelled</span></div>';
+
+/* Put the shared Account panel in whichever layout is on, and empty the other
+   layout so the same job never exists twice in the page. */
+function layout(){
+  const acct = $('acct');
+  if(deskOn()){
+    if(acct.parentNode !== $('dRail')) $('dRail').appendChild(acct);
+    $('jobs').innerHTML = ''; $('calDay').innerHTML = '';
+  } else {
+    if(acct.parentNode !== $('board')) $('board').appendChild(acct);
+    $('dBody').innerHTML = ''; $('dPanel').innerHTML = '';
+  }
+}
+DESK.addEventListener('change', ()=>{ layout(); if(document.body.classList.contains('in')) redraw(); });
+
+function setDView(v){ DVIEW = v; redraw(); }
+function dShift(n){ if(DVIEW==='days'){ WD_SHIFT += n; redraw(); } else calShift(n); }
+function dToday(){ WD_SHIFT = 0; calToday(); }
+
+/* Work days window: five weeks, starting the Sunday before last, so the most
+   recent working day stays in view beside the ones coming up. */
+const wdBase = () => { const tk = todayKey(); return addDays(tk, -keyDow(tk) - 7); };
+const WD_PAGE = 7 * (WD_WEEKS - 1);   // one page forward keeps a week of overlap
+
+/* Bring a day into view in every calendar view. */
+function dReveal(k){
+  WD_SHIFT = Math.floor(Math.round((keyDate(k) - keyDate(wdBase())) / 86400000) / WD_PAGE);
+  const [y,m] = k.split('-').map(Number);
+  CAL_REF = { y, m: m-1 }; CAL_SEL = k;
+}
+function dSelect(id, reveal){
+  const j = JOBS.find(x=>x.id===id); if(!j) return;
+  const from = document.activeElement && document.activeElement.closest('#dQueue,#dBody');
+  DSEL = id;
+  if(reveal) dReveal(dayKey(j.slot_start));
+  if(DVIEW==='agenda' && !FILTERS.find(f=>f.id===FILTER).match(j)) FILTER = 'all';
+  redraw();
+  // The views are rebuilt on every change; hand keyboard focus back to the same job.
+  const again = from && $(from.id).querySelector(`[data-j="${id}"]`);
+  if(again) again.focus({preventScroll:true});
+}
+function dDay(k){
+  dReveal(k);
+  const js = JOBS.filter(j=>dayKey(j.slot_start)===k);
+  const j = js.find(x=>x.status!=='cancelled') || js[0];
+  if(j){ DSEL = j.id; if(DVIEW==='agenda' && !FILTERS.find(f=>f.id===FILTER).match(j)) FILTER = 'all'; }
+  redraw();
+}
+/* With nothing picked, open the next job that still needs doing. */
+function dPickDefault(){
+  if(JOBS.some(j=>j.id===DSEL)) return;
+  const tk = todayKey();
+  const next = JOBS.find(j=>(j.status==='pending'||j.status==='confirmed') && dayKey(j.slot_start)>=tk);
+  const j = next || JOBS[JOBS.length-1];
+  DSEL = j ? j.id : null;
+}
+
+function drawDesk(){
+  calInit();
+  dPickDefault();
+  for(const v of ['days','month','agenda']){
+    $('dv-'+v).classList.toggle('on', v===DVIEW);
+    $('dv-'+v).setAttribute('aria-pressed', v===DVIEW);
+  }
+  $('dNav').hidden = DVIEW==='agenda';
+  $('dFilters').hidden = DVIEW!=='agenda';
+  $('dMini').hidden = DVIEW==='month';
+  drawRail();
+  if(DVIEW==='days') drawDays(); else if(DVIEW==='month') drawMonth(); else drawAgenda();
+  drawPanel();
+}
+
+function drawRail(){
+  const tk = todayKey();
+  const pend = JOBS.filter(j=>j.status==='pending');
+  $('dQueueN').textContent = pend.length || '';
+  $('dQueue').innerHTML = pend.length ? pend.map(j=>
+    `<button class="d-q${j.id===DSEL?' sel':''}" data-j="${j.id}" onclick="dSelect('${j.id}',true)">`+
+    `<span>${dayFmt.format(new Date(j.slot_start))} · ${timeFmt.format(new Date(j.slot_start))}</span>`+
+    `<b>${esc(j.customer_name)}</b><span>${esc(pkgName(j))} · ${money(j.total_usd)}</span></button>`).join('')
+    : '<p class="d-none">Nothing waiting on you</p>';
+
+  const upcoming = JOBS.filter(j=>j.status==='confirmed' && dayKey(j.slot_start)>=tk);
+  $('dStats').innerHTML =
+    `<div><dt>New</dt><dd>${pend.length}</dd></div>`+
+    `<div><dt>Upcoming</dt><dd>${upcoming.length}</dd></div>`+
+    `<div><dt>Booked</dt><dd>${money(upcoming.reduce((s,j)=>s+(j.total_usd||0),0))}</dd></div>`;
+
+  // Month at a glance: a dot under any day with a live job, coloured by its status.
+  const { y, m } = CAL_REF;
+  const live = {};
+  for(const j of JOBS){ if(j.status==='cancelled') continue; const k = dayKey(j.slot_start); (live[k] = live[k] || []).push(j); }
+  const startDow = new Date(y, m, 1).getDay(), daysIn = new Date(y, m+1, 0).getDate();
+  let cells = '<span>S</span><span>M</span><span>T</span><span>W</span><span>T</span><span>F</span><span>S</span>' + '<span></span>'.repeat(startDow);
+  for(let d=1; d<=daysIn; d++){
+    const k = `${y}-${pad2(m+1)}-${pad2(d)}`, js = live[k] || [];
+    cells += `<button class="d-mday${k===tk?' today':''}${js.length?' m-'+js[0].status:''}" onclick="dDay('${k}')" `+
+             `aria-label="${MONTHS[m]} ${d}${js.length?', '+plural(js.length,'job'):''}"><i>${d}</i></button>`;
+  }
+  $('dMini').innerHTML =
+    `<div class="d-mini-head"><h2 class="d-label">${MONTHS[m]} ${y}</h2>`+
+    `<button class="cal-nav" onclick="calShift(-1)" aria-label="Previous month">${CHEV_L}</button>`+
+    `<button class="cal-nav" onclick="calShift(1)" aria-label="Next month">${CHEV_R}</button></div>`+
+    `<div class="d-mini-grid">${cells}</div>`;
+}
+
+/* Work days: one column per working day in the window (plus any other day that
+   has a booking), hours down the side, each live job as tall as it takes. */
+function drawDays(){
+  const tk = todayKey();
+  const start = addDays(wdBase(), WD_SHIFT * WD_PAGE), end = addDays(start, WD_WEEKS*7 - 1);
+  const byDay = {};
+  for(const j of JOBS){ const k = dayKey(j.slot_start); if(k>=start && k<=end) (byDay[k] = byDay[k] || []).push(j); }
+  const keys = new Set(Object.keys(byDay));
+  for(let i=0; i<WD_WEEKS*7; i++){ const k = addDays(start, i); if(WORK_DOW.includes(keyDow(k))) keys.add(k); }
+  const days = [...keys].sort();
+  const liveAll = Object.values(byDay).flat().filter(j=>j.status!=='cancelled');
+
+  // Show 7 AM to 6 PM, stretched to fit any job that starts earlier or runs later.
+  let h0 = 7, h1 = 18;
+  for(const j of liveAll){
+    const s = hourOf(new Date(j.slot_start));
+    h0 = Math.min(h0, Math.floor(s)); h1 = Math.max(h1, Math.ceil(s + jobMins(j)/60));
+  }
+  h1 = Math.min(h1, 24);
+
+  const md = { month:'short', day:'numeric' };
+  $('dTitle').textContent = days.length ? `${keyFmt(days[0], md)} to ${keyFmt(days[days.length-1], md)}` : 'No work days';
+  $('dSub').textContent = `${plural(days.length,'work day')} · ${plural(liveAll.length,'job')} · ${money(liveAll.reduce((s,j)=>s+(j.total_usd||0),0))}`;
+
+  let hours = '';
+  for(let h=h0; h<h1; h++) hours += `<div>${hourLabel(h)}</div>`;
+  const lines = '<div class="wd-ln"></div>'.repeat(h1 - h0);
+
+  const cols = days.map(k=>{
+    const js = byDay[k] || [];
+    const on = js.filter(j=>j.status!=='cancelled'), off = js.filter(j=>j.status==='cancelled');
+    // Jobs that overlap share the column side by side.
+    const lanes = [];
+    const placed = on.map(j=>{
+      const s = hourOf(new Date(j.slot_start)), e = s + jobMins(j)/60;
+      let lane = lanes.findIndex(until => until <= s);
+      if(lane < 0){ lane = lanes.length; lanes.push(e); } else lanes[lane] = e;
+      return { j, s, e, lane };
+    });
+    const w = 100 / Math.max(1, lanes.length);
+    const blocks = placed.map(({j, s, e, lane})=>{
+      const top = (s - h0) * WD_ROW + 2, h = Math.max((Math.min(e, h1) - s) * WD_ROW - 4, 44);
+      return `<button class="wd-job${h<148?' sm':''}${h<100?' xs':''}${j.id===DSEL?' sel':''}" data-j="${j.id}" onclick="dSelect('${j.id}')" `+
+        `style="top:${top}px;height:${h}px;left:calc(${lane*w}% + 8px);width:calc(${w}% - 16px)" `+
+        `aria-label="${esc(j.customer_name)}, ${timeFmt.format(new Date(j.slot_start))}, ${STATUS[j.status]}">`+
+        `<span class="wd-t"><span><i class="dot s-${j.status}"></i>${timeFmt.format(new Date(j.slot_start))}</span> <span>to ${timeFmt.format(jobEnd(j))}</span></span>`+
+        `<span class="wd-n">${esc(j.customer_name)}</span>`+
+        `<span class="wd-m">${esc(pkgName(j))}</span><span class="wd-m">${esc(j.town)}</span>`+
+        `<span class="wd-total">${money(j.total_usd)}</span></button>`;
+    }).join('');
+    const tag = k < tk ? 'Past' : k === tk ? 'Today' : k === addDays(tk, 1) ? 'Tomorrow' : on.length ? plural(on.length,'job') : 'Nothing booked';
+    const cancelled = off.map(j=>
+      `<button class="wd-x${j.id===DSEL?' sel':''}" data-j="${j.id}" onclick="dSelect('${j.id}')" `+
+      `aria-label="${esc(j.customer_name)}, cancelled">${timeFmt.format(new Date(j.slot_start))} ${esc(j.customer_name)}</button>`).join('');
+    return `<section class="wd-col${k===tk?' today':''}" aria-label="${keyFmt(k,{weekday:'long',month:'long',day:'numeric'})}">`+
+      `<div class="wd-head"><b>${keyFmt(k,{weekday:'short',month:'short',day:'numeric'})}</b><span>${tag}</span></div>`+
+      `<div class="wd-body">${lines}${blocks}</div>`+
+      `<div class="wd-foot">${cancelled}</div></section>`;
+  }).join('');
+
+  $('dBody').innerHTML = `<div class="wd"><div class="wd-in"><div class="wd-hours" aria-hidden="true">${hours}</div>${cols}</div></div>`+
+    LEGEND.replace('</div>', '<span>A block is as tall as the job is long, cancelled jobs sit under the day</span></div>');
+}
+
+/* Month: the full grid, every job a block you can open. */
+function drawMonth(){
+  const { y, m } = CAL_REF, tk = todayKey();
+  const byDay = {};
+  for(const j of JOBS){ const k = dayKey(j.slot_start); (byDay[k] = byDay[k] || []).push(j); }
+  const mPrefix = `${y}-${pad2(m+1)}-`;
+  const mJobs = JOBS.filter(j => dayKey(j.slot_start).startsWith(mPrefix) && j.status!=='cancelled');
+  $('dTitle').textContent = `${MONTHS[m]} ${y}`;
+  $('dSub').textContent = mJobs.length ? `${plural(mJobs.length,'job')} · ${money(mJobs.reduce((s,j)=>s+(j.total_usd||0),0))}` : 'No jobs this month';
+
+  const startDow = new Date(y, m, 1).getDay(), daysIn = new Date(y, m+1, 0).getDate(), daysInPrev = new Date(y, m, 0).getDate();
+  const total = Math.ceil((startDow + daysIn) / 7) * 7, MAXCHIP = 3;
+  let cells = '';
+  for(let i=0; i<total; i++){
+    const d = i - startDow + 1;
+    if(d < 1 || d > daysIn){
+      cells += `<div class="mo-cell out"><span class="mo-num">${d < 1 ? daysInPrev + d : d - daysIn}</span></div>`;
+      continue;
+    }
+    const k = `${y}-${pad2(m+1)}-${pad2(d)}`, js = byDay[k] || [];
+    const chips = js.slice(0, MAXCHIP).map(j=>
+      `<button class="mo-chip${j.status==='cancelled'?' is-cancelled':''}${j.id===DSEL?' sel':''}" data-j="${j.id}" onclick="dSelect('${j.id}')" `+
+      `aria-label="${esc(j.customer_name)}, ${timeFmt.format(new Date(j.slot_start))}, ${STATUS[j.status]}">`+
+      `<span><span><i class="dot s-${j.status}"></i>${timeFmt.format(new Date(j.slot_start))}</span><em>${money(j.total_usd)}</em></span>`+
+      `<b>${esc(j.customer_name)}</b><span>${esc(pkgName(j))}</span></button>`).join('')
+      + (js.length > MAXCHIP ? `<span class="mo-more">+${js.length - MAXCHIP} more</span>` : '');
+    cells += `<div class="mo-cell${k===tk?' today':''}"><span class="mo-num">${d}</span>${chips}</div>`;
+  }
+  $('dBody').innerHTML = `<div class="mo"><div class="mo-dow"><span>Sun</span><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span></div>`+
+    `<div class="mo-grid">${cells}</div></div>` + LEGEND;
+}
+
+/* Agenda: the filtered list as a table, grouped by day. */
+function drawAgenda(){
+  const f = FILTERS.find(x=>x.id===FILTER), tk = todayKey();
+  let list = JOBS.filter(f.match);
+  if(FILTER==='completed' || FILTER==='cancelled') list = list.slice().reverse();
+  $('dFilters').innerHTML = filtersHtml();
+  $('dTitle').textContent = f.label;
+  $('dSub').textContent = `${plural(list.length,'job')} · ${money(list.reduce((s,j)=>s+(j.total_usd||0),0))}`;
+
+  let rows = '', lastDay = '';
+  for(const j of list){
+    const dk = dayKey(j.slot_start);
+    if(dk !== lastDay){
+      lastDay = dk;
+      const tag = dk === tk ? 'Today' : dk < tk ? 'Past' : dk === addDays(tk, 1) ? 'Tomorrow' : '';
+      rows += `<div class="ag-day">${longDay.format(new Date(j.slot_start))}<em>${tag}</em></div>`;
+    }
+    rows += `<button class="ag-row${j.status==='cancelled'?' is-cancelled':''}${j.id===DSEL?' sel':''}" data-j="${j.id}" onclick="dSelect('${j.id}')" `+
+      `aria-label="${esc(j.customer_name)}, ${timeFmt.format(new Date(j.slot_start))}, ${STATUS[j.status]}">`+
+      `<span class="ag-time">${timeFmt.format(new Date(j.slot_start))}</span>`+
+      `<span><b>${esc(j.customer_name)}</b><small>${esc(j.customer_phone)}</small></span>`+
+      `<span><span class="ag-pk">${esc(pkgName(j))}</span><small>${esc(pkgSize(j))}</small></span>`+
+      `<span class="ag-town">${esc(j.town)}</span>`+
+      `<span class="ag-total">${money(j.total_usd)}</span>`+
+      `<span class="ag-status"><i class="dot s-${j.status}"></i>${STATUS[j.status]||esc(j.status)}</span></button>`;
+  }
+  $('dBody').innerHTML = `<div class="ag"><div class="ag-in">`+
+    `<div class="ag-head" aria-hidden="true"><span>Time</span><span>Customer</span><span>Job</span><span>Town</span><span>Total</span><span>Status</span></div>`+
+    (rows || '<p class="empty">Nothing here right now</p>') + `</div></div>`;
+}
+
+/* The selected job: everything the phone's job card shows, with the same actions. */
+function drawPanel(){
+  const el = $('dPanel'), j = JOBS.find(x=>x.id===DSEL);
+  if(!j){ el.innerHTML = '<p class="empty">Pick a job to see its details</p>'; return; }
+  const start = new Date(j.slot_start), hrs = Math.round(jobMins(j) / 6) / 10;
+  const warn = warnText(j)
+    ? `<div class="warn"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><path d="M12 9v4M12 17h.01"/></svg><span>${esc(warnText(j))}</span></div>` : '';
+  el.innerHTML = `<div class="d-job" id="job-${j.id}">
+    <div class="in-top">
+      <span class="badge b-${j.status}">${STATUS[j.status]||esc(j.status)}</span>
+      <h2 class="in-name">${esc(j.customer_name)}</h2>
+      <a href="${esc(smsHref(j))}">${esc(j.customer_phone)} · Text to confirm</a>
+    </div>
+    <div class="in-when"><b>${longDay.format(start)}</b><span>${timeFmt.format(start)} to about ${timeFmt.format(jobEnd(j))} · ${hrs} hr${hrs===1?'':'s'}</span></div>
+    <dl class="in-dl">
+      <dt>Package</dt><dd>${esc(pkgName(j))}</dd>
+      ${pkgSize(j) ? `<dt>Vehicle</dt><dd>${esc(pkgSize(j))}</dd>` : ''}
+      <dt>Add-ons</dt><dd>${(j.addons && j.addons.length) ? esc(j.addons.join(', ')) : 'None'}</dd>
+      <dt>Where</dt><dd><a href="${mapHref(j)}" target="_blank" rel="noopener">${esc(j.address)}, ${esc(j.town)}</a></dd>
+      <dt>Booked</dt><dd>${shortDate.format(new Date(j.created_at))}</dd>
+      <dt class="tot">Total</dt><dd class="in-total">${money(j.total_usd)}</dd>
+    </dl>
+    ${warn}
+    <div><label for="dNotes">Notes</label>
+      <textarea class="notes" id="dNotes" placeholder="Gate code, dog, reminders" data-id="${j.id}" onblur="saveNotes(this)">${esc(j.notes)}</textarea></div>
+    <div class="actions">${actionsHtml(j)}</div>
+  </div>`;
 }
 
 boot();

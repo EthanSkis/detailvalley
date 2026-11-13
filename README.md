@@ -183,6 +183,22 @@ Supabase table. It's deployed alongside the site (e.g. `detailvalley.com/admin.h
 - Filter chips (To do · New · Confirmed · Done · Cancelled · All) and a summary
   strip (new count · upcoming count · dollars booked).
 
+**On a computer (1280px and wider)** the same page opens as a three-pane
+calendar instead: a rail on the left (jobs that need a reply, the month at a
+glance, the totals), the calendar in the middle, and the selected job on the
+right with its notes and the same Confirm / Mark done / Cancel buttons. The
+switch in the header picks the calendar view:
+- **Work days** (the default) — one column per working day with the hours down
+  the side; each job is drawn as tall as it takes, so a Showroom that eats the
+  whole day looks like it. Cancelled jobs sit under their day.
+- **Month** — the full month grid, every job a block you can open.
+- **Agenda** — the filtered list as a table, grouped by day.
+
+Work days gives a column to every Saturday, plus any other day that has a
+booking. Which weekdays always get a column is `WORK_DOW` near the bottom of
+`admin.html`; if you reopen weekdays in `HOURS` in `index.html`, add them there
+too. Phones and tablets keep the job board described above.
+
 **Signing in.** The dashboard uses Supabase Auth, so only you can read customer
 details — the page itself is harmless to host publicly. Sign in with your owner
 email (`ethangardner298@gmail.com`) and password.

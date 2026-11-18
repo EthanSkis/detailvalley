@@ -112,6 +112,36 @@ A few things in `index.html` are still placeholders:
   Nothing more required, though you may want to add email/SMS alerts on new bookings.
 - **Prices & package details** — confirm against your real time-per-car before launch.
 
+## Spring lock-in (winter pre-booking)
+
+The business is closed for winter and reopens **April 1, 2027**. Until then the
+site runs a "lock in this year's price" offer:
+
+- **Prices go up April 1.** The new package prices live in `dv-pricing.js`
+  (`increase`). Before that date the site charges the current prices; from
+  midnight April 1 (Mountain Time) the new prices switch on by themselves in the
+  booking flow, the quoting tool and the homepage package cards. Nothing to edit.
+- **Deposit.** Bookings made before April 1 hold the date with a deposit: $50,
+  or $25 for a Maintenance Wash. There's no online payment, so it's collected by
+  text after booking. Those bookings show up on the job board with
+  `🔒 Lock-in: $X deposit due` in the package line; note "deposit paid" on the
+  booking once it's in. Rules (also in `terms.html` §3): comes off the total,
+  moves free with 48 hours' notice or for weather, kept for a no-show or a cancel
+  under 48 hours, refunded if we cancel. From April 1 there's no deposit.
+- **Early bird.** Bookings made before Dec 25 get a free engine bay wipe-down
+  (`EARLY_BIRD_ENDS` / `FREE_ADDON` in `index.html`).
+- **Calendar.** `OPEN_FROM = '2027-04-01'`, and while the lock-in is on the
+  calendar shows 60 days (April and May) instead of 21.
+- **Banner.** A navy banner under the nav pitches the offer and shows
+  "X of 20 spring spots booked" (`LOCKIN_GOAL`), counted from the calendar's
+  booked slots. The bar stays hidden until 3 are booked (`LOCKIN_SHOW_FROM`).
+  The banner disappears on April 1.
+
+**After April 1:** everything above switches off by itself. When convenient,
+tidy up: set the `increase` prices as the main prices in `dv-pricing.js` (and
+delete `increase`), and update the static `$85`/`$295`/… fallback text in the
+homepage package cards.
+
 ## Bookings (Supabase)
 
 The booking flow is backed by a Supabase project (**valleydetail1**). Confirmed

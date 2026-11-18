@@ -29,5 +29,19 @@ window.DV_PRICING = {
     {id:'engine',   name:'Engine bay wipe-down',               price:25, min:20},
     {id:'intglass', name:'Interior glass refresh',             price:15, min:10},
     {id:'wax',      name:'Extra wax coat — longer protection', price:30, min:20}
-  ]
+  ],
+  // Spring price increase. Until `on` (Mountain Time), the package prices above
+  // are the "lock-in" prices: the booking flow asks for a deposit to hold a date
+  // at them. From `on`, these new package prices replace them everywhere that
+  // reads this file (booking flow, quoting tool) and the deposit goes away.
+  // Sizes and add-ons don't change.
+  increase: {on:'2027-04-01', packages:{maintenance:95, interior:205, full:325, showroom:395}}
 };
+(function(P){
+  // Midnight April 1 in Mountain Time (MDT, UTC-6).
+  P.lockIn = Date.now() < new Date(P.increase.on + 'T00:00:00-06:00').getTime();
+  P.packages.forEach(function(p){
+    p.later = P.increase.packages[p.id];          // the price from `on`
+    if(!P.lockIn && p.later) p.price = p.later;   // increase is live
+  });
+})(window.DV_PRICING);

@@ -675,6 +675,15 @@
   .pay-fine{margin:4px 0 0;font-size:.82rem;line-height:1.45;color:var(--mute)}
   .pay-mount.loading{display:flex;align-items:center;justify-content:center;border:1px dashed var(--rule-2);border-radius:12px;color:var(--mute);font-size:.92rem}
   .pay-mount a{color:inherit}
+  .addr-field{position:relative;z-index:20}
+  .addr-list{position:absolute;left:0;right:0;top:100%;z-index:5;margin:4px 0 0;padding:4px;list-style:none;background:var(--surface);border:1px solid var(--rule-2);border-radius:12px;box-shadow:0 12px 28px rgba(11,42,69,.16);max-height:240px;overflow-y:auto}
+  .addr-list[hidden]{display:none}
+  .addr-list li{display:flex;flex-direction:column;gap:2px;padding:10px 12px;border-radius:8px;cursor:pointer;min-height:44px;justify-content:center}
+  .addr-list li:hover,.addr-list li[aria-selected="true"]{background:var(--raised)}
+  .addr-list .a-st{font-weight:500;color:var(--text)}
+  .addr-list .a-tw{font-size:.84rem;color:var(--mute)}
+  .pkg-winter{display:inline-block;margin-left:6px;padding:2px 10px;border-radius:999px;background:#e8eef4;color:var(--text);font-family:var(--f-body);font-size:.78rem;font-weight:600;letter-spacing:0;vertical-align:middle}
+  .pkg-winter[hidden]{display:none}
   .pay-err{margin:0 0 12px;color:#b3261e;font-weight:500;font-size:.95rem;line-height:1.4}
   .pay-err[hidden],.bk-intro[hidden]{display:none}
   .bk-skip{display:block;margin:4px auto 0;background:none;border:none;color:var(--mute);font:inherit;font-size:.9rem;text-decoration:underline;cursor:pointer;min-height:44px;padding:0 12px}
@@ -708,7 +717,7 @@
 <!-- Spring lock-in banner. Hidden automatically once prices go up (dv-pricing.js). -->
 <aside class="lockin" id="lockin" aria-label="Spring booking">
   <div class="lockin-inner">
-    <p class="lockin-copy"><b>Off for winter, back in April.</b> Book a spring date now at this year's price<span class="lockin-long"> (it goes up April 1); $50 holds your date and comes off your total</span>. <span class="eb" id="lockinEb">Book by Dec 24 for a free engine bay wipe-down.</span></p>
+    <p class="lockin-copy"><b>Interiors all winter in your garage.</b> Full details are back in April: book now at this year's price<span class="lockin-long"> (it goes up April 1); $50 holds a spring date</span>. <span class="eb" id="lockinEb">Book by Dec 24 for a free engine bay wipe-down.</span></p>
     <div class="lockin-prog" id="lockinProg" hidden>
       <span><b id="lockinCount">0</b> of <span id="lockinGoal">20</span> spring spots booked</span>
       <div class="lockin-bar" aria-hidden="true"><span id="lockinBar"></span></div>
@@ -748,7 +757,7 @@
 <div class="facts">
   <div class="facts-inner">
     <div class="fact"><div class="k">We come to you</div><div class="v">Home or workplace, our own gear</div></div>
-    <div class="fact"><div class="k">Spring: Sundays · Summer: every day</div><div class="v">One car a day, done properly</div></div>
+    <div class="fact"><div class="k">Winter: garage interiors · Summer: every day</div><div class="v">One car a day, done properly</div></div>
     <div class="fact"><div class="k">Flat pricing</div><div class="v"><span data-price="maintenance">$85</span> to <span data-price="showroom">$360</span>, no surprises on the day</div></div>
     <div class="fact"><div class="k">Pay your way</div><div class="v">Cash, check, card, Venmo, PayPal, Cash App</div></div>
   </div>
@@ -809,7 +818,7 @@
 
     <div class="pkg pkg-inside">
       <div>
-        <h3 class="pkg-name">Interior Detail <span>· inside only · 2 to 3 hours</span></h3>
+        <h3 class="pkg-name">Interior Detail <span>· inside only · 2 to 3 hours</span> <span class="pkg-winter" data-winter>Available all winter</span></h3>
         <p class="inside-sub">Full vacuum, carpet &amp; upholstery shampoo, surfaces, vents, interior glass and dressed trim. No exterior wash.</p>
       </div>
       <div class="pkg-price"><span data-price="interior">$185</span><span class="pkg-later" data-lockin>$205 from April 1</span></div>
@@ -943,7 +952,7 @@
       </details>
       <details>
         <summary>Do you detail in winter?</summary>
-        <p>No. We work outdoors, so we take the winter off and start back up in April. Until school's out on May 22 we work Sundays (some Saturdays open up once the track schedule is set), then every day through August 15. Spring and summer dates are open to book now.</p>
+        <p>Interiors, yes: we do Interior Details all winter on weekends, as long as the car is in a heated or attached garage (so the carpets dry). Washes and full details start back up in April. Until school's out on May 22 we work Sundays (some Saturdays open up once the track schedule is set), then every day through August 15. Spring and summer dates are open to book now.</p>
       </details>
       <details>
         <summary>Which areas do you cover?</summary>
@@ -1005,6 +1014,7 @@
     </div>
     <div>
       <p class="foot-h">Hours</p>
+      <div class="hours-row"><span class="day">Now to Mar: weekends, interiors in your garage</span><span class="time">8am to 6pm</span></div>
       <div class="hours-row"><span class="day">Apr to May 21: Sundays</span><span class="time">8am to 6pm</span></div>
       <div class="hours-row"><span class="day">May 22 to Aug 15: every day</span><span class="time">8am to 6pm</span></div>
     </div>
@@ -1127,8 +1137,20 @@ const LAST_DAY   = '2027-08-15';     // last working day before leaving for coll
 const OPEN_SATURDAYS = [
   // '2027-04-10',   // e.g. no meet that day
 ];
+// Winter interiors: until OPEN_FROM, only the Interior Detail is offered, in a
+// heated or attached garage, on weekends. Saturdays stop at WINTER_SAT_UNTIL
+// (track season). Pay when done, no deposit.
+const WINTER_PKG = 'interior';
+const WINTER_SAT_UNTIL = '2027-02-28';
+const winterOn = () => !!OPEN_FROM && Date.now() < mtToInstant(...OPEN_FROM.split('-').map(Number), 0, 0).getTime();
+const winterPkg = () => winterOn() && state.pkg === WINTER_PKG;
+const isWinterSlot = slot => !!(slot && OPEN_FROM && mtDayISO(mtDateParts(slot.instant)) < OPEN_FROM);
 function dayOpen(iso, dow){
   if(LAST_DAY && iso > LAST_DAY) return false;
+  if(OPEN_FROM && iso < OPEN_FROM){                 // winter: garage interiors only
+    if(!winterPkg()) return false;
+    return dow === 0 || (dow === 6 && iso <= WINTER_SAT_UNTIL);
+  }
   if(iso >= SCHOOL_OUT) return true;
   if(dow === 0) return true;                        // Sunday
   if(dow === 6) return OPEN_SATURDAYS.includes(iso);
@@ -1151,7 +1173,9 @@ const DOW = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
 // after booking (no card online). After the increase: no deposit, new prices.
 const LOCK_IN = !!DV_PRICING.lockIn;
 const LOCK_IN_DATE = 'April 1';
-function deposit(){ return LOCK_IN ? (state.pkg==='maintenance' ? 25 : 50) : 0; }
+// Winter interiors are pay-when-done; the deposit is only for spring dates.
+function needsDeposit(){ return LOCK_IN && !isWinterSlot(state.slot); }
+function deposit(){ return needsDeposit() ? (state.pkg==='maintenance' ? 25 : 50) : 0; }
 // Early bird: bookings made before this instant (MT) get FREE_ADDON at no charge.
 const EARLY_BIRD_ENDS = '2026-12-25';
 const EARLY_BIRD_LABEL = 'booked by Dec 24';
@@ -1187,10 +1211,10 @@ function fmtTime(i){ return i.toLocaleTimeString('en-US',{timeZone:SLOT_TZ,hour:
    days, not rolling 24h blocks — with MIN_LEAD_DAYS = 1, tomorrow morning stays
    bookable all day today. Never before OPEN_FROM (owner unavailable until then);
    once OPEN_FROM is in the past it stops mattering and only the lead applies. */
-function earliestBookable(now){
+function earliestBookable(now, ignoreOpen){
   const {y,m,d} = mtDateParts(now);
   let earliest = mtToInstant(y, m, d + MIN_LEAD_DAYS, 0, 0).getTime();
-  if(OPEN_FROM){
+  if(OPEN_FROM && !ignoreOpen){
     const [oy,om,od] = OPEN_FROM.split('-').map(Number);
     earliest = Math.max(earliest, mtToInstant(oy,om,od,0,0).getTime());
   }
@@ -1206,9 +1230,13 @@ function jobMinutes(){
    working hours, within the booking window, at/after the earliest bookable
    instant, skipping any day listed in BLOCKED_DAYS. */
 function candidateStarts(jobMin){
-  const out = [], now = new Date(), earliest = earliestBookable(now);
+  const out = [], now = new Date();
+  // Winter interiors start tomorrow; everything else waits for OPEN_FROM. Either
+  // way the window runs to the same end (OPEN_FROM + DAYS_AHEAD).
+  const earliest = earliestBookable(now, winterPkg());
   const startDay = Math.floor((earliest - now.getTime())/86400000);
-  for(let i=startDay;i<=startDay+DAYS_AHEAD;i++){
+  const endDay = Math.floor((earliestBookable(now) - now.getTime())/86400000) + DAYS_AHEAD;
+  for(let i=startDay;i<=endDay;i++){
     const {y,m,d,dow} = mtDateParts(new Date(now.getTime()+i*86400000));
     const hrs = HOURS[dow];
     if(!hrs) continue;
@@ -1285,14 +1313,117 @@ const SIZE_ICON = {
   oversize:'<svg viewBox="0 0 56 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9.500 18H5.500a2 2 0 0 1-2-2v-5.500a1 1 0 0 1 1-1H24V5.500a2 2 0 0 1 2-2h7.800a5 5 0 0 1 3.900 1.900L41 10l8.300 1.300a4 4 0 0 1 3.200 3.900V16a2 2 0 0 1-2 2h-4M18.500 18h19M24 9.500V14M28 10h12.500"/><circle cx="14" cy="18" r="4"/><circle cx="42" cy="18" r="4"/></svg>'
 };
 
-function freshState(){ return {step:1, pkg:null, size:null, addons:[], slot:null, calDate:null, name:'', phone:'', address:'', town:'', utilities:null, hp:false, bookingId:null, depositPaid:false}; }
+function freshState(){ return {step:1, pkg:null, size:null, addons:[], slot:null, calDate:null, name:'', phone:'', address:'', town:'', zip:'', addrPicked:false, utilities:null, garage:null, hp:false, bookingId:null, depositPaid:false}; }
 let state = freshState();
 let slotCache = null;
 let submitting = false;
 let scrollLockY = 0;
 const modal = document.getElementById('modal');
 const inner = document.getElementById('modalInner');
-const TOWNS = ['McCall','Cascade','Donnelly','Other'];
+/* ---------- Address: town comes from the address, not a separate question ---------- */
+const ZIP_TOWN = {'83638':'McCall','83611':'Cascade','83615':'Donnelly','83635':'Lake Fork','83654':'New Meadows','83677':'Yellow Pine'};
+const KNOWN_TOWNS = ['McCall','Cascade','Donnelly','Lake Fork','New Meadows','Yellow Pine','Warren','Smiths Ferry','Valley County'];
+// Split a typed address into street + town, e.g. "12 Lake St, McCall ID 83638".
+function splitAddress(text){
+  let street = String(text||'').trim(), town = '', zip = '';
+  const z = street.match(/\b(8\d{4})\s*$/); if(z){ zip = z[1]; street = street.slice(0, z.index).trim(); }
+  street = street.replace(/,?\s*(id|idaho)\.?\s*$/i, '').trim();
+  for(const t of KNOWN_TOWNS){
+    const re = new RegExp('[,\\s]+' + t.replace(' ', '\\s+') + '\\s*$', 'i');
+    if(re.test(street)){ town = t; street = street.replace(re, '').trim(); break; }
+  }
+  if(!town && zip) town = ZIP_TOWN[zip] || '';
+  return { street: street.replace(/,\s*$/, ''), town, zip };
+}
+// What we show: "123 Davis Ave, McCall"
+function addrLine(){ return [state.address, state.town].filter(Boolean).join(', '); }
+function garageNoteText(v){
+  if(v==='yes') return "Great. We just need an outlet in the garage, and we'll fill water jugs at a sink.";
+  if(v==='no') return `<b>Winter interiors need a heated or attached garage</b> so the carpets dry. Pick a date from April instead, or text us at ${BIZ_PHONE}.`;
+  return '';
+}
+function pickGarage(v){
+  state.garage = v;
+  document.querySelectorAll('#garGrp .util-opt').forEach(b=>{ b.classList.toggle('sel', b.dataset.v===v); b.setAttribute('aria-pressed', b.dataset.v===v); });
+  const n = document.getElementById('garNote');
+  if(n){ n.innerHTML = garageNoteText(v); n.classList.toggle('warn-note', v==='no'); n.hidden = !v; }
+}
+
+/* Address suggestions (free OpenStreetMap search via Photon, limited to the Valley
+   County area). Knows streets well but few house numbers, so we keep the number
+   the customer typed and fill in the street, town and ZIP. */
+const ADDR_API = 'https://photon.komoot.io/api/';
+const ADDR_BBOX = '-116.45,44.2,-114.9,45.35';
+let addrTimer = null, addrCtl = null, addrItems = [], addrIdx = -1;
+function onAddrInput(el){
+  state.addrPicked = false;
+  clearTimeout(addrTimer);
+  const raw = el.value.trim();
+  const m = raw.match(/^(\d+[A-Za-z]?)\s+(.+)$/);
+  const num = m ? m[1] : '', q = (m ? m[2] : raw).replace(/,.*$/, '').trim();
+  if(q.length < 3){ closeAddr(); return; }
+  addrTimer = setTimeout(async ()=>{
+    try{
+      if(addrCtl) addrCtl.abort();
+      addrCtl = new AbortController();
+      const url = `${ADDR_API}?q=${encodeURIComponent(q)}&limit=8&lang=en&bbox=${ADDR_BBOX}&lat=44.91&lon=-116.1`;
+      const d = await (await fetch(url, {signal: addrCtl.signal})).json();
+      const seen = new Set(); addrItems = [];
+      for(const f of (d.features||[])){
+        const pr = f.properties || {};
+        const street = pr.street || (pr.osm_key === 'highway' ? pr.name : '');
+        if(!street) continue;
+        const zip = pr.postcode || '';
+        const town = pr.city || pr.town || pr.village || ZIP_TOWN[zip] || '';
+        const key = (street + '|' + town).toLowerCase(); if(seen.has(key)) continue; seen.add(key);
+        addrItems.push({ street: [pr.housenumber || num, street].filter(Boolean).join(' '), town, zip });
+        if(addrItems.length >= 5) break;
+      }
+      drawAddr();
+    }catch(e){ /* offline or aborted: plain typing still works */ }
+  }, 250);
+}
+function drawAddr(){
+  const ul = document.getElementById('addrList'), inp = document.getElementById('f-address');
+  if(!ul || !inp) return;
+  addrIdx = -1;
+  if(!addrItems.length){ closeAddr(); return; }
+  ul.innerHTML = addrItems.map((a,i)=>`<li role="option" id="addr-${i}" aria-selected="false" onmousedown="event.preventDefault();pickAddr(${i})">
+    <span class="a-st">${esc(a.street)}</span><span class="a-tw">${esc([a.town, a.zip].filter(Boolean).join(' '))}</span></li>`).join('');
+  ul.hidden = false; inp.setAttribute('aria-expanded','true');
+}
+function closeAddr(){
+  const ul = document.getElementById('addrList'), inp = document.getElementById('f-address');
+  if(ul){ ul.hidden = true; ul.innerHTML = ''; }
+  if(inp){ inp.setAttribute('aria-expanded','false'); inp.removeAttribute('aria-activedescendant'); }
+  addrIdx = -1;
+}
+function pickAddr(i){
+  const a = addrItems[i], inp = document.getElementById('f-address'); if(!a || !inp) return;
+  state.address = a.street; state.town = a.town || 'Valley County'; state.zip = a.zip; state.addrPicked = true;
+  inp.value = addrLine();
+  closeAddr();
+  if(!/^\d/.test(a.street)){ inp.focus(); inp.setSelectionRange(0, 0); }   // still needs a house number
+}
+function onAddrKey(e){
+  const ul = document.getElementById('addrList'); if(!ul || ul.hidden) return;
+  if(e.key === 'ArrowDown' || e.key === 'ArrowUp'){
+    e.preventDefault();
+    addrIdx = (addrIdx + (e.key === 'ArrowDown' ? 1 : -1) + addrItems.length) % addrItems.length;
+    [...ul.children].forEach((li,k)=> li.setAttribute('aria-selected', k===addrIdx));
+    e.target.setAttribute('aria-activedescendant', 'addr-' + addrIdx);
+  } else if(e.key === 'Enter' && addrIdx >= 0){ e.preventDefault(); pickAddr(addrIdx); }
+  else if(e.key === 'Escape'){ closeAddr(); }
+}
+// Read the address field into state.address / state.town.
+function readAddress(){
+  const el = document.getElementById('f-address'); if(!el) return;
+  const typed = el.value.trim();
+  if(state.addrPicked && typed === addrLine()) return;   // picked from the list, untouched
+  const sp = splitAddress(typed);
+  state.address = sp.street; state.zip = sp.zip;
+  state.town = sp.town || 'Valley County';
+}
 
 function openBooking(pre){
   state = freshState();
@@ -1399,7 +1530,7 @@ function stashDetails(){
   const v = id => { const el = document.getElementById(id); return el ? el.value : null; };
   if(v('f-name')===null) return;
   state.name = v('f-name').trim(); state.phone = v('f-phone').trim();
-  state.address = v('f-address').trim(); state.town = v('f-town') || '';
+  readAddress();
 }
 function go(step){
   if(state.step===5) stashDetails();
@@ -1410,7 +1541,7 @@ function go(step){
 }
 function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
 const STEP_LABELS = {1:'Service', 2:'Vehicle', 3:'Extras', 4:'Day & time', 5:'Your details', 6:'Review', 7:'Deposit'};
-const STEP_COUNT = () => LOCK_IN ? 7 : 6;
+const STEP_COUNT = () => needsDeposit() ? 7 : 6;
 const IC_BACK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>';
 const IC_CLOSE = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>';
 function topBar(n, fwd){
@@ -1432,11 +1563,11 @@ function asideInner(){
   h += chosenAddons().map(a=>{ const x=ADDONS.find(z=>z.id===a); return `<div class="bk-a-line"><span>${x.name}</span>${isFree(a)?`<span class="m">Free</span>`:`<b>+$${x.price}</b>`}</div>`; }).join('');
   if(state.slot) h += `<div class="bk-a-line"><span>${fmtDay(state.slot.instant)} · ${fmtTime(state.slot.instant)}</span><span class="m">${state.slot.label}</span></div>`;
   h += `<div class="bk-a-total"><span>Total</span><b>$${total()}</b></div>`;
-  if(LOCK_IN) h += `<div class="bk-a-line"><span>Deposit to hold your date</span><b>$${deposit()}</b></div>`;
+  if(needsDeposit()) h += `<div class="bk-a-line"><span>Deposit to hold your date</span><b>$${deposit()}</b></div>`;
   return h + asideNotes();
 }
 function asideNotes(){
-  return LOCK_IN
+  return needsDeposit()
     ? `<div class="bk-a-notes"><span>This year's price, locked in</span><span>Deposit comes off your total</span><span>Not happy? We fix it</span></div>`
     : `<div class="bk-a-notes"><span>No deposit, no card needed</span><span>Pay after the job's done</span><span>Not happy? We fix it</span></div>`;
 }
@@ -1491,7 +1622,7 @@ function icsHref(){
     'DTEND:'+f(en),
     'SUMMARY:'+escT('Detail Valley — '+pkg),
     'DESCRIPTION:'+escT(pkg+' · $'+total()+'. We come to you — please have an outdoor water tap and power outlet available.'),
-    'LOCATION:'+escT(state.address+', '+state.town+', ID'),
+    'LOCATION:'+escT(addrLine()+', ID'),
     'END:VEVENT','END:VCALENDAR'].join('\r\n');
   return 'data:text/calendar;charset=utf-8,'+encodeURIComponent(ics);
 }
@@ -1500,12 +1631,12 @@ function render(){
   if(state.step===1){
     sheet(1, `
       <h2 class="bk-title">What does your car need?</h2>
-      ${LOCK_IN ? `<p class="bk-intro">Spring dates from April. Book now to keep this year's price.</p>` : ''}
+      ${LOCK_IN ? `<p class="bk-intro">${winterOn() ? 'Interior Details all winter in your garage. Everything else from April, at this year\'s price.' : 'Spring dates from April. Book now to keep this year\'s price.'}</p>` : ''}
       ${PACKAGES.map(p=>`
         <button class="bk-opt ${state.pkg===p.id?'sel':''}" data-grp="pkg" data-id="${p.id}" aria-pressed="${state.pkg===p.id}" onclick="pickPkg('${p.id}')">
           <span class="bk-radio" aria-hidden="true"></span>
           <span class="bk-o-tx"><span class="bk-o-name">${p.name}${p.id==='full'?' <span class="bk-badge">Most popular</span>':''}</span>
-          <span class="bk-o-meta">${p.meta}${LOCK_IN && p.later ? ` · $${p.later} from ${LOCK_IN_DATE}` : ''}</span></span>
+          <span class="bk-o-meta">${p.id===WINTER_PKG && winterOn() ? 'Available all winter · ' : ''}${p.meta}${LOCK_IN && p.later ? ` · $${p.later} from ${LOCK_IN_DATE}` : ''}</span></span>
           <span class="bk-o-price">$${p.price}</span>
         </button>`).join('')}
     `, footNext('Continue', !!state.pkg, 'go(2)'));
@@ -1557,22 +1688,25 @@ function render(){
         <div class="field"><label for="f-phone">Phone <span class="opt-note">(we'll text you)</span></label>
           <input id="f-phone" type="tel" inputmode="tel" value="${esc(state.phone)}" placeholder="(208) 555-0123" autocomplete="tel" oninput="onPhoneInput(this)" enterkeyhint="next"></div>
       </div>
-      <div class="bk-row2">
-        <div class="field"><label for="f-address">Where should we come?</label>
-          <input id="f-address" value="${esc(state.address)}" placeholder="123 Main St" autocomplete="street-address" autocapitalize="words" enterkeyhint="next"></div>
-        <div class="field"><label for="f-town">Town</label><select id="f-town">
-          <option value="" ${state.town?'':'selected'} disabled>Choose</option>
-          ${TOWNS.map(t=>`<option value="${t}" ${state.town===t?'selected':''}>${t}</option>`).join('')}
-        </select></div>
-      </div>
-      <fieldset class="field"><legend>Outdoor water tap &amp; power outlet nearby?</legend>
+      <div class="field addr-field"><label for="f-address">Where should we come?</label>
+        <input id="f-address" value="${esc(addrLine())}" placeholder="123 Main St, McCall" autocomplete="street-address" autocapitalize="words" enterkeyhint="next"
+          role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="addrList"
+          oninput="onAddrInput(this)" onkeydown="onAddrKey(event)" onblur="setTimeout(closeAddr,150)">
+        <ul id="addrList" class="addr-list" role="listbox" aria-label="Address suggestions" hidden></ul></div>
+      ${isWinterSlot(state.slot) ? `<fieldset class="field"><legend>Will the car be in a heated or attached garage?</legend>
+        <div class="util-grp" id="garGrp">
+          <button type="button" class="util-opt ${state.garage==='yes'?'sel':''}" data-v="yes" aria-pressed="${state.garage==='yes'}" onclick="pickGarage('yes')">Yes</button>
+          <button type="button" class="util-opt ${state.garage==='no'?'sel':''}" data-v="no" aria-pressed="${state.garage==='no'}" onclick="pickGarage('no')">No</button>
+        </div>
+        <p class="util-note ${state.garage==='no'?'warn-note':''}" id="garNote" ${state.garage?'':'hidden'}>${garageNoteText(state.garage)}</p>
+      </fieldset>` : `<fieldset class="field"><legend>Outdoor water tap &amp; power outlet nearby?</legend>
         <div class="util-grp" id="utilGrp">
           <button type="button" class="util-opt ${state.utilities==='yes'?'sel':''}" data-v="yes" aria-pressed="${state.utilities==='yes'}" onclick="pickUtil('yes')">Yes</button>
           <button type="button" class="util-opt ${state.utilities==='no'?'sel':''}" data-v="no" aria-pressed="${state.utilities==='no'}" onclick="pickUtil('no')">No</button>
           <button type="button" class="util-opt ${state.utilities==='unsure'?'sel':''}" data-v="unsure" aria-pressed="${state.utilities==='unsure'}" onclick="pickUtil('unsure')">Not sure</button>
         </div>
         <p class="util-note ${state.utilities==='no'?'warn-note':''}" id="utilNote" ${state.utilities==='no'||state.utilities==='unsure'?'':'hidden'}>${utilNoteText(state.utilities)}</p>
-      </fieldset>
+      </fieldset>`}
       <input type="text" id="f-company" class="hp" tabindex="-1" autocomplete="off" aria-hidden="true">
       <p id="detailErr" class="form-err" hidden></p>
     `, footNext('Review', true, 'saveDetails()', 'Total'));
@@ -1594,19 +1728,19 @@ function render(){
       </div>
       <div class="bk-card tight"><div class="bk-who">
         <div><div class="n">${esc(state.name)} · ${esc(state.phone)}</div>
-        <div class="s">${esc(state.address)}, ${esc(state.town)}</div>
-        ${state.utilities==='yes'?'':`<div class="s warn">${state.utilities==='no'?'No water tap or power outlet on site':'Water &amp; power: not sure yet'}</div>`}</div>
+        <div class="s">${esc(addrLine())}</div>
+        ${isWinterSlot(state.slot) ? `<div class="s">In a heated or attached garage</div>` : state.utilities==='yes'?'':`<div class="s warn">${state.utilities==='no'?'No water tap or power outlet on site':'Water &amp; power: not sure yet'}</div>`}</div>
         <button class="bk-change" onclick="go(5)">Change</button>
       </div></div>
-      ${LOCK_IN ? `<div class="bk-card tight bk-lock">
+      ${needsDeposit() ? `<div class="bk-card tight bk-lock">
         <div class="bk-line"><span><b>$${deposit()} deposit</b> holds your date at this year's price</span></div>
         <p class="bk-lock-p">You'll pay it on the next step (card, Apple Pay or Google Pay); your date is booked once it's paid. It comes off your total. Need to move? Give us 48 hours' notice and it moves with you, free. Weather reschedules are always free. A no-show or a cancel under 48 hours keeps the deposit. If we cancel, you get it back.</p>
       </div>` : ''}
       <p id="confirmErr" class="form-err" hidden></p>
       <p class="bk-legal">By confirming, you agree to our <a href="/terms" target="_blank" rel="noopener">terms</a> and to get texts about this booking. Reply STOP to opt out. <a href="/privacy" target="_blank" rel="noopener">Privacy</a></p>
     `, `<div class="bk-foot keep-tot">
-      <div class="bk-tot"><span>${LOCK_IN ? `$${deposit()} now · rest after` : 'Pay after the job'}</span><b>$${total()}</b></div>
-      <button class="bk-go" id="confirmBtn" onclick="submitBooking()">${LOCK_IN ? 'Continue to deposit' : 'Confirm booking'}</button>
+      <div class="bk-tot"><span>${needsDeposit() ? `$${deposit()} now · rest after` : 'Pay after the job'}</span><b>$${total()}</b></div>
+      <button class="bk-go" id="confirmBtn" onclick="submitBooking()">${needsDeposit() ? 'Continue to deposit' : 'Confirm booking'}</button>
     </div>`);
   }
   else if(state.step==='pay'){
@@ -1624,22 +1758,24 @@ function render(){
     const svc = [p.name, sz && sz.name].concat(chosenAddons().map(a=>shortName(ADDONS.find(z=>z.id===a)) + (isFree(a)?' (free)':''))).filter(Boolean).join(', ');
     sheet(0, `
       <div class="bk-tick" aria-hidden="true"></div>
-      <h2 class="bk-done-h">${!LOCK_IN ? "You're booked in" : state.depositPaid ? "You're locked in" : 'Your spring date is held'}</h2>
-      <p class="bk-done-p">${!LOCK_IN
+      <h2 class="bk-done-h">${!needsDeposit() ? "You're booked in" : state.depositPaid ? "You're locked in" : 'Your spring date is held'}</h2>
+      <p class="bk-done-p">${!needsDeposit()
         ? `We'll text ${esc(state.phone)||'you'} to confirm. Nothing to pay until the work's done.`
         : state.depositPaid
           ? `Deposit paid, and this year's price is yours. We'll text ${esc(state.phone)||'you'} to confirm.`
           : `We'll text ${esc(state.phone)||'you'} a link for your $${deposit()} deposit. Once it's in, your date and this year's price are locked.`}</p>
       <div class="bk-card">
         <div class="bk-line"><span class="k">When</span><span class="v">${fmtDay(state.slot.instant)} · ${fmtTime(state.slot.instant)}</span></div>
-        <div class="bk-line"><span class="k">Where</span><span class="v">${esc(state.address)}, ${esc(state.town)}</span></div>
+        <div class="bk-line"><span class="k">Where</span><span class="v">${esc(addrLine())}</span></div>
         <div class="bk-line"><span class="k">Service</span><span class="v">${svc}</span></div>
-        ${LOCK_IN
+        ${needsDeposit()
           ? `<div class="bk-line"><span class="k">Deposit</span><span class="v">$${deposit()}${state.depositPaid ? ' paid' : ', link by text'}</span></div>
         <div class="bk-line"><span class="k">Due after the job</span><span class="v">$${total()-deposit()}</span></div>`
           : `<div class="bk-line"><span class="k">Total due after</span><span class="v">$${total()}</span></div>`}
       </div>
-      <p class="bk-tip"><b>Before we arrive:</b> park near the water tap and outlet, and clear out anything you want kept.</p>
+      <p class="bk-tip"><b>Before we arrive:</b> ${isWinterSlot(state.slot)
+        ? "have the car in the garage near an outlet; we'll fill water jugs at a sink. Clear out anything you want kept."
+        : 'park near the water tap and outlet, and clear out anything you want kept.'}</p>
     `, `<div class="bk-foot pair">
       <a class="bk-go navy" download="detail-valley-booking.ics" href="${icsHref()}">Add to calendar</a>
       <button class="bk-alt" onclick="closeBooking()">Done</button>
@@ -1798,15 +1934,18 @@ function showErr(el,msg){ if(el){ el.textContent=msg; el.hidden=false; el.scroll
 function saveDetails(){
   state.name = document.getElementById('f-name').value.trim();
   state.phone = document.getElementById('f-phone').value.trim();
-  state.address = document.getElementById('f-address').value.trim();
-  state.town = document.getElementById('f-town').value;
+  readAddress();
   state.hp = !!(document.getElementById('f-company') && document.getElementById('f-company').value);
   const err = document.getElementById('detailErr');
   if(!state.name) return showErr(err,'Please enter your name');
   if(state.phone.replace(/\D/g,'').length < 7) return showErr(err,'Please enter a valid phone number');
   if(state.address.length < 5) return showErr(err,'Please enter the address we should come to');
-  if(!state.town) return showErr(err,'Please choose your town');
-  if(!state.utilities) return showErr(err,'Please let us know if a water tap and power outlet are available');
+  if(!/\d/.test(state.address)) return showErr(err,'Please include the house number in your address');
+  if(isWinterSlot(state.slot)){
+    if(!state.garage) return showErr(err,'Please let us know if the car will be in a heated or attached garage');
+    if(state.garage==='no') return showErr(err,'Winter interiors need a heated or attached garage. Pick a date from April instead.');
+    state.utilities = 'yes';   // garage outlet; we bring the water
+  } else if(!state.utilities) return showErr(err,'Please let us know if a water tap and power outlet are available');
   go(6);
 }
 
@@ -1823,7 +1962,7 @@ async function submitBooking(){
   const bookingId = (crypto.randomUUID ? crypto.randomUUID() : null);
   const row = {
     slot_start: state.slot.iso,
-    package: PACKAGES.find(p=>p.id===state.pkg).name + (sz ? ` · ${sz.name}` : '') + (state.utilities!=='yes' ? ` · ⚠ Water/power: ${state.utilities==='no'?'NOT available':'unsure'}` : '') + (LOCK_IN ? ` · 🔒 Lock-in: $${deposit()} deposit due` : ''),
+    package: PACKAGES.find(p=>p.id===state.pkg).name + (sz ? ` · ${sz.name}` : '') + (isWinterSlot(state.slot) ? ' · Winter, in garage' : (state.utilities!=='yes' ? ` · ⚠ Water/power: ${state.utilities==='no'?'NOT available':'unsure'}` : '')) + (needsDeposit() ? ` · 🔒 Lock-in: $${deposit()} deposit due` : ''),
     addons: chosenAddons().map(a=>ADDONS.find(x=>x.id===a).name + (isFree(a) ? ' (free, early bird)' : '')),
     customer_name: state.name,
     customer_phone: state.phone,
@@ -1835,7 +1974,7 @@ async function submitBooking(){
   };
   if(bookingId) row.id = bookingId;   // so the deposit checkout can find this booking
   const { error } = await sb.from('bookings').insert(row);
-  submitting = false; if(btn){ btn.disabled=false; btn.textContent = LOCK_IN ? 'Continue to deposit' : 'Confirm booking'; }
+  submitting = false; if(btn){ btn.disabled=false; btn.textContent = needsDeposit() ? 'Continue to deposit' : 'Confirm booking'; }
   if(error){
     if(error.code==='23505' || error.code==='23P01'){
       takenCache = null;   // our cached availability was out of date
@@ -1847,7 +1986,7 @@ async function submitBooking(){
     return;
   }
   takenCache = null;
-  if(LOCK_IN && bookingId){
+  if(needsDeposit() && bookingId){
     state.bookingId = bookingId;
     go('pay');                     // pay the deposit right inside the booking sheet
     return;
@@ -2053,6 +2192,7 @@ const LOCKIN_SHOW_FROM = 3;  // hide the progress bar until this many spring job
   document.querySelectorAll('[data-price]').forEach(el=>{
     const p = PACKAGES.find(x=>x.id===el.dataset.price); if(p) el.textContent = '$'+p.price;
   });
+  if(!winterOn()) document.querySelectorAll('[data-winter]').forEach(el=>el.hidden=true);
   if(!LOCK_IN){
     document.querySelectorAll('[data-lockin]').forEach(el=>el.hidden=true);
     document.querySelectorAll('[data-after]').forEach(el=>el.hidden=false);

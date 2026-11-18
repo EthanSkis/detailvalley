@@ -148,6 +148,32 @@ tidy up: set the `increase` prices as the main prices in `dv-pricing.js` (and
 delete `increase`), and update the static `$85`/`$295`/… fallback text in the
 homepage package cards.
 
+## Winter interiors
+
+Until `OPEN_FROM` (April 1, 2027) the only thing offered is the **Interior
+Detail**, on weekends, in the customer's **heated or attached garage**. Saturdays
+stop at `WINTER_SAT_UNTIL` (track season); `BLOCKED_DAYS` still applies. Pick
+any other package and the calendar starts in April as before.
+
+- Winter interiors are **pay when done**, no deposit (the flow is 6 steps). The
+  spring lock-in deposit only applies to April-and-later dates (`needsDeposit()`).
+- The details step asks "Will the car be in a heated or attached garage?"
+  instead of the water/power question; "No" can't continue. Bookings are saved
+  with `· Winter, in garage` in the package line.
+- The homepage banner, Interior card tag, facts strip, footer hours and winter
+  FAQ say so; the winter bits hide themselves from April 1.
+
+## Address autofill
+
+There's no town question: the town comes from the address. Typing in "Where
+should we come?" suggests matching **streets** in the Valley County area (free
+OpenStreetMap search via Photon, no key), keeping the house number the
+customer typed and filling in the town and ZIP. OSM has few house numbers
+around here, so suggestions are street-level. Typed addresses without a pick
+are split into street + town (`splitAddress`: known towns and ZIPs), falling
+back to "Valley County". A house number is required. For house-level autofill,
+swap `ADDR_API` for Google Places or Mapbox (needs an API key).
+
 ## Stripe deposits
 
 Deposits are taken with Stripe Checkout, driven by two Supabase Edge Functions

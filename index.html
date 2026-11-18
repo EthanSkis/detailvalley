@@ -675,6 +675,8 @@
   .pay-fine{margin:4px 0 0;font-size:.82rem;line-height:1.45;color:var(--mute)}
   .pay-mount.loading{display:flex;align-items:center;justify-content:center;border:1px dashed var(--rule-2);border-radius:12px;color:var(--mute);font-size:.92rem}
   .pay-mount a{color:inherit}
+  .pay-err{margin:0 0 12px;color:#b3261e;font-weight:500;font-size:.95rem;line-height:1.4}
+  .pay-err[hidden],.bk-intro[hidden]{display:none}
   .bk-skip{display:block;margin:4px auto 0;background:none;border:none;color:var(--mute);font:inherit;font-size:.9rem;text-decoration:underline;cursor:pointer;min-height:44px;padding:0 12px}
   .dep-notice{background:#e3f4e8;color:#123b22}
   .dep-notice>p,.dep-notice>button{max-width:1200px}
@@ -1610,9 +1612,9 @@ function render(){
   else if(state.step==='pay'){
     sheet(7, `
       <h2 class="bk-title">Pay your deposit</h2>
-      <p class="bk-intro">$${deposit()} books ${fmtDay(state.slot.instant)} at this year's price. It comes off your total.</p>
+      <p class="bk-intro" id="payIntro">$${deposit()} books ${fmtDay(state.slot.instant)} at this year's price. It comes off your total.</p>
+      <p id="payErr" class="pay-err" role="alert" hidden></p>
       <div id="payMount" class="pay-mount loading"><span>Loading secure payment…</span></div>
-      <p id="payErr" class="form-err" role="alert" hidden></p>
     `, `<div class="bk-foot"><div class="bk-tot"><span>Due today</span><b>$${deposit()}</b></div>
       <button class="bk-go" id="payBtn" onclick="submitPay()" disabled>Pay $${deposit()} &amp; book</button></div>`);
   }
@@ -1871,6 +1873,7 @@ const PAY_APPEARANCE = {
     '.Input': { border: '1px solid #c9d2da', boxShadow: 'none' },
     '.Input:focus': { borderColor: '#0b2a45', boxShadow: '0 0 0 3px rgba(11,42,69,.12)' },
     '.Input--invalid': { borderColor: '#b3261e', boxShadow: 'none' },
+    '.Error': { fontSize: '0px', lineHeight: '0px', marginTop: '0px', color: 'rgba(0,0,0,0)' },   // one message in our own slot instead
     '.Tab': { border: '1px solid #c9d2da', boxShadow: 'none' },
     '.Tab:hover': { borderColor: '#0b2a45' },
     '.Tab--selected, .Tab--selected:hover, .Tab--selected:focus': { borderColor: '#0b2a45', boxShadow: '0 0 0 1px #0b2a45' }
@@ -1899,7 +1902,11 @@ function reportPayError(id, err){
       body: JSON.stringify({booking_id:id, client_error: String(err && (err.message || err) || 'unknown').slice(0,300), ua: navigator.userAgent.slice(0,200)})});
   }catch(e){}
 }
-function payError(msg){ const e = document.getElementById('payErr'); if(e){ e.textContent = msg; e.hidden = !msg; } }
+function payError(msg){
+  const e = document.getElementById('payErr'), i = document.getElementById('payIntro');
+  if(e){ e.textContent = msg; e.hidden = !msg; }
+  if(i) i.hidden = !!msg;   // the error takes the intro's place
+}
 async function mountPay(){
   const area = document.getElementById('payMount'), id = state.bookingId;
   let gaveUp = false;

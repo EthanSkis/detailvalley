@@ -140,7 +140,7 @@ slot back up, or `confirmed` / `completed` to track it.
   iPhone SE with the browser toolbars showing (375×553). If you add packages,
   add-ons or form fields, re-check the small-phone layout before shipping.
 - Knobs near the top of the `<script>` in `index.html`:
-  - `HOURS` — working hours per weekday (omit a day to close it; Sunday is closed)
+  - `HOURS` — working hours per weekday (omit a day to close it; currently every day, 8am to 6pm)
   - `BLOCKED_DAYS` — one-off days off, as `'YYYY-MM-DD'` strings. A listed day is
     closed regardless of `HOURS` — use it when you're already booked up, out of
     town, or taking a holiday. Add or remove dates any time; past ones do nothing.
@@ -207,8 +207,8 @@ The calendar fills whatever screen it is on: on a wide monitor Work days shows
 more weeks (up to ten) and the side panes widen; on a tall one the hours get
 taller so the day fills the height.
 
-Work days gives a column to every Saturday, plus any other day that has a
-booking. Which weekdays always get a column is `WORK_DOW` near the bottom of
+Work days gives a column to every working day (currently all seven), plus
+any other day that has a booking. Which weekdays always get a column is `WORK_DOW` near the bottom of
 `admin.html`; if you reopen weekdays in `HOURS` in `index.html`, add them there
 too. Phones and tablets keep the job board described above.
 

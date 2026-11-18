@@ -136,6 +136,8 @@ site runs a "lock in this year's price" offer:
   bookable. Saturdays stay closed for track meets; once the meet schedule is out,
   add each free Saturday to `OPEN_SATURDAYS` in `index.html` (`'2027-04-10'` form).
   From May 22 every day in `HOURS` is open.
+- **Last day.** Nothing is offered after `LAST_DAY` (Aug 15, 2027). Clear it
+  (`''`) to reopen.
 - **Banner.** A navy banner under the nav pitches the offer and shows
   "X of 20 spring spots booked" (`LOCKIN_GOAL`), counted from the calendar's
   booked slots. The bar stays hidden until 3 are booked (`LOCKIN_SHOW_FROM`).

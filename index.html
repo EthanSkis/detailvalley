@@ -927,7 +927,7 @@
       </details>
       <details>
         <summary>Do you detail in winter?</summary>
-        <p>No. We work outdoors, so we take the winter off and start back up in April. Until school's out on May 22 we work Sundays (some Saturdays open up once the track schedule is set), then every day through the summer. Spring and early summer dates are open to book now.</p>
+        <p>No. We work outdoors, so we take the winter off and start back up in April. Until school's out on May 22 we work Sundays (some Saturdays open up once the track schedule is set), then every day through August 15. Spring and summer dates are open to book now.</p>
       </details>
       <details>
         <summary>Which areas do you cover?</summary>
@@ -990,7 +990,7 @@
     <div>
       <p class="foot-h">Hours</p>
       <div class="hours-row"><span class="day">Apr to May 21: Sundays</span><span class="time">8am to 6pm</span></div>
-      <div class="hours-row"><span class="day">From May 22: every day</span><span class="time">8am to 6pm</span></div>
+      <div class="hours-row"><span class="day">May 22 to Aug 15: every day</span><span class="time">8am to 6pm</span></div>
     </div>
     <div class="foot-col">
       <p class="foot-h">Explore</p>
@@ -1107,10 +1107,12 @@ const BLOCKED_DAYS = [
 // OPEN_SATURDAYS (add the free ones once the meet schedule is out). From
 // SCHOOL_OUT every day in HOURS is open again.
 const SCHOOL_OUT = '2027-05-22';     // MT, 'YYYY-MM-DD'
+const LAST_DAY   = '2027-08-15';     // last working day before leaving for college; nothing offered after
 const OPEN_SATURDAYS = [
   // '2027-04-10',   // e.g. no meet that day
 ];
 function dayOpen(iso, dow){
+  if(LAST_DAY && iso > LAST_DAY) return false;
   if(iso >= SCHOOL_OUT) return true;
   if(dow === 0) return true;                        // Sunday
   if(dow === 6) return OPEN_SATURDAYS.includes(iso);

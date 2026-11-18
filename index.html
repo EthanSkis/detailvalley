@@ -1355,12 +1355,46 @@ function pickGarage(v){
 const ADDR_API = 'https://photon.komoot.io/api/';
 const ADDR_BBOX = '-116.45,44.2,-114.9,45.35';
 let addrTimer = null, addrCtl = null, addrItems = [], addrIdx = -1;
+/* Instant suggestions: the Valley County street list (dv-streets.js, ~13 KB)
+   loads when the booking sheet opens and is matched as the customer types, with
+   no network wait. The live search below only runs when the list has no match. */
+function loadStreets(){
+  if(window.DV_STREETS || loadStreets.started) return;
+  loadStreets.started = true;
+  const sc = document.createElement('script'); sc.src = 'dv-streets.js'; sc.async = true;
+  sc.onerror = ()=>{ loadStreets.started = false; };
+  document.head.appendChild(sc);
+}
+const ST_ALIAS = {road:'rd', street:'st', avenue:'ave', drive:'dr', lane:'ln', court:'ct', boulevard:'blvd', highway:'hwy',
+  circle:'cir', place:'pl', trail:'trl', parkway:'pkwy', terrace:'ter', north:'n', south:'s', east:'e', west:'w', mountain:'mtn', saint:'st'};
+// Where most customers are: McCall first when a street name exists in several towns.
+const TOWN_RANK = {'McCall':0, 'Donnelly':1, 'Cascade':2, 'New Meadows':3, 'Lake Fork':4};
+const stTokens = t => String(t||'').toLowerCase().replace(/[^a-z0-9 ]+/g,' ').split(/\s+/).filter(Boolean);
+function localStreets(num, q){
+  const S = window.DV_STREETS; if(!S) return null;
+  if(!S._tok) S._tok = S.s.map(r=>stTokens(r[0]));
+  const qt = stTokens(q); if(!qt.length) return [];
+  const hit = (nt, t)=> nt.startsWith(t) || (ST_ALIAS[nt] && ST_ALIAS[nt].startsWith(t));
+  const out = [];
+  for(let i=0;i<S.s.length;i++){
+    const nt = S._tok[i];
+    if(!qt.every(t=> nt.some(x=>hit(x,t)))) continue;
+    // rank: query's first word starts the name (or follows a direction), then shorter names
+    const lead = hit(nt[0], qt[0]) || (nt.length>1 && /^[nsew]$|^(north|south|east|west)$/.test(nt[0]) && hit(nt[1], qt[0]));
+    out.push({ i, score: (lead ? 0 : 100) + nt.join(' ').length + 3 * (TOWN_RANK[S.t[S.s[i][1]]] ?? 6) });
+  }
+  out.sort((a,b)=>a.score-b.score);
+  return out.slice(0,5).map(({i})=>{ const [name, ti] = S.s[i]; return { street: [num, name].filter(Boolean).join(' '), town: S.t[ti], zip: S.z[ti] }; });
+}
 function onAddrInput(el){
   state.addrPicked = false;
   clearTimeout(addrTimer);
   const raw = el.value.trim();
   const m = raw.match(/^(\d+[A-Za-z]?)\s+(.+)$/);
   const num = m ? m[1] : '', q = (m ? m[2] : raw).replace(/,.*$/, '').trim();
+  if(q.length < 2){ closeAddr(); return; }
+  const local = localStreets(num, q);
+  if(local && local.length){ addrItems = local; drawAddr(); return; }   // instant
   if(q.length < 3){ closeAddr(); return; }
   addrTimer = setTimeout(async ()=>{
     try{
@@ -1436,6 +1470,7 @@ function openBooking(pre){
   modal.classList.remove('closing');
   modal.classList.add('open');
   warmSlots();
+  loadStreets();
   render();
 }
 let closeTimer = null;

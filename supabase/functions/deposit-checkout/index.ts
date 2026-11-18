@@ -6,6 +6,9 @@
 //   { action: "confirm", payment_intent: "pi_..." }
 //                               -> { paid: true }     checks the PaymentIntent with
 //                                  Stripe and marks the booking's deposit paid
+//   { action: "release" }       -> { released }       customer backed out: cancel the
+//                                  unpaid hold so the date frees up
+//   { action: "status" }        -> { ok }             is the hold still payable?
 //   { embedded: true }          -> { client_secret }  Embedded Checkout (legacy)
 //   {}                          -> { url }            Stripe-hosted Checkout page
 //                                  (fallback + "Copy pay link" on the job board)
@@ -81,9 +84,11 @@ Deno.serve(async (req) => {
   if (!/^[0-9a-f-]{36}$/i.test(bookingId)) return json({ error: "bad_booking" }, 400, origin);
 
   const sb = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
+  // Release abandoned holds (no-op until the expire_unpaid_holds migration exists).
+  await sb.rpc("expire_unpaid_holds").then(() => {}, () => {});
   const { data: b, error } = await sb
     .from("bookings")
-    .select("id, package, status, slot_start, customer_name, deposit_paid_at")
+    .select("id, package, status, slot_start, customer_name, deposit_paid_at, created_at, stripe_session_id")
     .eq("id", bookingId)
     .maybeSingle();
   if (error || !b) return json({ error: "not_found" }, 404, origin);
@@ -106,9 +111,26 @@ Deno.serve(async (req) => {
     return json({ paid: true }, 200, origin);
   }
 
+  const isHold = String(b.package).includes("Lock-in");
+
+  // ---- release: the customer backed out before paying ----
+  if (action === "release") {
+    const fresh = Date.now() - new Date(b.created_at).getTime() < 2 * 3600_000;
+    if (!isHold || b.deposit_paid_at || b.status !== "pending" || !fresh) return json({ released: false }, 200, origin);
+    await sb.from("bookings").update({
+      status: "cancelled",
+      notes: "[Released: customer left before paying the deposit]",
+    }).eq("id", b.id).is("deposit_paid_at", null).eq("status", "pending");
+    // Make sure the abandoned PaymentIntent can't be paid later.
+    const pi = String(b.stripe_session_id || "");
+    if (pi.startsWith("pi_")) await stripe(key, "POST", `payment_intents/${pi}/cancel`, new URLSearchParams());
+    return json({ released: true }, 200, origin);
+  }
+
   if (b.status === "cancelled") return json({ error: "cancelled" }, 409, origin);
   if (b.deposit_paid_at) return json({ error: "already_paid" }, 409, origin);
-  if (!String(b.package).includes("Lock-in")) return json({ error: "no_deposit_due" }, 409, origin);
+  if (!isHold) return json({ error: "no_deposit_due" }, 409, origin);
+  if (action === "status") return json({ ok: true }, 200, origin);
 
   const amount = depositFor(String(b.package));
   const when = new Date(b.slot_start).toLocaleDateString("en-US", {
@@ -133,6 +155,8 @@ Deno.serve(async (req) => {
       console.error("stripe error", r.status, r.data?.error?.message);
       return json({ error: "stripe" }, 502, origin);
     }
+    // Remember it so a release can cancel it.
+    await sb.from("bookings").update({ stripe_session_id: r.data.id }).eq("id", b.id).is("deposit_paid_at", null);
     return json({ client_secret: r.data.client_secret, amount }, 200, origin);
   }
 
@@ -160,6 +184,8 @@ Deno.serve(async (req) => {
     form.set("success_url", `${SITE}/?deposit=paid`);
     form.set("cancel_url", `${SITE}/?deposit=cancelled&b=${b.id}`);
   }
+  // Matches the 35-minute hold: an expired hold's checkout can't be paid.
+  form.set("expires_at", String(Math.floor(Date.now() / 1000) + 31 * 60));
   const r = await stripe(key, "POST", "checkout/sessions", form);
   if (!r.ok || !(embedded ? r.data.client_secret : r.data.url)) {
     console.error("stripe error", r.status, r.data?.error?.message);

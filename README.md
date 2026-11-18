@@ -333,9 +333,14 @@ worked out from the bookings already loaded; nothing new goes in the database.
   (15.3% of 92.35%, only once that reaches $400), federal income tax (single
   filer, standard deduction, 20% QBI deduction) and Idaho's flat rate, then the
   four IRS estimated-payment periods with their due dates.
-- **Tax settings** (expenses, miles, mileage rate, tips/other income, W-2 wages,
-  Idaho rate) are kept **on that device only**, per year. Federal brackets live
-  in `TAX_TABLES` in `admin.html`; add a row each year when the IRS publishes them.
+- **Log it:** each expense (with a category), each drive in business miles,
+  and income the board doesn't know about (tips, cash jobs, kept deposits) is a
+  row in `public.money_entries`. The year's mileage rate, Idaho rate and W-2
+  wages are a row in `public.tax_settings`. Both are owner-only (same
+  `is_admin()` RLS as bookings), so phone and computer show the same numbers.
+  Schema: `supabase/migrations/20261118_money_entries.sql`. Federal brackets
+  live in `TAX_TABLES` in `admin.html`; add a row each year when the IRS
+  publishes them.
 - **Flags:** past jobs never marked done, and cancelled jobs with a paid deposit
   (not counted unless you add them as other income).
 - **Download as CSV:** every job in the year for a tax pro or a spreadsheet (no

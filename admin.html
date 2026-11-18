@@ -523,7 +523,16 @@
   .m-set input{font-variant-numeric:tabular-nums}
   .m-set .ef-hint{margin-top:6px}
   .m-set ul{padding-left:18px;font-size:.75rem;line-height:1.5;color:var(--text-2);display:flex;flex-direction:column;gap:4px}
-  #moneySet{margin-bottom:12px}
+  #moneySet{margin:0 0 12px}
+  .m-side{display:flex;flex-direction:column;gap:28px}
+  .m-set .viewswitch{margin:0}
+  .m-set .vw{padding:8px}
+  .m-scroll{max-height:320px;overflow-y:auto;margin:0 -4px;padding:0 4px}
+  .m-tbl td:last-child:has(.m-del){width:36px;padding-left:4px}
+  .m-del{position:relative;width:32px;height:32px;display:inline-flex;align-items:center;justify-content:center;border:none;border-radius:8px;
+    background:transparent;color:var(--text-3);cursor:pointer}
+  .m-del::after{content:'';position:absolute;inset:-6px}
+  @media(hover:hover){ .m-del:hover{background:var(--card-2);color:var(--red)} }
   @media(min-width:561px){ .m-kpis{grid-template-columns:repeat(3,minmax(0,1fr))} }
   @media(min-width:1280px){
     .m-kpis{grid-template-columns:repeat(6,minmax(0,1fr));margin:0}
@@ -748,6 +757,7 @@ async function render(session){
   hidePws();
   layout();
   loadJobs();
+  loadMoney();
 }
 
 /* The signed-out screen (also shown to a signed-in account that is not an owner).
@@ -755,6 +765,7 @@ async function render(session){
    is left in the page behind the sign-in. */
 function showLogin(notOwner){
   JOBS = []; DSEL = null; EDIT = null; EDIT_DIRTY = false;
+  ENTRIES = []; TAXSET = {}; MONEY_LOADED = false; MONEY_ERR = null;
   for(const id of ['jobs','calDay','money','dBody','dPanel','sheet']) $(id).innerHTML = '';
   $('sheet').hidden = true;
   document.body.classList.remove('in','sheet-open');
@@ -1635,9 +1646,10 @@ async function saveEdit(ev){
 
 /* ---------- Money ----------
    Income, where it came from, and a tax set-aside, all worked out from the
-   bookings already loaded. Nothing new is stored in the database: the few
-   numbers the board can't know (expenses, miles, tips, other wages) are typed
-   into Tax settings and kept on this device, per year.
+   bookings already loaded, plus two owner-only tables: money_entries (each
+   expense, each drive in business miles, each tip or cash job) and
+   tax_settings (per year: mileage rate, Idaho rate, other wages). Both sync
+   across devices; see supabase/migrations/20261118_money_entries.sql.
 
    How income is counted (cash basis, the way a sole proprietor files):
    a deposit counts the day Stripe took it, the rest of the job counts on the
@@ -1658,19 +1670,92 @@ const TAX_TABLES = {
   2026:{ std:16100, brackets:[[12400,.10],[50400,.12],[105700,.22],[201775,.24],[256225,.32],[640600,.35],[Infinity,.37]] }
 };
 const taxTable = y => TAX_TABLES[Math.max(2025, Math.min(2026, y))];
-const taxDefaults = y => ({ extra:0, expenses:0, miles:0, mileRate: y <= 2025 ? 0.70 : 0.725, wages:0, idaho:5.3 });
-function taxSettings(y){
-  let saved = {};
-  try{ saved = JSON.parse(localStorage.getItem('dv-tax-'+y) || '{}') || {}; }catch(e){}
-  const s = taxDefaults(y);
-  for(const k in s) if(typeof saved[k] === 'number' && isFinite(saved[k]) && saved[k] >= 0) s[k] = saved[k];
-  return s;
+const taxDefaults = y => ({ mileRate: y <= 2025 ? 0.70 : 0.725, wages:0, idaho:5.3 });
+let ENTRIES = [];       // money_entries rows, newest first
+let TAXSET = {};        // tax_settings rows by year
+let MONEY_ERR = null;   // why the two tables could not be loaded, if they could not
+let MONEY_LOADED = false;
+const EXPENSE_CATS = ['Supplies','Equipment','Insurance','Phone & software','Marketing','Fees','Other'];
+const INCOME_CATS = ['Tips','Cash job','Kept deposit','Other'];
+
+async function loadMoney(){
+  const [e, t] = await Promise.all([
+    sb.from('money_entries').select('*').order('entry_date', { ascending:false }).order('created_at', { ascending:false }),
+    sb.from('tax_settings').select('*')
+  ]);
+  MONEY_ERR = (e.error || t.error) ? (e.error || t.error).message : null;
+  ENTRIES = e.data || [];
+  TAXSET = {}; for(const r of (t.data || [])) TAXSET[r.year] = r;
+  MONEY_LOADED = true;
+  if(moneyShowing()) drawMoneyBody(true);
 }
+const moneyShowing = () => document.body.classList.contains('in') && (deskOn() ? DVIEW==='money' : VIEW==='money');
+const entriesIn = y => ENTRIES.filter(e => String(e.entry_date).slice(0, 4) === String(y));
+
+/* The year's settings: rates and wages from tax_settings, totals from money_entries. */
+function taxSettings(y){
+  const d = taxDefaults(y), r = TAXSET[y] || {}, num = (v, dflt) => v == null || !isFinite(+v) ? dflt : +v;
+  const es = entriesIn(y), tot = (kind, f) => es.filter(e => e.kind===kind).reduce((n, e) => n + (+e[f] || 0), 0);
+  return { mileRate: num(r.mileage_rate, d.mileRate), idaho: num(r.idaho_rate, d.idaho), wages: num(r.other_wages, d.wages),
+    expenses: tot('expense', 'amount_usd'), miles: tot('miles', 'miles'), extra: tot('income', 'amount_usd') };
+}
+/* A rate or wages changed: refigure now, save a moment after the typing stops. */
+let taxSaveT = null;
 function saveTaxSetting(input){
-  const y = moneyYear(), s = taxSettings(y), v = parseFloat(input.value);
-  s[input.name] = isFinite(v) && v >= 0 ? v : taxDefaults(y)[input.name];
-  try{ localStorage.setItem('dv-tax-'+y, JSON.stringify(s)); }catch(e){}
+  const y = moneyYear(), v = parseFloat(input.value), col = { mileRate:'mileage_rate', idaho:'idaho_rate', wages:'other_wages' }[input.name];
+  const row = TAXSET[y] = Object.assign({ year:y }, TAXSET[y]);
+  row[col] = isFinite(v) && v >= 0 ? v : null;
   drawMoneyBody();
+  clearTimeout(taxSaveT);
+  taxSaveT = setTimeout(async () => {
+    const d = taxDefaults(y);
+    const { error } = await sb.from('tax_settings').upsert({ year:y,
+      mileage_rate: row.mileage_rate ?? d.mileRate, idaho_rate: row.idaho_rate ?? d.idaho, other_wages: row.other_wages ?? 0,
+      updated_at: new Date().toISOString() });
+    toast(error ? 'Couldn’t save: ' + error.message : 'Tax settings saved');
+  }, 700);
+}
+
+/* Log an expense, a drive or some income. */
+function entryKind(kind){
+  const f = $('entryForm'); if(!f) return;
+  f.dataset.kind = kind;
+  for(const b of f.querySelectorAll('[data-k]')){ b.classList.toggle('on', b.dataset.k===kind); b.setAttribute('aria-pressed', b.dataset.k===kind); }
+  $('en-amt-l').textContent = kind==='miles' ? 'Miles' : 'Amount ($)';
+  $('en-amt').step = kind==='miles' ? '0.1' : '0.01';
+  const cats = kind==='expense' ? EXPENSE_CATS : kind==='income' ? INCOME_CATS : [];
+  $('en-cat-w').hidden = !cats.length;
+  $('en-cat').innerHTML = cats.map(c => optHtml(c, c, false)).join('');
+  $('en-note').placeholder = kind==='miles' ? 'Where to (e.g. Smith job, Cascade)' : kind==='income' ? 'Who or what for' : 'What you bought';
+  $('en-hint').textContent = kind==='miles' ? 'Using the mileage rate covers gas and wear, so don’t also log gas as an expense.'
+    : kind==='income' ? 'Money the job board doesn’t already know about.' : 'Keep the receipt (a photo is fine).';
+}
+async function addEntry(ev){
+  ev.preventDefault();
+  const f = $('entryForm'), kind = f.dataset.kind, date = $('en-date').value, n = parseFloat($('en-amt').value);
+  if(!date) return toast('Pick a date');
+  if(!(n > 0)) return toast(kind==='miles' ? 'Enter the miles' : 'Enter an amount');
+  const row = { entry_date: date, kind, note: $('en-note').value.trim().slice(0, 300) || null,
+    category: kind==='miles' ? null : $('en-cat').value,
+    amount_usd: kind==='miles' ? 0 : Math.round(n * 100) / 100, miles: kind==='miles' ? Math.round(n * 10) / 10 : 0 };
+  const btn = $('en-add'); btn.disabled = true;
+  const { data, error } = await sb.from('money_entries').insert(row).select().single();
+  btn.disabled = false;
+  if(error) return toast('Couldn’t save: ' + error.message);
+  ENTRIES.unshift(data);
+  ENTRIES.sort((a, b) => String(b.entry_date).localeCompare(String(a.entry_date)));
+  $('en-amt').value = ''; $('en-note').value = ''; $('en-amt').focus();
+  const y = +String(data.entry_date).slice(0, 4);
+  toast(y===moneyYear() ? 'Logged' : `Logged under ${y}`);
+  drawMoneyBody();
+}
+async function deleteEntry(id){
+  const e = ENTRIES.find(x => x.id===id); if(!e) return;
+  if(!confirm('Delete this entry?')) return;
+  const { data, error } = await sb.from('money_entries').delete().eq('id', id).select('id');
+  if(error || !data || !data.length) return toast('Couldn’t delete' + (error ? ': ' + error.message : ''));
+  ENTRIES = ENTRIES.filter(x => x.id!==id);
+  toast('Deleted'); drawMoneyBody();
 }
 
 const cur = n => (n < -0.5 ? '−' : '') + '$' + Math.round(Math.abs(n)).toLocaleString('en-US');
@@ -1808,7 +1893,7 @@ function moneyBodyHtml(m){
 
   const flags = [];
   if(m.stale.length) flags.push(`${plural(m.stale.length, 'past job')} still ${m.stale.length===1 ? 'shows' : 'show'} as New or Confirmed (${cur(m.staleSum)}). Mark ${m.stale.length===1 ? 'it' : 'them'} done or cancelled so the numbers count ${m.stale.length===1 ? 'it' : 'them'} right.`);
-  if(m.keptDeps.length) flags.push(`${plural(m.keptDeps.length, 'cancelled job')} had a paid deposit (${cur(m.keptSum)}). It isn't counted. If you kept it (late cancel or no-show), add it under Other business income.`);
+  if(m.keptDeps.length) flags.push(`${plural(m.keptDeps.length, 'cancelled job')} had a paid deposit (${cur(m.keptSum)}). It isn't counted. If you kept it (late cancel or no-show), log it as income (Kept deposit).`);
   const flagsHtml = flags.length ? `<div class="m-flags">${flags.map(f => `<div class="warn">${esc(f)}</div>`).join('')}</div>` : '';
 
   // Month bars
@@ -1832,8 +1917,8 @@ function moneyBodyHtml(m){
     row('Came in', cur(m.cashIn), '', m.depsAhead ? `Includes ${cur(m.depsAhead)} in deposits for jobs not done yet` : 'Balances on the day of the job, deposits the day paid'),
     s.extra ? row('Other business income', cur(s.extra)) : '',
     m.fees ? row('Card fees', cur(-m.fees), 'less', `Stripe, about 2.9% + 30¢ on ${plural(m.deps, 'deposit')}`) : '',
-    row('Expenses', cur(-s.expenses), 'less', s.expenses ? '' : 'None entered yet. Add them in Tax settings'),
-    row('Mileage', cur(-m.mileage), 'less', s.miles ? `${s.miles.toLocaleString('en-US')} mi × $${s.mileRate}` : 'No miles entered yet'),
+    row('Expenses', cur(-s.expenses), 'less', s.expenses ? '' : 'None logged yet'),
+    row('Mileage', cur(-m.mileage), 'less', s.miles ? `${s.miles.toLocaleString('en-US')} mi × $${s.mileRate}` : 'No miles logged yet'),
     row('Net profit', cur(m.net), 'sum'),
     '<div class="gap"></div>',
     row('Self-employment tax', cur(tax.se), '', 'Social Security + Medicare, 15.3%'),
@@ -1864,41 +1949,67 @@ function moneyBodyHtml(m){
   const pkgCard = tbl('By package', m.byPkg, 'Jobs done');
   const townCard = tbl('By town', m.byTown, 'Jobs done');
 
+  // What's been logged this year
+  const es = entriesIn(y);
+  const entRow = e => {
+    const what = e.kind==='miles' ? 'Miles' : esc(e.category || (e.kind==='income' ? 'Income' : 'Expense'));
+    const v = e.kind==='miles' ? `${(+e.miles).toLocaleString('en-US')} mi` : (e.kind==='income' ? '+' : '−') + '$' + (+e.amount_usd).toLocaleString('en-US', { minimumFractionDigits:2, maximumFractionDigits:2 });
+    return `<tr><td>${what}<small>${keyFmt(String(e.entry_date), { month:'short', day:'numeric' })}${e.note ? ' · ' + esc(e.note) : ''}</small></td>`+
+      `<td>${v}</td><td><button class="m-del" onclick="deleteEntry('${e.id}')" aria-label="Delete ${what} entry">${XICON}</button></td></tr>`;
+  };
+  const logCard = `<section class="m-card"><h2>Logged <em>${plural(es.length, 'entry').replace('entrys', 'entries')}</em></h2>`+
+    (!MONEY_LOADED ? '<p class="m-note">Loading…</p>'
+      : es.length ? `<div class="m-scroll"><table class="m-tbl"><tbody>${es.map(entRow).join('')}</tbody></table></div>`
+      : `<p class="m-note">Nothing logged for ${y} yet. Add expenses, miles and tips with <b>Log it</b>${deskOn() ? ' on the right' : ' above'}. Every receipt you skip is tax you pay for nothing.</p>`)+
+    `</section>`;
+  const errHtml = MONEY_ERR ? `<div class="m-flags"><div class="warn">Couldn’t load expenses and tax settings (${esc(MONEY_ERR)}). The numbers below leave them out.</div></div>` : '';
+
   const foot = `<div class="m-foot"><button class="act act-ghost" onclick="exportMoneyCsv()">Download ${y} as CSV</button>`+
     `<p>Estimates for planning, not tax advice. Per hour is time on site, not drive time. Check the numbers with a tax pro or IRS Free File before you file.</p></div>`;
 
-  return kpis + flagsHtml + `<div class="m-grid"><div>${chart}${pkgCard}${townCard}</div><div>${taxCard}${payCard}</div></div>` + foot;
+  return kpis + errHtml + flagsHtml + `<div class="m-grid"><div>${chart}${logCard}${pkgCard}${townCard}</div><div>${taxCard}${payCard}</div></div>` + foot;
 }
 
-/* Tax settings: the numbers the board can't know. Kept on this device, per year. */
+/* Log it (expenses, miles, income) and the year's tax settings. Drawn once per
+   year so nothing being typed is lost when the numbers refigure. */
 function moneySetHtml(y){
-  const s = taxSettings(y);
-  const f = (name, label, hint, step, unit) => `<div><label for="ts-${name}">${label}</label>`+
+  const s = taxSettings(y), tk = todayKey();
+  const date = yearKey(tk)===String(y) ? tk : `${y}-12-31`;
+  const f = (name, label, hint, step) => `<div><label for="ts-${name}">${label}</label>`+
     `<input id="ts-${name}" name="${name}" type="number" inputmode="decimal" min="0" step="${step}" value="${s[name]}" oninput="saveTaxSetting(this)">`+
     `<p class="ef-hint">${hint}</p></div>`;
-  return `<form class="m-set" id="taxSet" data-y="${y}" onsubmit="event.preventDefault()">`+
+  const kb = (k, label) => `<button type="button" class="vw" data-k="${k}" onclick="entryKind('${k}')">${label}</button>`;
+  return `<div class="m-side" data-y="${y}" id="taxSet">`+
+    `<form class="m-set" id="entryForm" data-kind="expense" novalidate onsubmit="addEntry(event)">`+
+    `<h2>Log it</h2>`+
+    `<div class="viewswitch" role="group" aria-label="What to log">${kb('expense', 'Expense')}${kb('miles', 'Miles')}${kb('income', 'Income')}</div>`+
+    `<div class="ef-row"><div><label for="en-date">Date</label><input id="en-date" type="date" value="${date}"></div>`+
+    `<div><label for="en-amt" id="en-amt-l">Amount ($)</label><input id="en-amt" type="number" inputmode="decimal" min="0" step="0.01"></div></div>`+
+    `<div id="en-cat-w"><label for="en-cat">Category</label><select id="en-cat"></select></div>`+
+    `<div><label for="en-note">Note</label><input id="en-note" maxlength="300" autocomplete="off"><p class="ef-hint" id="en-hint"></p></div>`+
+    `<button class="btn" id="en-add" style="margin-top:0">Add</button>`+
+    `</form>`+
+    `<form class="m-set" onsubmit="event.preventDefault()">`+
     `<h2>Tax settings, ${y}</h2>`+
-    f('expenses', 'Business expenses ($)', 'Supplies, chemicals, equipment, insurance, your phone’s business share. Keep the receipts.', '1')+
-    f('miles', 'Business miles', 'Driving to jobs and supply runs, not home to school. Keep a log (date, where, miles).', '1')+
     f('mileRate', 'Mileage rate ($ per mile)', 'IRS standard rate: $0.70 for 2025, $0.725 for 2026. Check irs.gov if it changed.', '0.005')+
-    f('extra', 'Other business income ($)', 'Tips, cash jobs that never went on the board, deposits you kept.', '1')+
     f('wages', 'Other wages this year ($)', 'A W-2 job. Its own withholding covers it; this only bumps your bracket.', '1')+
     f('idaho', 'Idaho tax rate (%)', 'Idaho’s flat rate (5.3% as of 2025). Update it if the legislature changes it.', '0.01')+
-    `<ul><li>Saved on this device only.</li><li>Assumes a single filer with the standard deduction and the 20% business income deduction.</li>`+
+    `<ul><li>Synced to your account, so phone and computer match.</li><li>Assumes a single filer with the standard deduction and the 20% business income deduction.</li>`+
     `<li>Idaho generally doesn’t charge sales tax on labor like detailing, so none is figured. Selling products would change that.</li></ul>`+
-    `</form>`;
+    `</form></div>`;
 }
+const XICON = '<svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg>';
 
 /* Phone: inside the job board, under the Money tab. */
 function drawMoney(){
   const y = moneyYear(), el = $('money');
-  if(!$('moneyBody')) el.innerHTML = '<div class="filters" id="moneyYears"></div><div id="moneyBody"></div><details class="acct" id="moneySet"><summary><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>Tax settings</summary><div></div></details>';
+  if(!$('moneyBody')) el.innerHTML = '<div class="filters" id="moneyYears"></div><details class="acct" id="moneySet"><summary><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>Log expenses &amp; tax settings</summary><div></div></details><div id="moneyBody"></div>';
   const ys = moneyYears();
   $('moneyYears').hidden = ys.length < 2;
   $('moneyYears').innerHTML = ys.map(v => `<button class="chip ${v===y ? 'on' : ''}" aria-pressed="${v===y}" onclick="moneyPick(${v})">${v}</button>`).join('');
   $('moneyBody').innerHTML = moneyBodyHtml(moneyStats(y));
   const set = $('moneySet').lastElementChild;
-  if(!set.querySelector(`#taxSet[data-y="${y}"]`)) set.innerHTML = moneySetHtml(y);
+  if(!set.querySelector(`#taxSet[data-y="${y}"]`)){ set.innerHTML = moneySetHtml(y); entryKind('expense'); }
 }
 /* Computer: in the calendar's place, settings in the side panel. */
 function drawMoneyDesk(){
@@ -1907,11 +2018,12 @@ function drawMoneyDesk(){
   $('dSub').textContent = `${cur(m.earned)} earned · ${plural(m.done.length, 'job')} done · ${cur(m.bookedAhead)} booked ahead`;
   $('dBody').innerHTML = moneyBodyHtml(m);
   el.classList.remove('editing');
-  if(!el.querySelector(`#taxSet[data-y="${y}"]`)) el.innerHTML = moneySetHtml(y);
+  if(!el.querySelector(`#taxSet[data-y="${y}"]`)){ el.innerHTML = moneySetHtml(y); entryKind('expense'); }
 }
 /* A setting changed: redo the numbers, leave the form (and the cursor in it) alone. */
-function drawMoneyBody(){
-  if(deskOn()) drawMoneyDesk(); else if($('moneyBody')) $('moneyBody').innerHTML = moneyBodyHtml(moneyStats(moneyYear()));
+function drawMoneyBody(fresh){
+  if(fresh){ const f = $('taxSet'); if(f) f.removeAttribute('data-y'); }   // just loaded: redraw the form with the saved rates
+  if(deskOn()) drawMoneyDesk(); else if($('moneyBody')){ if(fresh) drawMoney(); else $('moneyBody').innerHTML = moneyBodyHtml(moneyStats(moneyYear())); }
 }
 
 /* Every job in the year (by job date or deposit date), one row each, for a tax

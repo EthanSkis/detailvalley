@@ -155,12 +155,17 @@ Deposits are taken with Stripe Checkout, driven by two Supabase Edge Functions
 
 - **`deposit-checkout`**: the booking page calls it with the new booking's id.
   It looks the booking up and works out the deposit itself ($25 Maintenance Wash,
-  $50 otherwise). With `embedded: true` (the booking flow) it returns an
-  Embedded Checkout session, and the payment form appears right inside the
-  booking sheet, so the customer never leaves the page. Without it, it returns a
-  hosted Checkout link. That's what `/?deposit=cancelled&b=<id>` uses, and the job
-  board's **Copy pay link** button hands customers that URL for anyone who chose
-  "Pay later".
+  $50 otherwise). The booking flow uses `action: "intent"` to get a
+  PaymentIntent and shows **our own payment screen** in the booking sheet: our
+  summary, copy and button, with Stripe's Payment Element supplying only the card
+  fields (styled to match via `PAY_APPEARANCE` in `index.html`; Link is hidden).
+  After paying, the page calls `action: "confirm"`, which re-checks the
+  PaymentIntent with Stripe before marking the booking paid. Repeat intent calls
+  for one booking return the same PaymentIntent (idempotency key), so nobody is
+  charged twice. If the form can't load (some privacy browsers), the page falls
+  back to Stripe's hosted Checkout page; that's also what `/?deposit=cancelled&b=<id>`
+  and the job board's **Copy pay link** use. Load failures are logged by the
+  function (`client_error`).
 - **`stripe-webhook`**: Stripe calls it when a checkout completes; it verifies
   the signature and sets `deposit_paid_usd`, `deposit_paid_at` and
   `stripe_session_id` on the booking. Visitors can't set those columns
@@ -171,7 +176,9 @@ Deposits are taken with Stripe Checkout, driven by two Supabase Edge Functions
    (`sk_test_…` to try it out, `sk_live_…` for real money).
 2. Stripe → Developers → Webhooks → **Add endpoint**:
    `https://utybbdrthxgsijplowup.supabase.co/functions/v1/stripe-webhook`,
-   event **`checkout.session.completed`**. Copy its **signing secret** (`whsec_…`).
+   events **`checkout.session.completed`** and **`payment_intent.succeeded`**.
+   Copy its **signing secret** (`whsec_…`). (The page also confirms payments
+   itself; the webhook is the backup if a customer closes the tab mid-payment.)
 3. Supabase dashboard → Edge Functions → **Secrets**: add
    `STRIPE_SECRET_KEY` and `STRIPE_WEBHOOK_SECRET`.
 

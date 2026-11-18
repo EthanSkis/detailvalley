@@ -47,8 +47,12 @@ Deno.serve(async (req) => {
   const key = Deno.env.get("STRIPE_SECRET_KEY");
   if (!key) return json({ error: "payments_not_configured" }, 503, origin);
 
-  let bookingId = "";
-  try { bookingId = String((await req.json()).booking_id || ""); } catch { /* bad body */ }
+  let bookingId = "", embedded = false;
+  try {
+    const body = await req.json();
+    bookingId = String(body.booking_id || "");
+    embedded = body.embedded === true;   // in-page checkout instead of a redirect
+  } catch { /* bad body */ }
   if (!/^[0-9a-f-]{36}$/i.test(bookingId)) return json({ error: "bad_booking" }, 400, origin);
 
   const sb = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
@@ -79,9 +83,17 @@ Deno.serve(async (req) => {
     "line_items[0][price_data][unit_amount]": String(amount * 100),
     "line_items[0][price_data][product_data][name]": "Spring lock-in deposit",
     "line_items[0][price_data][product_data][description]": `${pkgName} on ${when}. Comes off your total on the day.`,
-    success_url: `${SITE}/?deposit=paid`,
-    cancel_url: `${SITE}/?deposit=cancelled&b=${b.id}`,
   });
+  if (embedded) {
+    // Embedded Checkout: stays on the booking page; only payment methods that
+    // need a bank redirect ever leave it, and they come back to the paid notice.
+    form.set("ui_mode", "embedded");
+    form.set("redirect_on_completion", "if_required");
+    form.set("return_url", `${SITE}/?deposit=paid`);
+  } else {
+    form.set("success_url", `${SITE}/?deposit=paid`);
+    form.set("cancel_url", `${SITE}/?deposit=cancelled&b=${b.id}`);
+  }
 
   const r = await fetch("https://api.stripe.com/v1/checkout/sessions", {
     method: "POST",
@@ -89,9 +101,9 @@ Deno.serve(async (req) => {
     body: form,
   });
   const s = await r.json();
-  if (!r.ok || !s.url) {
+  if (!r.ok || !(embedded ? s.client_secret : s.url)) {
     console.error("stripe error", r.status, s?.error?.message);
     return json({ error: "stripe" }, 502, origin);
   }
-  return json({ url: s.url }, 200, origin);
+  return json(embedded ? { client_secret: s.client_secret } : { url: s.url }, 200, origin);
 });

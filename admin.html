@@ -1038,13 +1038,14 @@ let DSEL = null;         // id of the job open in the right-hand panel
 let WD_SHIFT = 0;        // Work days: pages forward (+) or back (-) from the current window
 // Weekdays that always get a column in Work days (0=Sun … 6=Sat). Keep this in
 // step with HOURS in index.html. Any other day that has a booking gets one too.
-const WORK_DOW = [6];
+const WORK_DOW = [0, 1, 2, 3, 4, 5, 6];
 /* Work days sizes itself to the screen. Wider: more weeks, about one per 190px
    of calendar, between 5 and 10. Taller: taller hours, so the day fills the
    height instead of leaving it empty, between 52px and 160px each. */
 const wdWeeks = () => {
   const room = $('dBody').clientWidth - 60;                       // minus the hours gutter
-  return Math.max(5, Math.min(10, Math.floor(room / 190 / WORK_DOW.length)));
+  const fewest = WORK_DOW.length > 2 ? 1 : 5;                     // a full week of columns needs the room
+  return Math.max(fewest, Math.min(10, Math.floor(room / 190 / WORK_DOW.length)));
 };
 const wdRow = hours => {
   const top = $('dBody').getBoundingClientRect().top + window.scrollY;
@@ -1110,7 +1111,7 @@ function dToday(){ WD_SHIFT = 0; calToday(); }
 /* Work days window: starts the Sunday before last, so the most recent working
    day stays in view beside the ones coming up. */
 const wdBase = () => { const tk = todayKey(); return addDays(tk, -keyDow(tk) - 7); };
-const wdPage = () => 7 * (wdWeeks() - 1);   // one page forward keeps a week of overlap
+const wdPage = () => 7 * Math.max(1, wdWeeks() - 1);   // one page forward keeps a week of overlap (or a full week at one-week width)
 
 /* Bring a day into view in every calendar view. */
 function dReveal(k){

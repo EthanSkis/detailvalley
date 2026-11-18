@@ -680,7 +680,8 @@
   .addr-list[hidden]{display:none}
   .addr-list li{display:flex;flex-direction:column;gap:2px;padding:10px 12px;border-radius:8px;cursor:pointer;min-height:44px;justify-content:center}
   .addr-list li:hover,.addr-list li[aria-selected="true"]{background:var(--raised)}
-  .addr-list .a-st{font-weight:500;color:var(--text)}
+  .addr-list .a-st{font-weight:400;color:var(--text)}
+  .addr-list .a-st b{font-weight:700}
   .addr-list .a-tw{font-size:.84rem;color:var(--mute)}
   .pkg-winter{display:inline-block;margin-left:6px;padding:2px 10px;border-radius:999px;background:#e8eef4;color:var(--text);font-family:var(--f-body);font-size:.78rem;font-weight:600;letter-spacing:0;vertical-align:middle}
   .pkg-winter[hidden]{display:none}
@@ -1370,11 +1371,15 @@ const ST_ALIAS = {road:'rd', street:'st', avenue:'ave', drive:'dr', lane:'ln', c
 // Where most customers are: McCall first when a street name exists in several towns.
 const TOWN_RANK = {'McCall':0, 'Donnelly':1, 'Cascade':2, 'New Meadows':3, 'Lake Fork':4};
 const stTokens = t => String(t||'').toLowerCase().replace(/[^a-z0-9 ]+/g,' ').split(/\s+/).filter(Boolean);
+// Roads nobody lives on (Forest Service roads, bare route numbers).
+const ST_JUNK = /forest (development |service )?(road|rd)|national forest|^(nf|fs|nfsr|fr)[- ]?\d|^forest road|^\d+[a-z]?$|^road \d+$|^unnamed/i;
+const stHit = (nt, t)=> nt.startsWith(t) || (ST_ALIAS[nt] && ST_ALIAS[nt].startsWith(t));
+let addrQuery = [];
 function localStreets(num, q){
   const S = window.DV_STREETS; if(!S) return null;
   if(!S._tok) S._tok = S.s.map(r=>stTokens(r[0]));
   const qt = stTokens(q); if(!qt.length) return [];
-  const hit = (nt, t)=> nt.startsWith(t) || (ST_ALIAS[nt] && ST_ALIAS[nt].startsWith(t));
+  const hit = stHit;
   const out = [];
   for(let i=0;i<S.s.length;i++){
     const nt = S._tok[i];
@@ -1389,13 +1394,15 @@ function localStreets(num, q){
 function onAddrInput(el){
   state.addrPicked = false;
   clearTimeout(addrTimer);
-  const raw = el.value.trim();
-  const m = raw.match(/^(\d+[A-Za-z]?)\s+(.+)$/);
-  const num = m ? m[1] : '', q = (m ? m[2] : raw).replace(/,.*$/, '').trim();
-  if(q.length < 2){ closeAddr(); return; }
+  const raw = el.value.replace(/^\s+/, '');
+  const m = raw.match(/^(\d+[A-Za-z]?)(?:\s+(.*))?$/);
+  const num = m ? m[1] : '', q = (m ? (m[2] || '') : raw).replace(/,.*$/, '').trim();
+  addrQuery = stTokens(q);
+  // Like any search box: wait for the start of the street name, not just the number.
+  if(q.replace(/[^a-z]/gi, '').length < 2){ closeAddr(); return; }
   const local = localStreets(num, q);
   if(local && local.length){ addrItems = local; drawAddr(); return; }   // instant
-  if(q.length < 3){ closeAddr(); return; }
+  if(q.replace(/[^a-z]/gi, '').length < 3){ closeAddr(); return; }
   addrTimer = setTimeout(async ()=>{
     try{
       if(addrCtl) addrCtl.abort();
@@ -1406,11 +1413,13 @@ function onAddrInput(el){
       for(const f of (d.features||[])){
         const pr = f.properties || {};
         const street = pr.street || (pr.osm_key === 'highway' ? pr.name : '');
-        if(!street) continue;
+        if(!street || ST_JUNK.test(street)) continue;
+        const nt = stTokens(street);   // no fuzzy guesses: every typed word must start a word in the name
+        if(!addrQuery.every(t=> nt.some(x=> stHit(x, t)))) continue;
         const zip = pr.postcode || '';
         const town = pr.city || pr.town || pr.village || ZIP_TOWN[zip] || '';
         const key = (street + '|' + town).toLowerCase(); if(seen.has(key)) continue; seen.add(key);
-        addrItems.push({ street: [pr.housenumber || num, street].filter(Boolean).join(' '), town, zip });
+        addrItems.push({ street: [pr.housenumber || num, street].filter(Boolean).join(' '), town: town || 'Valley County', zip });
         if(addrItems.length >= 5) break;
       }
       drawAddr();
@@ -1423,8 +1432,16 @@ function drawAddr(){
   addrIdx = -1;
   if(!addrItems.length){ closeAddr(); return; }
   ul.innerHTML = addrItems.map((a,i)=>`<li role="option" id="addr-${i}" aria-selected="false" onmousedown="event.preventDefault();pickAddr(${i})">
-    <span class="a-st">${esc(a.street)}</span><span class="a-tw">${esc([a.town, a.zip].filter(Boolean).join(' '))}</span></li>`).join('');
+    <span class="a-st">${hlStreet(a.street)}</span><span class="a-tw">${esc([a.town, a.zip].filter(Boolean).join(' '))}</span></li>`).join('');
   ul.hidden = false; inp.setAttribute('aria-expanded','true');
+}
+// "412 Davis Avenue" with the typed word-starts in bold: 412 <b>Dav</b>is Avenue
+function hlStreet(text){
+  return String(text).split(/(\s+)/).map(w=>{
+    const lw = w.toLowerCase().replace(/[^a-z0-9]/g, '');
+    const t = addrQuery.filter(t=> lw && lw.startsWith(t)).sort((a,b)=>b.length-a.length)[0];
+    return t ? `<b>${esc(w.slice(0, t.length))}</b>${esc(w.slice(t.length))}` : esc(w);
+  }).join('');
 }
 function closeAddr(){
   const ul = document.getElementById('addrList'), inp = document.getElementById('f-address');

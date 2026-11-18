@@ -52,6 +52,15 @@ Deno.serve(async (req) => {
     const body = await req.json();
     bookingId = String(body.booking_id || "");
     embedded = body.embedded === true;   // in-page checkout instead of a redirect
+    // The booking page reports why the in-page form failed; just log it.
+    if (body.client_error) {
+      console.error("embedded checkout failed", JSON.stringify({
+        booking: bookingId.slice(0, 36),
+        error: String(body.client_error).slice(0, 300),
+        ua: String(body.ua || "").slice(0, 200),
+      }));
+      return new Response(null, { status: 204, headers: cors(origin) });
+    }
   } catch { /* bad body */ }
   if (!/^[0-9a-f-]{36}$/i.test(bookingId)) return json({ error: "bad_booking" }, 400, origin);
 

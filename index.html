@@ -1861,9 +1861,25 @@ function loadStripe(){
   return stripeLoad;
 }
 function unmountPay(){ if(payCheckout){ try{ payCheckout.destroy(); }catch(e){} payCheckout = null; } }
+// Tell the server log why the in-page form didn't work (browser + error), for debugging.
+function reportPayError(id, err){
+  try{
+    fetch(DEPOSIT_FN, {method:'POST', headers:{'Content-Type':'application/json'}, keepalive:true,
+      body: JSON.stringify({booking_id:id, client_error: String(err && (err.message || err) || 'unknown').slice(0,300), ua: navigator.userAgent.slice(0,200)})});
+  }catch(e){}
+}
 async function mountPay(){
   const area = document.getElementById('payMount'), id = state.bookingId;
-  const fail = ()=>{ if(state.step==='pay'){ unmountPay(); go(7); } };   // falls back to "we'll text you a link"
+  let gaveUp = false;
+  // In-page form failed: go to Stripe's own checkout page instead. Only if that
+  // can't open either do we fall back to "we'll text you a link".
+  const fail = async (err)=>{
+    if(gaveUp || state.step!=='pay') return; gaveUp = true;
+    reportPayError(id, err); unmountPay();
+    if(area){ area.classList.add('loading'); area.innerHTML = '<span>Opening secure checkout…</span>'; }
+    if(await startDeposit(id)) return;
+    if(state.step==='pay') go(7);
+  };
   try{
     const stripe = await loadStripe();
     const fetchClientSecret = async ()=>{
@@ -1879,8 +1895,11 @@ async function mountPay(){
     });
     if(state.step!=='pay' || !area || !document.body.contains(area)){ unmountPay(); return; }
     area.classList.remove('loading');
+    area.innerHTML = '';
     payCheckout.mount(area);
-  }catch(e){ fail(); }
+    // Some browsers (privacy blockers) accept the form but never draw it.
+    setTimeout(()=>{ if(state.step==='pay' && !gaveUp && !area.querySelector('iframe')) fail(new Error('checkout never rendered')); }, 8000);
+  }catch(e){ fail(e); }
 }
 // Leaving the pay step without paying: the booking is saved, so say so.
 function skipPay(){ unmountPay(); go(7); }

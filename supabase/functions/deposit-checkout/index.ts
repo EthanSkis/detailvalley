@@ -91,7 +91,10 @@ Deno.serve(async (req) => {
     "line_items[0][price_data][currency]": "usd",
     "line_items[0][price_data][unit_amount]": String(amount * 100),
     "line_items[0][price_data][product_data][name]": "Spring lock-in deposit",
-    "line_items[0][price_data][product_data][description]": `${pkgName} on ${when}. Comes off your total on the day.`,
+    "line_items[0][price_data][product_data][description]": `${pkgName} on ${when}`,
+    "line_items[0][price_data][product_data][images][0]": `${SITE}/logo.png`,
+    submit_type: "book",   // button reads "Book" instead of "Pay"
+    "custom_text[submit][message]": "Comes off your total on the day. Moves free with 48 hours' notice; weather reschedules are always free.",
   });
   if (embedded) {
     // Embedded Checkout: stays on the booking page; only payment methods that

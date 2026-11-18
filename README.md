@@ -131,7 +131,11 @@ site runs a "lock in this year's price" offer:
 - **Early bird.** Bookings made before Dec 25 get a free engine bay wipe-down
   (`EARLY_BIRD_ENDS` / `FREE_ADDON` in `index.html`).
 - **Calendar.** `OPEN_FROM = '2027-04-01'`, and while the lock-in is on the
-  calendar shows 60 days (April and May) instead of 21.
+  calendar shows April through June (91 days) instead of 21.
+- **School and track.** Until `SCHOOL_OUT` (May 22, 2027) only Sundays are
+  bookable. Saturdays stay closed for track meets; once the meet schedule is out,
+  add each free Saturday to `OPEN_SATURDAYS` in `index.html` (`'2027-04-10'` form).
+  From May 22 every day in `HOURS` is open.
 - **Banner.** A navy banner under the nav pitches the offer and shows
   "X of 20 spring spots booked" (`LOCKIN_GOAL`), counted from the calendar's
   booked slots. The bar stays hidden until 3 are booked (`LOCKIN_SHOW_FROM`).

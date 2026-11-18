@@ -669,6 +669,10 @@
     .lockin-prog{flex:1 1 0;min-width:0}
     .lockin-btn{padding:10px 16px}
   }
+  .dep-notice{background:#e3f4e8;color:#123b22}
+  .dep-notice>p,.dep-notice>button{max-width:1200px}
+  .dep-notice{padding:14px 20px;display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:10px 20px;font-size:.95rem;line-height:1.45;text-align:center}
+  .dep-notice[hidden]{display:none}
   .lockin[hidden],.lockin-prog[hidden],.pkg-later[hidden],.lockin-copy .eb[hidden]{display:none}
 </style>
 </head>
@@ -688,6 +692,9 @@
     <button class="btn nav-btn" onclick="openBooking()">Book a detail</button>
   </div>
 </nav>
+
+<!-- Shown after returning from Stripe checkout. -->
+<div class="dep-notice" id="depNotice" role="status" hidden></div>
 
 <!-- Spring lock-in banner. Hidden automatically once prices go up (dv-pricing.js). -->
 <aside class="lockin" id="lockin" aria-label="Spring booking">
@@ -923,7 +930,7 @@
       </details>
       <details>
         <summary>Do I pay a deposit to book?</summary>
-        <p>Only to lock in a spring date before April 1. A $50 deposit ($25 for a Maintenance Wash) holds your date at this year's price and comes off your total. We text you to collect it. It moves free if you reschedule with 48 hours' notice or the weather turns; you only lose it for a no-show or a cancel under 48 hours. From April 1 there's no deposit: you book, we do the work, you look the car over, and then you pay: cash, check, cards, Venmo, PayPal or Cash App.</p>
+        <p>Only to lock in a spring date before April 1. A $50 deposit ($25 for a Maintenance Wash) holds your date at this year's price and comes off your total. You pay it by card when you book. It moves free if you reschedule with 48 hours' notice or the weather turns; you only lose it for a no-show or a cancel under 48 hours. From April 1 there's no deposit: you book, we do the work, you look the car over, and then you pay: cash, check, cards, Venmo, PayPal or Cash App.</p>
       </details>
       <details>
         <summary>Do you detail in winter?</summary>
@@ -1578,13 +1585,13 @@ function render(){
       </div></div>
       ${LOCK_IN ? `<div class="bk-card tight bk-lock">
         <div class="bk-line"><span><b>$${deposit()} deposit</b> holds your date at this year's price</span></div>
-        <p class="bk-lock-p">We'll text you to collect it (Venmo, Cash App, PayPal or card). It comes off your total. Need to move? Give us 48 hours' notice and it moves with you, free. Weather reschedules are always free. A no-show or a cancel under 48 hours keeps the deposit. If we cancel, you get it back.</p>
+        <p class="bk-lock-p">You'll pay it by card on the next screen, through Stripe. It comes off your total. Need to move? Give us 48 hours' notice and it moves with you, free. Weather reschedules are always free. A no-show or a cancel under 48 hours keeps the deposit. If we cancel, you get it back.</p>
       </div>` : ''}
       <p id="confirmErr" class="form-err" hidden></p>
       <p class="bk-legal">By confirming, you agree to our <a href="/terms" target="_blank" rel="noopener">terms</a> and to get texts about this booking. Reply STOP to opt out. <a href="/privacy" target="_blank" rel="noopener">Privacy</a></p>
     `, `<div class="bk-foot keep-tot">
       <div class="bk-tot"><span>${LOCK_IN ? `$${deposit()} now · rest after` : 'Pay after the job'}</span><b>$${total()}</b></div>
-      <button class="bk-go" id="confirmBtn" onclick="submitBooking()">${LOCK_IN ? 'Lock in my date' : 'Confirm booking'}</button>
+      <button class="bk-go" id="confirmBtn" onclick="submitBooking()">${LOCK_IN ? `Book &amp; pay $${deposit()} deposit` : 'Confirm booking'}</button>
     </div>`);
   }
   else if(state.step===7){
@@ -1595,7 +1602,7 @@ function render(){
       <div class="bk-tick" aria-hidden="true"></div>
       <h2 class="bk-done-h">${LOCK_IN ? 'Your spring date is held' : "You're booked in"}</h2>
       <p class="bk-done-p">${LOCK_IN
-        ? `We'll text ${esc(state.phone)||'you'} within a day to collect your $${deposit()} deposit. Once it's in, your date and this year's price are locked.`
+        ? `Payment couldn't open just now, so we'll text ${esc(state.phone)||'you'} a link for your $${deposit()} deposit. Once it's in, your date and this year's price are locked.`
         : `We'll text ${esc(state.phone)||'you'} to confirm. Nothing to pay until the work's done.`}</p>
       <div class="bk-card">
         <div class="bk-line"><span class="k">When</span><span class="v">${fmtDay(state.slot.instant)} · ${fmtTime(state.slot.instant)}</span></div>
@@ -1786,7 +1793,8 @@ async function submitBooking(){
   if(!sb) return showErr(err, `Booking is offline right now — call or text ${BIZ_PHONE}.`);
   submitting = true; if(btn){ btn.disabled=true; btn.textContent='Booking…'; }
   const sz = SIZES.find(s=>s.id===state.size);
-  const { error } = await sb.from('bookings').insert({
+  const bookingId = (crypto.randomUUID ? crypto.randomUUID() : null);
+  const row = {
     slot_start: state.slot.iso,
     package: PACKAGES.find(p=>p.id===state.pkg).name + (sz ? ` · ${sz.name}` : '') + (state.utilities!=='yes' ? ` · ⚠ Water/power: ${state.utilities==='no'?'NOT available':'unsure'}` : '') + (LOCK_IN ? ` · 🔒 Lock-in: $${deposit()} deposit due` : ''),
     addons: chosenAddons().map(a=>ADDONS.find(x=>x.id===a).name + (isFree(a) ? ' (free, early bird)' : '')),
@@ -1797,8 +1805,10 @@ async function submitBooking(){
     total_usd: total(),
     duration_min: jobMinutes(),
     status: 'pending'
-  });
-  submitting = false; if(btn){ btn.disabled=false; btn.textContent='Confirm booking'; }
+  };
+  if(bookingId) row.id = bookingId;   // so the deposit checkout can find this booking
+  const { error } = await sb.from('bookings').insert(row);
+  submitting = false; if(btn){ btn.disabled=false; btn.textContent = LOCK_IN ? `Book & pay $${deposit()} deposit` : 'Confirm booking'; }
   if(error){
     if(error.code==='23505' || error.code==='23P01'){
       takenCache = null;   // our cached availability was out of date
@@ -1810,8 +1820,42 @@ async function submitBooking(){
     return;
   }
   takenCache = null;
-  go(7);
+  if(LOCK_IN && bookingId){
+    if(btn){ btn.disabled = true; btn.textContent = 'Opening payment…'; }
+    const ok = await startDeposit(bookingId);
+    if(ok) return;                 // on our way to Stripe
+  }
+  go(7);                           // no deposit, or payment couldn't open: we'll text instead
 }
+
+/* ---------- Deposit checkout (Stripe, via the deposit-checkout function) ---------- */
+const DEPOSIT_FN = SUPABASE_URL + '/functions/v1/deposit-checkout';
+async function startDeposit(id){
+  try{
+    const r = await fetch(DEPOSIT_FN, {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({booking_id:id})});
+    const d = await r.json().catch(()=>({}));
+    if(r.ok && d.url){ window.location.href = d.url; return true; }
+  }catch(e){}
+  return false;
+}
+/* Back from Stripe: ?deposit=paid, or ?deposit=cancelled&b=<booking id>. */
+(function(){
+  const q = new URLSearchParams(location.search), dep = q.get('deposit');
+  if(!dep) return;
+  const box = document.getElementById('depNotice');
+  if(!box) return;
+  const id = q.get('b');
+  if(dep === 'paid'){
+    box.innerHTML = `<p><b>Deposit received. You're locked in.</b> We'll text you to confirm your date. See you in the spring!</p>`;
+  } else if(dep === 'cancelled' && id && /^[0-9a-f-]{36}$/i.test(id)){
+    box.innerHTML = `<p><b>Your date is saved, but the deposit isn't paid yet.</b> Pay it now to lock in this year's price, or we'll text you a link.</p>
+      <button class="lockin-btn" id="depRetry">Pay deposit</button>`;
+    const b = document.getElementById('depRetry');
+    b.onclick = async ()=>{ b.disabled = true; b.textContent = 'Opening…'; if(!(await startDeposit(id))){ b.disabled = false; b.textContent = 'Pay deposit'; } };
+  } else return;
+  box.hidden = false;
+  history.replaceState(null, '', location.pathname + location.hash);
+})();
 
 /* Spring lock-in on the page: swap in live prices, hide lock-in copy once the
    increase is live, and fill the banner's progress bar from the calendar. */

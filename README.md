@@ -163,9 +163,16 @@ Deposits are taken with Stripe Checkout, driven by two Supabase Edge Functions
   PaymentIntent with Stripe before marking the booking paid. Repeat intent calls
   for one booking return the same PaymentIntent (idempotency key), so nobody is
   charged twice. If the form can't load (some privacy browsers), the page falls
-  back to Stripe's hosted Checkout page; that's also what `/?deposit=cancelled&b=<id>`
-  and the job board's **Copy pay link** use. Load failures are logged by the
-  function (`client_error`).
+  back to Stripe's hosted Checkout page (expires in 31 minutes). Load failures
+  are logged by the function (`client_error`).
+- **Holds, not bookings, until paid.** During the lock-in the deposit is step 7
+  of the booking flow. Saving a lock-in booking only *holds* the time: backing
+  out of the deposit step, closing the popup or the tab, or cancelling on
+  Stripe's page releases it (`action: "release"`, which also cancels the
+  PaymentIntent). Holds left unpaid for 35 minutes are released automatically
+  (`expire_unpaid_holds()`, run before every new booking and by the function)
+  and the calendar treats them as free. The owner email for a lock-in booking
+  is sent when its deposit is paid, not when the hold is made.
 - **`stripe-webhook`**: Stripe calls it when a checkout completes; it verifies
   the signature and sets `deposit_paid_usd`, `deposit_paid_at` and
   `stripe_session_id` on the booking. Visitors can't set those columns

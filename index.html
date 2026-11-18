@@ -337,7 +337,7 @@
   .bk-ic svg{width:18px;height:18px;display:block}
   .bk-ic-gap{width:44px;height:44px;flex:none}
   .bk-step{font-size:.88rem;font-weight:500;color:var(--mute);text-align:center}
-  .bk-prog{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:4px;padding:4px 12px 0}
+  .bk-prog{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(0,1fr);gap:4px;padding:4px 12px 0}
   .bk-prog span{height:4px;border-radius:2px;background:var(--rule);transition:background-color .25s var(--ease)}
   .bk-prog span.on{background:var(--text)}
 
@@ -674,6 +674,7 @@
   .pay-sum .bk-line.m{color:var(--mute)}
   .pay-fine{margin:4px 0 0;font-size:.82rem;line-height:1.45;color:var(--mute)}
   .pay-mount.loading{display:flex;align-items:center;justify-content:center;border:1px dashed var(--rule-2);border-radius:12px;color:var(--mute);font-size:.92rem}
+  .pay-mount a{color:inherit}
   .bk-skip{display:block;margin:4px auto 0;background:none;border:none;color:var(--mute);font:inherit;font-size:.9rem;text-decoration:underline;cursor:pointer;min-height:44px;padding:0 12px}
   .dep-notice{background:#e3f4e8;color:#123b22}
   .dep-notice>p,.dep-notice>button{max-width:1200px}
@@ -1307,6 +1308,7 @@ function openBooking(pre){
 let closeTimer = null;
 const reduceMotion = window.matchMedia ? window.matchMedia('(prefers-reduced-motion: reduce)') : {matches:false};
 function closeBooking(){
+  if(state.step==='pay' && !state.depositPaid) releaseHold();
   unmountPay();
   document.body.classList.remove('modal-open');
   document.body.style.top = '';
@@ -1399,20 +1401,21 @@ function stashDetails(){
 }
 function go(step){
   if(state.step===5) stashDetails();
-  if(state.step==='pay' && step!=='pay') unmountPay();
+  if(state.step==='pay' && step!=='pay'){ unmountPay(); if(!state.depositPaid) releaseHold(); }
   state.step=step; render();
   if(step===4) loadSlots();
   if(step==='pay') mountPay();
 }
 function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
-const STEP_LABELS = {1:'Service', 2:'Vehicle', 3:'Extras', 4:'Day & time', 5:'Your details', 6:'Review'};
+const STEP_LABELS = {1:'Service', 2:'Vehicle', 3:'Extras', 4:'Day & time', 5:'Your details', 6:'Review', 7:'Deposit'};
+const STEP_COUNT = () => LOCK_IN ? 7 : 6;
 const IC_BACK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>';
 const IC_CLOSE = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>';
 function topBar(n, fwd){
-  const segs = [1,2,3,4,5,6].map(i=>`<span class="${i<n || (i===n && !fwd) ? 'on' : (i===n ? 'now' : '')}"></span>`).join('');
+  const segs = Array.from({length:STEP_COUNT()}, (_, k)=>k+1).map(i=>`<span class="${i<n || (i===n && !fwd) ? 'on' : (i===n ? 'now' : '')}"></span>`).join('');
   return `<div class="bk-head"><div class="bk-head-row">`+
     (n>1 ? `<button class="bk-ic" onclick="go(${n-1})" aria-label="Back">${IC_BACK}</button>` : `<span class="bk-ic-gap"></span>`)+
-    `<span class="bk-step">Step ${n} of 6 · ${STEP_LABELS[n]}</span>`+
+    `<span class="bk-step">Step ${n} of ${STEP_COUNT()} · ${STEP_LABELS[n]}</span>`+
     `<button class="bk-ic" onclick="closeBooking()" aria-label="Close booking">${IC_CLOSE}</button></div>`+
     `<div class="bk-prog" aria-hidden="true">${segs}</div></div>`;
 }
@@ -1450,8 +1453,9 @@ inner.addEventListener('click', e=>{
 let lastStep = 0;
 function sheet(n, body, foot){
   tapGuard();
-  const dir = state.step >= lastStep ? 'fwd' : 'back';
-  lastStep = state.step;
+  const stepNum = state.step==='pay' ? 7 : state.step;   // the deposit step comes after review
+  const dir = stepNum >= lastStep ? 'fwd' : 'back';
+  lastStep = stepNum;
   inner.classList.toggle('done', !n);
   inner.innerHTML = `<div class="bk-main">`
     + (n ? topBar(n, dir==='fwd') : `<div class="bk-done-top"><button class="bk-ic" onclick="closeBooking()" aria-label="Close booking">${IC_CLOSE}</button></div>`)
@@ -1594,34 +1598,23 @@ function render(){
       </div></div>
       ${LOCK_IN ? `<div class="bk-card tight bk-lock">
         <div class="bk-line"><span><b>$${deposit()} deposit</b> holds your date at this year's price</span></div>
-        <p class="bk-lock-p">You'll pay it right here on the next screen (card, Apple Pay or Google Pay). It comes off your total. Need to move? Give us 48 hours' notice and it moves with you, free. Weather reschedules are always free. A no-show or a cancel under 48 hours keeps the deposit. If we cancel, you get it back.</p>
+        <p class="bk-lock-p">You'll pay it on the next step (card, Apple Pay or Google Pay); your date is booked once it's paid. It comes off your total. Need to move? Give us 48 hours' notice and it moves with you, free. Weather reschedules are always free. A no-show or a cancel under 48 hours keeps the deposit. If we cancel, you get it back.</p>
       </div>` : ''}
       <p id="confirmErr" class="form-err" hidden></p>
       <p class="bk-legal">By confirming, you agree to our <a href="/terms" target="_blank" rel="noopener">terms</a> and to get texts about this booking. Reply STOP to opt out. <a href="/privacy" target="_blank" rel="noopener">Privacy</a></p>
     `, `<div class="bk-foot keep-tot">
       <div class="bk-tot"><span>${LOCK_IN ? `$${deposit()} now · rest after` : 'Pay after the job'}</span><b>$${total()}</b></div>
-      <button class="bk-go" id="confirmBtn" onclick="submitBooking()">${LOCK_IN ? `Book &amp; pay $${deposit()} deposit` : 'Confirm booking'}</button>
+      <button class="bk-go" id="confirmBtn" onclick="submitBooking()">${LOCK_IN ? 'Continue to deposit' : 'Confirm booking'}</button>
     </div>`);
   }
   else if(state.step==='pay'){
-    const p = PACKAGES.find(x=>x.id===state.pkg);
-    sheet(0, `
-      <h2 class="bk-done-h">Lock in your date</h2>
-      <p class="bk-done-p">Your date is saved. Pay the deposit to keep this year's price.</p>
-      <div class="bk-card tight pay-sum">
-        <div class="bk-line"><span>${p.name} · ${fmtDay(state.slot.instant)}</span><b>$${total()}</b></div>
-        <div class="bk-line"><span>Deposit today</span><b>$${deposit()}</b></div>
-        <div class="bk-line m"><span>Due after the job</span><span>$${total()-deposit()}</span></div>
-      </div>
+    sheet(7, `
+      <h2 class="bk-title">Pay your deposit</h2>
+      <p class="bk-intro">$${deposit()} books ${fmtDay(state.slot.instant)} at this year's price. It comes off your total.</p>
       <div id="payMount" class="pay-mount loading"><span>Loading secure payment…</span></div>
       <p id="payErr" class="form-err" role="alert" hidden></p>
-      <p class="pay-fine">Comes off your total. Moves free with 48 hours' notice, and weather reschedules are always free. Card details are handled securely by Stripe.</p>
-      <button class="bk-skip" onclick="skipPay()">Pay later instead</button>
-    `, `<div class="bk-foot keep-tot">
-      <div class="bk-tot"><span>Due today</span><b>$${deposit()}</b></div>
-      <button class="bk-go" id="payBtn" onclick="submitPay()" disabled>Pay $${deposit()} &amp; lock in</button>
-    </div>`);
-    const x = inner.querySelector('.bk-done-top .bk-ic'); if(x) x.setAttribute('onclick','skipPay()');
+    `, `<div class="bk-foot"><div class="bk-tot"><span>Due today</span><b>$${deposit()}</b></div>
+      <button class="bk-go" id="payBtn" onclick="submitPay()" disabled>Pay $${deposit()} &amp; book</button></div>`);
   }
   else if(state.step===7){
     const p = PACKAGES.find(x=>x.id===state.pkg);
@@ -1823,6 +1816,7 @@ async function submitBooking(){
   if(state.hp){ go(7); return; }                       // honeypot: bot, skip silently
   if(!sb) return showErr(err, `Booking is offline right now — call or text ${BIZ_PHONE}.`);
   submitting = true; if(btn){ btn.disabled=true; btn.textContent='Booking…'; }
+  await releasing;   // a hold we just released must be gone before re-booking the same time
   const sz = SIZES.find(s=>s.id===state.size);
   const bookingId = (crypto.randomUUID ? crypto.randomUUID() : null);
   const row = {
@@ -1839,7 +1833,7 @@ async function submitBooking(){
   };
   if(bookingId) row.id = bookingId;   // so the deposit checkout can find this booking
   const { error } = await sb.from('bookings').insert(row);
-  submitting = false; if(btn){ btn.disabled=false; btn.textContent = LOCK_IN ? `Book & pay $${deposit()} deposit` : 'Confirm booking'; }
+  submitting = false; if(btn){ btn.disabled=false; btn.textContent = LOCK_IN ? 'Continue to deposit' : 'Confirm booking'; }
   if(error){
     if(error.code==='23505' || error.code==='23P01'){
       takenCache = null;   // our cached availability was out of date
@@ -1869,11 +1863,12 @@ const PAY_APPEARANCE = {
     colorPrimary: '#a4521f', colorText: '#0b2a45', colorTextSecondary: '#3d566b',
     colorTextPlaceholder: '#8497a8', colorBackground: '#ffffff', colorDanger: '#b3261e',
     fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
-    fontSizeBase: '16px', borderRadius: '10px', spacingUnit: '4px', gridRowSpacing: '14px'
+    fontSizeBase: '16px', borderRadius: '10px', spacingUnit: '4px', gridRowSpacing: '12px'
   },
+  labels: 'floating',
   rules: {
-    '.Label': { fontWeight: '500', color: '#0b2a45', marginBottom: '6px' },
-    '.Input': { border: '1px solid #c9d2da', boxShadow: 'none', padding: '12px 14px' },
+    '.Label': { fontWeight: '500', color: '#3d566b' },
+    '.Input': { border: '1px solid #c9d2da', boxShadow: 'none' },
     '.Input:focus': { borderColor: '#0b2a45', boxShadow: '0 0 0 3px rgba(11,42,69,.12)' },
     '.Input--invalid': { borderColor: '#b3261e', boxShadow: 'none' },
     '.Tab': { border: '1px solid #c9d2da', boxShadow: 'none' },
@@ -1915,7 +1910,10 @@ async function mountPay(){
     reportPayError(id, err); unmountPay();
     if(area){ area.classList.add('loading'); area.innerHTML = '<span>Opening secure checkout…</span>'; }
     if(await startDeposit(id)) return;
-    if(state.step==='pay') go(7);
+    if(state.step==='pay'){
+      releaseHold();
+      if(area) area.innerHTML = `<span>Payment couldn't load, so your date wasn't booked. Text <a href="sms:+12083151420">${BIZ_PHONE}</a> and we'll get you set up.</span>`;
+    }
   };
   try{
     const [stripe, d] = await Promise.all([
@@ -1933,6 +1931,7 @@ async function mountPay(){
     payEl = payElements.create('payment', {
       layout: { type: 'tabs' },
       defaultValues: { billingDetails: { name: state.name, phone: state.phone } },
+      fields: { billingDetails: { address: { country: 'never' } } },   // US only; ZIP still asked
       wallets: { applePay: 'auto', googlePay: 'auto', link: 'never' }
     });
     payEl.on('ready', ()=>{
@@ -1955,15 +1954,24 @@ async function submitPay(){
   payError('');
   const id = state.bookingId;
   try{
+    const chk = await fetch(DEPOSIT_FN, {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({booking_id:id, action:'status'})});
+    if(chk.status === 409){
+      payError('This hold expired, so nothing was charged. Go back and pick your time again.');
+      if(btn){ btn.textContent = 'Hold expired'; }
+      return;
+    }
     const { error, paymentIntent } = await payStripe.confirmPayment({
       elements: payElements,
       // Only used by payment steps that need a bank page (3-D Secure etc.).
-      confirmParams: { return_url: `${location.origin}/?deposit=paid&b=${id}` },
+      confirmParams: {
+        return_url: `${location.origin}/?deposit=paid&b=${id}`,
+        payment_method_data: { billing_details: { address: { country: 'US' } } }
+      },
       redirect: 'if_required'
     });
     if(error){
       payError(error.type === 'card_error' || error.type === 'validation_error'
-        ? error.message : 'Something went wrong with the payment. Try again, or tap "Pay later instead".');
+        ? error.message : 'Something went wrong with the payment. Please try again.');
       paying = false; if(btn){ btn.disabled = false; btn.innerHTML = label; }
       return;
     }
@@ -1973,9 +1981,9 @@ async function submitPay(){
       state.depositPaid = true; unmountPay(); go(7);
       return;
     }
-    payError('The payment didn\'t go through. Try again, or tap "Pay later instead".');
+    payError('The payment didn\'t go through. Please try again.');
   }catch(e){
-    payError('Something went wrong with the payment. Try again, or tap "Pay later instead".');
+    payError('Something went wrong with the payment. Please try again.');
   }
   paying = false; if(btn){ btn.disabled = false; btn.innerHTML = label; }
 }
@@ -1983,8 +1991,21 @@ function confirmDeposit(id, pi){
   return fetch(DEPOSIT_FN, {method:'POST', headers:{'Content-Type':'application/json'}, keepalive:true,
     body: JSON.stringify({booking_id:id, action:'confirm', payment_intent:pi})}).catch(()=>{});
 }
-// Leaving the pay step without paying: the booking is saved, so say so.
-function skipPay(){ unmountPay(); go(7); }
+// Leaving the pay step without paying frees the date again.
+let releasing = Promise.resolve(), leavingForStripe = false;
+function releaseHold(id){
+  id = id || state.bookingId;
+  if(!id) return releasing;
+  if(id === state.bookingId) state.bookingId = null;   // release once
+  takenCache = null;
+  try{
+    releasing = fetch(DEPOSIT_FN, {method:'POST', headers:{'Content-Type':'application/json'}, keepalive:true,
+      body: JSON.stringify({booking_id:id, action:'release'})}).then(()=>{}, ()=>{});
+  }catch(e){}
+  return releasing;
+}
+// Closing the tab mid-payment frees the date too (not when heading to Stripe's page).
+window.addEventListener('pagehide', ()=>{ if(state.step==='pay' && !state.depositPaid && !leavingForStripe) releaseHold(); });
 
 /* ---------- Deposit checkout (Stripe, via the deposit-checkout function) ---------- */
 const DEPOSIT_FN = SUPABASE_URL + '/functions/v1/deposit-checkout';
@@ -1992,7 +2013,7 @@ async function startDeposit(id){
   try{
     const r = await fetch(DEPOSIT_FN, {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({booking_id:id})});
     const d = await r.json().catch(()=>({}));
-    if(r.ok && d.url){ window.location.href = d.url; return true; }
+    if(r.ok && d.url){ leavingForStripe = true; window.location.href = d.url; return true; }
   }catch(e){}
   return false;
 }
@@ -2008,10 +2029,10 @@ async function startDeposit(id){
     if(id && pi && /^[0-9a-f-]{36}$/i.test(id)) confirmDeposit(id, pi);
     box.innerHTML = `<p><b>Deposit received. You're locked in.</b> We'll text you to confirm your date. See you in the spring!</p>`;
   } else if(dep === 'cancelled' && id && /^[0-9a-f-]{36}$/i.test(id)){
-    box.innerHTML = `<p><b>Your date is saved, but the deposit isn't paid yet.</b> Pay it now to lock in this year's price, or we'll text you a link.</p>
-      <button class="lockin-btn" id="depRetry">Pay deposit</button>`;
-    const b = document.getElementById('depRetry');
-    b.onclick = async ()=>{ b.disabled = true; b.textContent = 'Opening…'; if(!(await startDeposit(id))){ b.disabled = false; b.textContent = 'Pay deposit'; } };
+    releaseHold(id);
+    box.innerHTML = `<p><b>Payment cancelled, so nothing was charged and your date wasn't booked.</b></p>
+      <button class="lockin-btn" id="depRetry">Book again</button>`;
+    document.getElementById('depRetry').onclick = ()=>{ box.hidden = true; openBooking(); };
   } else return;
   box.hidden = false;
   history.replaceState(null, '', location.pathname + location.hash);

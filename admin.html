@@ -888,12 +888,8 @@ const pkgText = j => basePkg(j).replace(/·\s*⚠[^·]*$/,'').trim();
 function depositHtml(j){
   if(j.deposit_paid_at) return `<p class="dep dep-paid">Deposit ${money(j.deposit_paid_usd||0)} paid</p>`;
   const due = lockText(j).match(/\$(\d+)/);
-  return due ? `<p class="dep dep-due">Deposit $${due[1]} due</p> <button class="dep-link" onclick="copyPayLink('${j.id}')">Copy pay link</button>` : '';
+  return due ? `<p class="dep dep-due">${j.status==='cancelled' ? 'Deposit not paid' : `Deposit $${due[1]} due (paying now)`}</p>` : '';
 }
-/* A link the customer can pay the deposit from (opens Stripe from the homepage). */
-async function copyPayLink(id){
-  const url = `https://detailvalley.com/?deposit=cancelled&b=${id}`;
-  try{ await navigator.clipboard.writeText(url); toast('Pay link copied. Paste it in a text.'); }
   catch(e){ prompt('Copy this pay link:', url); }
 }
 const pkgName = j => pkgText(j).split('·')[0].trim();

@@ -303,6 +303,9 @@
   .pay svg.v-word{width:auto;height:14px}
   @media(min-width:640px){.pay-row{grid-template-columns:repeat(6,max-content)}}
   .foot-bottom{max-width:1200px;margin:0 auto;padding:16px 20px 32px;border-top:1px solid var(--rule);font-size:.82rem;color:var(--mute)}
+  .foot-bottom a{color:var(--mute)}
+  .bk-legal{font-size:.8rem;color:var(--mute);text-align:center;margin:8px 0 0}
+  .bk-legal a{color:var(--mute)}
 
   /* ---------- BOOKING FLOW ---------- */
   /* Full-screen on phones; a centered two-column dialog (steps + live summary)
@@ -987,7 +990,7 @@
       </span>
     </div>
   </div>
-  <div class="foot-bottom">© 2026 Detail Valley · Valley County, ID</div>
+  <div class="foot-bottom">© 2026 Detail Valley · Valley County, ID · <a href="/terms">Terms</a> · <a href="/privacy">Privacy</a></div>
 </footer>
 
 <div class="mobile-cta">
@@ -1481,6 +1484,7 @@ function render(){
         <button class="bk-change" onclick="go(5)">Change</button>
       </div></div>
       <p id="confirmErr" class="form-err" hidden></p>
+      <p class="bk-legal">By confirming, you agree to our <a href="/terms" target="_blank" rel="noopener">terms</a> and to get texts about this booking. Reply STOP to opt out. <a href="/privacy" target="_blank" rel="noopener">Privacy</a></p>
     `, `<div class="bk-foot keep-tot">
       <div class="bk-tot"><span>Pay after the job</span><b>$${total()}</b></div>
       <button class="bk-go" id="confirmBtn" onclick="submitBooking()">Confirm booking</button>

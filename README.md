@@ -122,10 +122,10 @@ site runs a "lock in this year's price" offer:
   midnight April 1 (Mountain Time) the new prices switch on by themselves in the
   booking flow, the quoting tool and the homepage package cards. Nothing to edit.
 - **Deposit.** Bookings made before April 1 hold the date with a deposit: $50,
-  or $25 for a Maintenance Wash. There's no online payment, so it's collected by
-  text after booking. Those bookings show up on the job board with
-  `🔒 Lock-in: $X deposit due` in the package line; note "deposit paid" on the
-  booking once it's in. Rules (also in `terms.html` §3): comes off the total,
+  or $25 for a Maintenance Wash, paid by card through Stripe right after booking
+  (see [Stripe deposits](#stripe-deposits)). The job board shows each lock-in
+  booking's deposit as **due** or **paid**. If checkout can't open, the customer
+  is told you'll text them a link. Rules (also in `terms.html` §3): comes off the total,
   moves free with 48 hours' notice or for weather, kept for a no-show or a cancel
   under 48 hours, refunded if we cancel. From April 1 there's no deposit.
 - **Early bird.** Bookings made before Dec 25 get a free engine bay wipe-down
@@ -147,6 +147,33 @@ site runs a "lock in this year's price" offer:
 tidy up: set the `increase` prices as the main prices in `dv-pricing.js` (and
 delete `increase`), and update the static `$85`/`$295`/… fallback text in the
 homepage package cards.
+
+## Stripe deposits
+
+Deposits are taken with Stripe Checkout, driven by two Supabase Edge Functions
+(source in `supabase/functions/`, deployed to the Detail Valley Backend project):
+
+- **`deposit-checkout`**: the booking page calls it with the new booking's id.
+  It looks the booking up, works out the deposit itself ($25 Maintenance Wash,
+  $50 otherwise), and returns a Stripe Checkout link. Customers who back out land
+  on `/?deposit=cancelled&b=<id>` with a "Pay deposit" button to try again.
+- **`stripe-webhook`**: Stripe calls it when a checkout completes; it verifies
+  the signature and sets `deposit_paid_usd`, `deposit_paid_at` and
+  `stripe_session_id` on the booking. Visitors can't set those columns
+  themselves (a trigger clears them on public inserts).
+
+**One-time setup**
+1. Stripe dashboard → Developers → API keys: copy the **secret key**
+   (`sk_test_…` to try it out, `sk_live_…` for real money).
+2. Stripe → Developers → Webhooks → **Add endpoint**:
+   `https://utybbdrthxgsijplowup.supabase.co/functions/v1/stripe-webhook`,
+   event **`checkout.session.completed`**. Copy its **signing secret** (`whsec_…`).
+3. Supabase dashboard → Edge Functions → **Secrets**: add
+   `STRIPE_SECRET_KEY` and `STRIPE_WEBHOOK_SECRET`.
+
+Until both secrets are set, the booking flow still works: the customer is told
+you'll text them a payment link. Test mode and live mode have different keys and
+different webhook endpoints; switch both when you go live.
 
 ## Bookings (Supabase)
 

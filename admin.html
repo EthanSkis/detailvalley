@@ -194,6 +194,9 @@
   .addr .ico{margin-top:4px}
   .warn{background:var(--card-2);color:var(--amber);font-size:.875rem;line-height:1.4286;
     padding:8px 12px;border-radius:8px;margin-top:8px;font-weight:500}
+  .dep{display:inline-block;margin:4px 0 2px;font-size:.8rem;font-weight:700;padding:3px 10px;border-radius:999px}
+  .dep-paid{background:#e3f4e8;color:#1d6b34}
+  .dep-due{background:#fbf0e9;color:#8a3b12}
   textarea.notes{display:block;width:100%;margin-top:12px;padding:11px;border:1px solid var(--sep);
     border-radius:8px;font:inherit;font-size:.875rem;line-height:1.4286;color:var(--text);resize:vertical;
     min-height:44px;background:var(--card-2)}
@@ -874,8 +877,18 @@ function smsHref(j){
 const mapHref = j => 'https://maps.google.com/?q=' + encodeURIComponent(`${j.address}, ${j.town}, Idaho`);
 /* The booking form folds a water/power warning into the package text, after a
    warning sign. These split the two apart again. */
-const warnText = j => /Water\/power/i.test(j.package||'') ? j.package.split('·').pop().replace('⚠','').trim() : '';
-const pkgText = j => (j.package||'').replace(/·\s*⚠[^·]*$/,'').trim();
+/* Spring lock-in bookings also carry a "🔒 Lock-in: $50 deposit due" part; it is
+   peeled off first so it never reads as the warning or the vehicle size. */
+const lockText = j => ((j.package||'').match(/🔒[^·]*/)||[''])[0].trim();
+const basePkg = j => (j.package||'').replace(/\s*·\s*🔒[^·]*/,'');
+const warnText = j => /Water\/power/i.test(basePkg(j)) ? basePkg(j).split('·').pop().replace('⚠','').trim() : '';
+const pkgText = j => basePkg(j).replace(/·\s*⚠[^·]*$/,'').trim();
+/* Deposit line: paid (by Stripe) or still due. */
+function depositHtml(j){
+  if(j.deposit_paid_at) return `<p class="dep dep-paid">Deposit ${money(j.deposit_paid_usd||0)} paid</p>`;
+  const due = lockText(j).match(/\$(\d+)/);
+  return due ? `<p class="dep dep-due">Deposit $${due[1]} due</p>` : '';
+}
 const pkgName = j => pkgText(j).split('·')[0].trim();
 const pkgSize = j => pkgText(j).split('·').slice(1).join('·').trim();
 
@@ -912,6 +925,7 @@ function jobCard(j){
     <p class="meta">${pkg}</p>
     ${addons}
     <p class="total">${money(j.total_usd)}</p>
+    ${depositHtml(j)}
     <a class="addr" href="${mapHref(j)}" target="_blank" rel="noopener"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"/><circle cx="12" cy="10" r="3"/></svg>${esc(j.address)}, ${esc(j.town)}</a>
     ${warn}
     <textarea class="notes" placeholder="Notes (gate code, dog, reminders)"
@@ -1358,6 +1372,7 @@ function drawPanel(){
       <dt>Booked</dt><dd>${shortDate.format(new Date(j.created_at))}</dd>
       <dt class="tot">Total</dt><dd class="in-total">${money(j.total_usd)}</dd>
     </dl>
+    ${depositHtml(j)}
     ${warn}
     <div><label for="dNotes">Notes</label>
       <textarea class="notes" id="dNotes" placeholder="Gate code, dog, reminders" data-id="${j.id}" onblur="saveNotes(this)">${esc(j.notes)}</textarea></div>
@@ -1504,6 +1519,7 @@ async function saveEdit(ev){
   const pkg = editPkg(), sz = editSize(), water = v('e-water');
   const parts = [pkg ? pkg.name : pkgName(j), sz ? sz.name : pkgSize(j)].filter(Boolean);
   if(water !== 'yes') parts.push(`⚠ Water/power: ${water==='no' ? 'NOT available' : 'unsure'}`);
+  if(lockText(j)) parts.push(lockText(j));   // keep the spring lock-in tag
   const next = {
     slot_start: boiseISO(date, time), duration_min: mins, package: parts.join(' · '), addons: editChecked(),
     total_usd: total, customer_name: name, customer_phone: phone, address: v('e-address'), town: v('e-town'), notes: $('e-notes').value

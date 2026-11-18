@@ -322,6 +322,27 @@ any other day that has a booking. Which weekdays always get a column is `WORK_DO
 `admin.html`; if you reopen weekdays in `HOURS` in `index.html`, add them there
 too. Phones and tablets keep the job board described above.
 
+**Money (income and taxes).** The **Money** tab (phone) or view (computer) is
+worked out from the bookings already loaded; nothing new goes in the database.
+- **Per year:** earned (jobs marked done), average job, dollars per hour on site,
+  booked ahead, cancelled, a month-by-month chart, and breakdowns by package and town.
+- **Cash basis:** a deposit counts the day Stripe took it and the rest counts on
+  the job day. A November deposit for an April job is this year's income.
+- **Tax set-aside:** income minus Stripe fees (2.9% + 30¢ per deposit), expenses
+  and mileage gives net profit. From that it estimates self-employment tax
+  (15.3% of 92.35%, only once that reaches $400), federal income tax (single
+  filer, standard deduction, 20% QBI deduction) and Idaho's flat rate, then the
+  four IRS estimated-payment periods with their due dates.
+- **Tax settings** (expenses, miles, mileage rate, tips/other income, W-2 wages,
+  Idaho rate) are kept **on that device only**, per year. Federal brackets live
+  in `TAX_TABLES` in `admin.html`; add a row each year when the IRS publishes them.
+- **Flags:** past jobs never marked done, and cancelled jobs with a paid deposit
+  (not counted unless you add them as other income).
+- **Download as CSV:** every job in the year for a tax pro or a spreadsheet (no
+  phone numbers or addresses).
+
+These are estimates for planning, not tax advice.
+
 **Signing in.** The dashboard uses Supabase Auth, so only you can read customer
 details — the page itself is harmless to host publicly. Sign in with your owner
 email (`ethangardner298@gmail.com`) and password. On a phone the sign-in is a

@@ -6,8 +6,12 @@ CENTERS = {'McCall':(44.911,-116.099),'Donnelly':(44.733,-116.078),'Cascade':(44
            'New Meadows':(44.971,-116.284),'Yellow Pine':(44.962,-115.495),'Smiths Ferry':(44.304,-116.090),'Warren':(45.263,-115.682)}
 def nearest(lat, lon):
     return min(CENTERS, key=lambda t: (CENTERS[t][0]-lat)**2 + ((CENTERS[t][1]-lon)*math.cos(math.radians(lat)))**2)
+import re
+# Not places anyone lives: Forest Service roads, bare route numbers.
+JUNK = re.compile(r'forest (development |service )?(road|rd)|national forest|^(nf|fs|nfsr|fr)[- ]?\d|^forest road|^\d+[a-z]?$|^road \d+$|^unnamed', re.I)
 out = {}
 for name, zip_, city, lat, lon in d:
+    if JUNK.search(name): continue
     town = ZIP_TOWN.get(zip_) or (city if city in CENTERS else '') or nearest(lat, lon)
     z = zip_ if zip_ in ZIP_TOWN else TOWN_ZIP.get(town, '')
     if town == 'Smiths Ferry': z = '83611'

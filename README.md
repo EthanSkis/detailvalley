@@ -59,6 +59,7 @@ command and no publish directory beyond the root are needed.
 | `quote.html` | Private **quoting tool** — pick a make &amp; model, get the same price and time on site the booking flow would charge. See [Quoting tool](#quoting-tool-quotehtml). |
 | `before-after.html` | Before &amp; after gallery — one chapter per vehicle, 10 drag-to-compare sliders each. See [Before &amp; after](#before--after-photos). |
 | `dv-pricing.js` | **The one price list**: packages, vehicle sizes and add-ons, with their prices and minutes. Read by both the booking flow and the quoting tool, so they always agree. |
+| `dv-streets.js` | Valley County street list for instant address suggestions (OpenStreetMap data, ODbL). Built by `tools/streets-*.py`. |
 | `dv-compare.js` | Drag / tap / keyboard behavior for the compare sliders. Shared by the homepage and the gallery page. |
 | `gallery/<vehicle>/` | The before &amp; after photos, one folder per vehicle, two widths each (`-sm` = 560px, plain = 900px) for `srcset`. |
 | `CNAME` | Custom domain for GitHub Pages (`detailvalley.com`). |
@@ -166,9 +167,14 @@ any other package and the calendar starts in April as before.
 ## Address autofill
 
 There's no town question: the town comes from the address. Typing in "Where
-should we come?" suggests matching **streets** in the Valley County area (free
-OpenStreetMap search via Photon, no key), keeping the house number the
-customer typed and filling in the town and ZIP. OSM has few house numbers
+should we come?" suggests matching **streets** instantly from `dv-streets.js`,
+a ~13 KB (gzipped) list of ~2,200 Valley County area streets with their town and
+ZIP, loaded when the booking sheet opens. It keeps the house number the customer
+typed, understands abbreviations (Rd, Ln, E…), and ranks McCall first when a
+name exists in several towns. Only if the list has no match does it fall back to
+the live Photon search. Rebuild the list with
+`python3 tools/streets-harvest.py && python3 tools/streets-harvest-pass2.py && python3 tools/streets-build.py`
+(run from a scratch folder; the last step writes `dv-streets.js`). OSM has few house numbers
 around here, so suggestions are street-level. Typed addresses without a pick
 are split into street + town (`splitAddress`: known towns and ZIPs), falling
 back to "Valley County". A house number is required. For house-level autofill,

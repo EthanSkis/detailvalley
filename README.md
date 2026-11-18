@@ -182,7 +182,8 @@ swap `ADDR_API` for Google Places or Mapbox (needs an API key).
 
 ## Stripe deposits
 
-Deposits are taken with Stripe Checkout, driven by two Supabase Edge Functions
+Deposits are taken with Stripe (our own payment screen with Stripe's card
+fields, hosted Checkout only as a fallback), driven by two Supabase Edge Functions
 (source in `supabase/functions/`, deployed to the Detail Valley Backend project):
 
 - **`deposit-checkout`**: the booking page calls it with the new booking's id.
@@ -267,8 +268,8 @@ slot back up, or `confirmed` / `completed` to track it.
     on each package, size and add-on in **`dv-pricing.js`**, next to its price.
     Tune these to your real time-per-car. The homepage cards and FAQ state the
     package prices and times as plain text, so update that text to match.
-  - `OPEN_FROM` — closed until this date (currently `2026-07-01`; `''` to remove)
-  - `MIN_LEAD_DAYS` — minimum lead time (currently **3** days out)
+  - `OPEN_FROM` — closed until this date (currently `2027-04-01`, the spring reopening; `''` to remove)
+  - `MIN_LEAD_DAYS` — minimum lead time (currently **1**, so tomorrow is the earliest day)
   - `DAYS_AHEAD` — how big a window to show, starting from the first bookable day
 - **Double-booking is impossible**: a database exclusion constraint rejects any
   two active jobs whose times overlap (and the calendar won't offer them in the
@@ -329,7 +330,8 @@ any other day that has a booking. Which weekdays always get a column is `WORK_DO
 too. Phones and tablets keep the job board described above.
 
 **Money (income and taxes).** The **Money** tab (phone) or view (computer) is
-worked out from the bookings already loaded; nothing new goes in the database.
+worked out from the bookings, plus two owner-only tables for what the board
+can't know (see *Log it* below).
 - **Per year:** earned (jobs marked done), average job, dollars per hour on site,
   booked ahead, cancelled, a month-by-month chart, and breakdowns by package and town.
 - **Cash basis:** a deposit counts the day Stripe took it and the rest counts on

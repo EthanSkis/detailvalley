@@ -732,7 +732,7 @@
 <div class="facts">
   <div class="facts-inner">
     <div class="fact"><div class="k">We come to you</div><div class="v">Home or workplace, our own gear</div></div>
-    <div class="fact"><div class="k">7 days a week, 8am to 6pm</div><div class="v">One car a day, done properly</div></div>
+    <div class="fact"><div class="k">Spring: Sundays · Summer: every day</div><div class="v">One car a day, done properly</div></div>
     <div class="fact"><div class="k">Flat pricing</div><div class="v"><span data-price="maintenance">$85</span> to <span data-price="showroom">$360</span>, no surprises on the day</div></div>
     <div class="fact"><div class="k">Pay your way</div><div class="v">Cash, check, card, Venmo, PayPal, Cash App</div></div>
   </div>
@@ -927,7 +927,7 @@
       </details>
       <details>
         <summary>Do you detail in winter?</summary>
-        <p>No. We work outdoors, so we take the winter off and start back up in April. Spring dates are open to book now.</p>
+        <p>No. We work outdoors, so we take the winter off and start back up in April. Until school's out on May 22 we work Sundays (some Saturdays open up once the track schedule is set), then every day through the summer. Spring and early summer dates are open to book now.</p>
       </details>
       <details>
         <summary>Which areas do you cover?</summary>
@@ -989,7 +989,8 @@
     </div>
     <div>
       <p class="foot-h">Hours</p>
-      <div class="hours-row"><span class="day">Every day</span><span class="time">8am to 6pm</span></div>
+      <div class="hours-row"><span class="day">Apr to May 21: Sundays</span><span class="time">8am to 6pm</span></div>
+      <div class="hours-row"><span class="day">From May 22: every day</span><span class="time">8am to 6pm</span></div>
     </div>
     <div class="foot-col">
       <p class="foot-h">Explore</p>
@@ -1061,9 +1062,9 @@ const sb = window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE
 
 /* ---------- Availability config ---------- */
 const SLOT_TZ    = 'America/Boise';   // Mountain Time (McCall / Valley County)
-// While spring lock-in is on (dv-pricing.js), open April and May so people can
-// pre-book; after that, the usual three-week window.
-const DAYS_AHEAD = DV_PRICING.lockIn ? 60 : 21;   // size of the booking window (days shown at once)
+// While spring lock-in is on (dv-pricing.js), open April through June so people
+// can pre-book; after that, the usual three-week window.
+const DAYS_AHEAD = DV_PRICING.lockIn ? 91 : 21;   // size of the booking window (days shown at once)
 const MIN_LEAD_DAYS = 1;             // earliest bookable day, in calendar days out (1 = tomorrow)
 const OPEN_FROM = '2027-04-01';      // closed for winter until this date (MT, 'YYYY-MM-DD'); set '' to remove
 const BIZ_PHONE  = '(208) 315-1420';
@@ -1101,6 +1102,20 @@ const BLOCKED_DAYS = [
   '2026-10-20',   // Tue — SRV 4A District Championship, Eagle Island
   '2026-10-31'    // Sat — IHSAA State Championships
 ];
+// School and track season. Before SCHOOL_OUT only weekends are open, and only
+// Sundays: Saturdays stay closed for track meets unless listed in
+// OPEN_SATURDAYS (add the free ones once the meet schedule is out). From
+// SCHOOL_OUT every day in HOURS is open again.
+const SCHOOL_OUT = '2027-05-22';     // MT, 'YYYY-MM-DD'
+const OPEN_SATURDAYS = [
+  // '2027-04-10',   // e.g. no meet that day
+];
+function dayOpen(iso, dow){
+  if(iso >= SCHOOL_OUT) return true;
+  if(dow === 0) return true;                        // Sunday
+  if(dow === 6) return OPEN_SATURDAYS.includes(iso);
+  return false;                                     // school day
+}
 const START_TIMES = ['08:00','09:00','10:00']; // only arrival times offered
 const BUFFER_MIN = 45;          // travel / cleanup gap kept between jobs
 const MAX_JOBS_PER_DAY = 1;     // never offer more than this many jobs in one day
@@ -1180,6 +1195,7 @@ function candidateStarts(jobMin){
     const hrs = HOURS[dow];
     if(!hrs) continue;
     if(BLOCKED_DAYS.includes(mtDayISO({y,m,d}))) continue;   // day off — nothing offered
+    if(!dayOpen(mtDayISO({y,m,d}), dow)) continue;          // school day / track Saturday
     const [oH,oM] = hrs[0].split(':').map(Number);
     const [cH,cM] = hrs[1].split(':').map(Number);
     const openMin = oH*60 + oM, closeMin = cH*60 + cM;
@@ -1814,7 +1830,7 @@ const LOCKIN_SHOW_FROM = 3;  // hide the progress bar until this many spring job
   if(!sb) return;
   const [oy,om,od] = OPEN_FROM.split('-').map(Number);
   const from = mtToInstant(oy,om,od,0,0).getTime();
-  sb.rpc('taken_slots',{p_from:new Date(from).toISOString(), p_to:new Date(from + 61*86400000).toISOString()})
+  sb.rpc('taken_slots',{p_from:new Date(from).toISOString(), p_to:new Date(from + DAYS_AHEAD*86400000).toISOString()})
     .then(({data,error})=>{
       if(error || !data) return;
       const n = data.length;

@@ -1,6 +1,7 @@
 // Stripe webhook: marks a booking's deposit as paid when its Checkout session
-// completes. Point a Stripe webhook endpoint at this function's URL with the
-// event `checkout.session.completed`.
+// completes or a PaymentIntent from our own payment form succeeds. Point a Stripe
+// webhook endpoint at this function's URL with the events
+// `checkout.session.completed` and `payment_intent.succeeded`.
 //
 // Secrets (Supabase dashboard -> Edge Functions -> Secrets):
 //   STRIPE_WEBHOOK_SECRET   whsec_... from that Stripe webhook endpoint
@@ -43,21 +44,31 @@ Deno.serve(async (req) => {
   if (!ok) return new Response("bad signature", { status: 400 });
 
   const event = JSON.parse(payload);
-  if (event.type !== "checkout.session.completed" && event.type !== "checkout.session.async_payment_succeeded") {
+  const s = event.data.object;
+  let bookingId = "", paidUsd = 0, ref = "";
+  if (event.type === "checkout.session.completed" || event.type === "checkout.session.async_payment_succeeded") {
+    if (s.payment_status !== "paid") return new Response("not paid yet", { status: 200 });
+    bookingId = s.metadata?.booking_id || s.client_reference_id;
+    paidUsd = Math.round((s.amount_total || 0) / 100);
+    ref = s.id;
+  } else if (event.type === "payment_intent.succeeded") {
+    // Our own payment form (Payment Element). Checkout's intents carry the same
+    // metadata; the update below only ever applies once per booking.
+    bookingId = s.metadata?.booking_id;
+    paidUsd = Math.round((s.amount_received || 0) / 100);
+    ref = s.id;
+  } else {
     return new Response("ignored", { status: 200 });
   }
-  const s = event.data.object;
-  if (s.payment_status !== "paid") return new Response("not paid yet", { status: 200 });
-  const bookingId = s.metadata?.booking_id || s.client_reference_id;
   if (!bookingId) return new Response("no booking", { status: 200 });
 
   const sb = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
   const { error } = await sb
     .from("bookings")
     .update({
-      deposit_paid_usd: Math.round((s.amount_total || 0) / 100),
+      deposit_paid_usd: paidUsd,
       deposit_paid_at: new Date().toISOString(),
-      stripe_session_id: s.id,
+      stripe_session_id: ref,
     })
     .eq("id", bookingId)
     .is("deposit_paid_at", null);

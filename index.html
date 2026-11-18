@@ -670,6 +670,9 @@
     .lockin-btn{padding:10px 16px}
   }
   .pay-mount{margin:4px 0 8px;min-height:120px}
+  .pay-sum{margin:4px 0 16px}
+  .pay-sum .bk-line.m{color:var(--mute)}
+  .pay-fine{margin:4px 0 0;font-size:.82rem;line-height:1.45;color:var(--mute)}
   .pay-mount.loading{display:flex;align-items:center;justify-content:center;border:1px dashed var(--rule-2);border-radius:12px;color:var(--mute);font-size:.92rem}
   .bk-skip{display:block;margin:4px auto 0;background:none;border:none;color:var(--mute);font:inherit;font-size:.9rem;text-decoration:underline;cursor:pointer;min-height:44px;padding:0 12px}
   .dep-notice{background:#e3f4e8;color:#123b22}
@@ -1601,12 +1604,23 @@ function render(){
     </div>`);
   }
   else if(state.step==='pay'){
+    const p = PACKAGES.find(x=>x.id===state.pkg);
     sheet(0, `
-      <h2 class="bk-done-h">Pay your $${deposit()} deposit</h2>
-      <p class="bk-done-p">Your date is saved. The deposit locks in this year's price and comes off your total.</p>
-      <div id="payMount" class="pay-mount loading"><span>Loading secure checkout…</span></div>
+      <h2 class="bk-done-h">Lock in your date</h2>
+      <p class="bk-done-p">Your date is saved. Pay the deposit to keep this year's price.</p>
+      <div class="bk-card tight pay-sum">
+        <div class="bk-line"><span>${p.name} · ${fmtDay(state.slot.instant)}</span><b>$${total()}</b></div>
+        <div class="bk-line"><span>Deposit today</span><b>$${deposit()}</b></div>
+        <div class="bk-line m"><span>Due after the job</span><span>$${total()-deposit()}</span></div>
+      </div>
+      <div id="payMount" class="pay-mount loading"><span>Loading secure payment…</span></div>
+      <p id="payErr" class="form-err" role="alert" hidden></p>
+      <p class="pay-fine">Comes off your total. Moves free with 48 hours' notice, and weather reschedules are always free. Card details are handled securely by Stripe.</p>
       <button class="bk-skip" onclick="skipPay()">Pay later instead</button>
-    `);
+    `, `<div class="bk-foot keep-tot">
+      <div class="bk-tot"><span>Due today</span><b>$${deposit()}</b></div>
+      <button class="bk-go" id="payBtn" onclick="submitPay()" disabled>Pay $${deposit()} &amp; lock in</button>
+    </div>`);
     const x = inner.querySelector('.bk-done-top .bk-ic'); if(x) x.setAttribute('onclick','skipPay()');
   }
   else if(state.step===7){
@@ -1845,34 +1859,57 @@ async function submitBooking(){
   go(7);
 }
 
-/* ---------- In-page deposit (Stripe Embedded Checkout) ---------- */
+/* ---------- In-page deposit: our own form, Stripe Payment Element for the card ---------- */
 // Publishable key: public by design (it can't charge or read anything).
 const STRIPE_PK = 'pk_live_51Pq7cJA8l4yd6OUzd0MBEirg9woJeAje74gFTOSMtuqBOwCITxx8856PKjQwsQz7yLZcKTPaPgSSKP6JtZ7Lif290018tEvRx1';
-let stripeLoad = null, payCheckout = null;
+// Styles Stripe's card fields to match the site (fonts, colors, corners).
+const PAY_APPEARANCE = {
+  theme: 'stripe',
+  variables: {
+    colorPrimary: '#a4521f', colorText: '#0b2a45', colorTextSecondary: '#3d566b',
+    colorTextPlaceholder: '#8497a8', colorBackground: '#ffffff', colorDanger: '#b3261e',
+    fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+    fontSizeBase: '16px', borderRadius: '10px', spacingUnit: '4px', gridRowSpacing: '14px'
+  },
+  rules: {
+    '.Label': { fontWeight: '500', color: '#0b2a45', marginBottom: '6px' },
+    '.Input': { border: '1px solid #c9d2da', boxShadow: 'none', padding: '12px 14px' },
+    '.Input:focus': { borderColor: '#0b2a45', boxShadow: '0 0 0 3px rgba(11,42,69,.12)' },
+    '.Input--invalid': { borderColor: '#b3261e', boxShadow: 'none' },
+    '.Tab': { border: '1px solid #c9d2da', boxShadow: 'none' },
+    '.Tab:hover': { borderColor: '#0b2a45' },
+    '.Tab--selected, .Tab--selected:hover, .Tab--selected:focus': { borderColor: '#0b2a45', boxShadow: '0 0 0 1px #0b2a45' }
+  }
+};
+let stripeLoad = null, payStripe = null, payElements = null, payEl = null, payReady = false, paying = false;
 function loadStripe(){
   if(window.Stripe) return Promise.resolve(window.Stripe(STRIPE_PK));
   if(!stripeLoad) stripeLoad = new Promise((res, rej)=>{
     const sc = document.createElement('script');
     sc.src = 'https://js.stripe.com/v3/';
     sc.onload = ()=> window.Stripe ? res(window.Stripe(STRIPE_PK)) : rej(new Error('stripe'));
-    sc.onerror = ()=>{ stripeLoad = null; rej(new Error('stripe')); };
+    sc.onerror = ()=>{ stripeLoad = null; rej(new Error('stripe.js blocked or offline')); };
     document.head.appendChild(sc);
   });
   return stripeLoad;
 }
-function unmountPay(){ if(payCheckout){ try{ payCheckout.destroy(); }catch(e){} payCheckout = null; } }
-// Tell the server log why the in-page form didn't work (browser + error), for debugging.
+function unmountPay(){
+  if(payEl){ try{ payEl.destroy(); }catch(e){} }
+  payEl = null; payElements = null; payReady = false; paying = false;
+}
+// Tell the server log why the form didn't work (browser + error), for debugging.
 function reportPayError(id, err){
   try{
     fetch(DEPOSIT_FN, {method:'POST', headers:{'Content-Type':'application/json'}, keepalive:true,
       body: JSON.stringify({booking_id:id, client_error: String(err && (err.message || err) || 'unknown').slice(0,300), ua: navigator.userAgent.slice(0,200)})});
   }catch(e){}
 }
+function payError(msg){ const e = document.getElementById('payErr'); if(e){ e.textContent = msg; e.hidden = !msg; } }
 async function mountPay(){
   const area = document.getElementById('payMount'), id = state.bookingId;
   let gaveUp = false;
-  // In-page form failed: go to Stripe's own checkout page instead. Only if that
-  // can't open either do we fall back to "we'll text you a link".
+  // Our form can't load (privacy blockers, network): use Stripe's checkout page
+  // instead. Only if that can't open either do we fall back to "we'll text you".
   const fail = async (err)=>{
     if(gaveUp || state.step!=='pay') return; gaveUp = true;
     reportPayError(id, err); unmountPay();
@@ -1881,25 +1918,70 @@ async function mountPay(){
     if(state.step==='pay') go(7);
   };
   try{
-    const stripe = await loadStripe();
-    const fetchClientSecret = async ()=>{
-      const r = await fetch(DEPOSIT_FN, {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({booking_id:id, embedded:true})});
-      const d = await r.json().catch(()=>({}));
-      if(!r.ok || !d.client_secret) throw new Error(d.error || 'checkout');
-      return d.client_secret;
-    };
+    const [stripe, d] = await Promise.all([
+      loadStripe(),
+      fetch(DEPOSIT_FN, {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({booking_id:id, action:'intent'})})
+        .then(r=>r.json().then(d=>{ if(!r.ok || !d.client_secret) throw new Error(d.error || 'intent'); return d; }))
+    ]);
+    if(state.step!=='pay' || !area || !document.body.contains(area)) return;
     unmountPay();
-    payCheckout = await stripe.initEmbeddedCheckout({
-      fetchClientSecret,
-      onComplete: ()=>{ state.depositPaid = true; unmountPay(); go(7); }
+    payStripe = stripe;
+    payElements = stripe.elements({
+      clientSecret: d.client_secret, appearance: PAY_APPEARANCE,
+      fonts: [{ cssSrc: 'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap' }]
     });
-    if(state.step!=='pay' || !area || !document.body.contains(area)){ unmountPay(); return; }
-    area.classList.remove('loading');
+    payEl = payElements.create('payment', {
+      layout: { type: 'tabs' },
+      defaultValues: { billingDetails: { name: state.name, phone: state.phone } },
+      wallets: { applePay: 'auto', googlePay: 'auto', link: 'never' }
+    });
+    payEl.on('ready', ()=>{
+      payReady = true; area.classList.remove('loading');
+      const b = document.getElementById('payBtn'); if(b) b.disabled = false;
+    });
+    payEl.on('loaderror', ev=> fail(new Error(ev && ev.error && ev.error.message || 'loaderror')));
+    payEl.on('change', ()=> payError(''));
     area.innerHTML = '';
-    payCheckout.mount(area);
-    // Some browsers (privacy blockers) accept the form but never draw it.
-    setTimeout(()=>{ if(state.step==='pay' && !gaveUp && !area.querySelector('iframe')) fail(new Error('checkout never rendered')); }, 8000);
+    payEl.mount(area);
+    // Some browsers accept the form but never draw it.
+    setTimeout(()=>{ if(state.step==='pay' && !gaveUp && !payReady) fail(new Error('payment form never rendered')); }, 10000);
   }catch(e){ fail(e); }
+}
+async function submitPay(){
+  if(!payReady || paying) return;
+  paying = true;
+  const btn = document.getElementById('payBtn'), label = btn ? btn.innerHTML : '';
+  if(btn){ btn.disabled = true; btn.textContent = 'Processing…'; }
+  payError('');
+  const id = state.bookingId;
+  try{
+    const { error, paymentIntent } = await payStripe.confirmPayment({
+      elements: payElements,
+      // Only used by payment steps that need a bank page (3-D Secure etc.).
+      confirmParams: { return_url: `${location.origin}/?deposit=paid&b=${id}` },
+      redirect: 'if_required'
+    });
+    if(error){
+      payError(error.type === 'card_error' || error.type === 'validation_error'
+        ? error.message : 'Something went wrong with the payment. Try again, or tap "Pay later instead".');
+      paying = false; if(btn){ btn.disabled = false; btn.innerHTML = label; }
+      return;
+    }
+    if(paymentIntent && (paymentIntent.status === 'succeeded' || paymentIntent.status === 'processing')){
+      // Mark it paid now (the webhook does the same as a backup).
+      await confirmDeposit(id, paymentIntent.id);
+      state.depositPaid = true; unmountPay(); go(7);
+      return;
+    }
+    payError('The payment didn\'t go through. Try again, or tap "Pay later instead".');
+  }catch(e){
+    payError('Something went wrong with the payment. Try again, or tap "Pay later instead".');
+  }
+  paying = false; if(btn){ btn.disabled = false; btn.innerHTML = label; }
+}
+function confirmDeposit(id, pi){
+  return fetch(DEPOSIT_FN, {method:'POST', headers:{'Content-Type':'application/json'}, keepalive:true,
+    body: JSON.stringify({booking_id:id, action:'confirm', payment_intent:pi})}).catch(()=>{});
 }
 // Leaving the pay step without paying: the booking is saved, so say so.
 function skipPay(){ unmountPay(); go(7); }
@@ -1922,6 +2004,8 @@ async function startDeposit(id){
   if(!box) return;
   const id = q.get('b');
   if(dep === 'paid'){
+    const pi = q.get('payment_intent');
+    if(id && pi && /^[0-9a-f-]{36}$/i.test(id)) confirmDeposit(id, pi);
     box.innerHTML = `<p><b>Deposit received. You're locked in.</b> We'll text you to confirm your date. See you in the spring!</p>`;
   } else if(dep === 'cancelled' && id && /^[0-9a-f-]{36}$/i.test(id)){
     box.innerHTML = `<p><b>Your date is saved, but the deposit isn't paid yet.</b> Pay it now to lock in this year's price, or we'll text you a link.</p>

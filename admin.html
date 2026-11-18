@@ -197,6 +197,7 @@
   .dep{display:inline-block;margin:4px 0 2px;font-size:.8rem;font-weight:700;padding:3px 10px;border-radius:999px}
   .dep-paid{background:#e3f4e8;color:#1d6b34}
   .dep-due{background:#fbf0e9;color:#8a3b12}
+  .dep-link{background:none;border:none;padding:4px 6px;font:inherit;font-size:.8rem;font-weight:600;color:var(--accent-ink);text-decoration:underline;cursor:pointer;min-height:32px}
   textarea.notes{display:block;width:100%;margin-top:12px;padding:11px;border:1px solid var(--sep);
     border-radius:8px;font:inherit;font-size:.875rem;line-height:1.4286;color:var(--text);resize:vertical;
     min-height:44px;background:var(--card-2)}
@@ -887,7 +888,13 @@ const pkgText = j => basePkg(j).replace(/·\s*⚠[^·]*$/,'').trim();
 function depositHtml(j){
   if(j.deposit_paid_at) return `<p class="dep dep-paid">Deposit ${money(j.deposit_paid_usd||0)} paid</p>`;
   const due = lockText(j).match(/\$(\d+)/);
-  return due ? `<p class="dep dep-due">Deposit $${due[1]} due</p>` : '';
+  return due ? `<p class="dep dep-due">Deposit $${due[1]} due</p> <button class="dep-link" onclick="copyPayLink('${j.id}')">Copy pay link</button>` : '';
+}
+/* A link the customer can pay the deposit from (opens Stripe from the homepage). */
+async function copyPayLink(id){
+  const url = `https://detailvalley.com/?deposit=cancelled&b=${id}`;
+  try{ await navigator.clipboard.writeText(url); toast('Pay link copied. Paste it in a text.'); }
+  catch(e){ prompt('Copy this pay link:', url); }
 }
 const pkgName = j => pkgText(j).split('·')[0].trim();
 const pkgSize = j => pkgText(j).split('·').slice(1).join('·').trim();

@@ -154,9 +154,13 @@ Deposits are taken with Stripe Checkout, driven by two Supabase Edge Functions
 (source in `supabase/functions/`, deployed to the Detail Valley Backend project):
 
 - **`deposit-checkout`**: the booking page calls it with the new booking's id.
-  It looks the booking up, works out the deposit itself ($25 Maintenance Wash,
-  $50 otherwise), and returns a Stripe Checkout link. Customers who back out land
-  on `/?deposit=cancelled&b=<id>` with a "Pay deposit" button to try again.
+  It looks the booking up and works out the deposit itself ($25 Maintenance Wash,
+  $50 otherwise). With `embedded: true` (the booking flow) it returns an
+  Embedded Checkout session, and the payment form appears right inside the
+  booking sheet, so the customer never leaves the page. Without it, it returns a
+  hosted Checkout link. That's what `/?deposit=cancelled&b=<id>` uses, and the job
+  board's **Copy pay link** button hands customers that URL for anyone who chose
+  "Pay later".
 - **`stripe-webhook`**: Stripe calls it when a checkout completes; it verifies
   the signature and sets `deposit_paid_usd`, `deposit_paid_at` and
   `stripe_session_id` on the booking. Visitors can't set those columns
@@ -170,6 +174,9 @@ Deposits are taken with Stripe Checkout, driven by two Supabase Edge Functions
    event **`checkout.session.completed`**. Copy its **signing secret** (`whsec_…`).
 3. Supabase dashboard → Edge Functions → **Secrets**: add
    `STRIPE_SECRET_KEY` and `STRIPE_WEBHOOK_SECRET`.
+
+For Apple Pay inside the embedded form, add `detailvalley.com` under Stripe →
+Settings → Payment method domains.
 
 Until both secrets are set, the booking flow still works: the customer is told
 you'll text them a payment link. Test mode and live mode have different keys and

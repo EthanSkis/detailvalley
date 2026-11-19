@@ -508,6 +508,7 @@
 
   /* Live summary (desktop only) */
   .bk-aside{flex:none;width:320px;background:var(--text);color:#fff;flex-direction:column;padding:32px 28px 28px;overflow-y:auto}
+  .bk-aside>.bk-fit{display:flex;flex-direction:column;flex:1 0 auto}
   .bk-a-h{font-size:.88rem;font-weight:500;color:var(--on-navy);margin-bottom:16px}
   .bk-a-line{display:flex;justify-content:space-between;gap:12px;padding:12px 0;border-top:1px solid var(--rule-navy)}
   .bk-a-line b{font-weight:500;white-space:nowrap}
@@ -675,9 +676,31 @@
   .pay-fine{margin:4px 0 0;font-size:.82rem;line-height:1.45;color:var(--mute)}
   .pay-mount.loading{display:flex;align-items:center;justify-content:center;border:1px dashed var(--rule-2);border-radius:12px;color:var(--mute);font-size:.92rem}
   .pay-mount a{color:inherit}
-  .bk-gift summary{cursor:pointer;font-weight:500;padding:8px 0;min-height:40px;display:flex;align-items:center}
-  .bk-gift .gift-row{display:flex;gap:8px;align-items:center;padding-bottom:8px}
-  .bk-gift .gift-row input{flex:1;min-width:0;text-transform:uppercase;letter-spacing:.08em}
+  .bk-depnote{margin:2px 2px 12px;font-size:.86rem;line-height:1.45;color:var(--mute)}
+  .bk-depnote b{color:var(--text);font-weight:600}
+  .bk-depnote a{color:var(--mute)}
+  .bk-giftrow{margin:-2px 2px 8px}
+  .bk-giftrow .bk-line{padding:6px 0}
+  .bk-giftrow .gift-entry{border-top:none;padding-top:2px}
+  .gift-add-row{justify-content:flex-start!important}
+  .gift-add{display:inline-flex;align-items:center;gap:8px;background:none;border:none;padding:0;font:inherit;font-size:.94rem;font-weight:500;color:var(--cop);cursor:pointer;min-height:36px}
+  .gift-add svg,.gift-tag svg{width:18px;height:18px;flex:none}
+  .gift-on{align-items:center}
+  .gift-tag{display:flex;align-items:flex-start;gap:8px;color:#1d6b34}
+  .gift-tag svg{margin-top:2px}
+  .gift-tag small{display:block;font-size:.8rem;color:var(--mute);font-weight:400}
+  .gift-code{font-weight:600;letter-spacing:.04em}
+  .gift-amt{display:flex;align-items:center;gap:6px;flex:none}
+  .gift-amt b{color:#1d6b34}
+  .gift-x{width:32px;height:32px;border:none;background:none;border-radius:50%;font-size:1.3rem;line-height:1;color:var(--mute);cursor:pointer}
+  .gift-x:hover{background:var(--raised)}
+  .gift-entry{display:flex;flex-wrap:wrap;gap:8px;padding:8px 0 10px;border-top:1px solid var(--rule)}
+  .gift-entry input{flex:1 1 160px;min-width:0;text-transform:uppercase;letter-spacing:.08em;font-size:16px;padding:10px 12px;border:1px solid var(--rule-2);border-radius:10px;font-family:inherit;color:var(--text)}
+  .gift-entry input:focus{outline:none;border-color:var(--text)}
+  .gift-apply{flex:none;padding:0 18px;min-height:44px;border-radius:10px;border:none;background:var(--text);color:#fff;font:inherit;font-weight:600;cursor:pointer}
+  .gift-entry .form-err{flex-basis:100%;margin:0}
+  .bk-a-line.gift b{color:var(--peach)}
+  .bk-a-line.due b{font-weight:700}
   .bk-linkbtn{background:none;border:none;padding:0;font:inherit;color:var(--mute);text-decoration:underline;cursor:pointer}
   .gift-cta{margin:20px 0 0;text-align:center;color:var(--mute)}
   .gift-cta a{color:var(--cop);font-weight:600}
@@ -1340,7 +1363,7 @@ const payLater = () => Math.max(0, total() - deposit() - giftOnDay());
 async function applyGift(){
   const el = document.getElementById('f-gift'), e = document.getElementById('giftErr'), b = document.getElementById('giftBtn');
   const code = (el && el.value || '').trim();
-  const fail = m => { if(e){ e.textContent = m; e.hidden = false; } if(b){ b.disabled = false; b.textContent = 'Apply'; } };
+  const fail = m => { if(e){ e.textContent = m; e.hidden = false; } if(b){ b.disabled = false; b.textContent = 'Apply'; } fitSheet(); };
   if(code.replace(/[^a-z0-9]/gi,'').length < 8) return fail('Enter the code from the gift card, like DV-7KQ4-M2XP.');
   if(b){ b.disabled = true; b.textContent = 'Checking…'; }
   try{
@@ -1352,7 +1375,22 @@ async function applyGift(){
     render(); refreshMoney();
   }catch(x){ fail("Couldn't check the gift card right now. Try again in a moment."); }
 }
-function removeGift(){ state.gift = null; render(); refreshMoney(); }
+function removeGift(){ state.gift = null; state.giftOpen = false; render(); refreshMoney(); }
+const GIFT_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="8" width="18" height="4" rx="1"/><path d="M12 8v13M19 12v7a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-7M7.5 8a2.5 2.5 0 0 1 0-5C10 3 12 8 12 8s2-5 4.5-5a2.5 2.5 0 0 1 0 5"/></svg>';
+function giftRowHtml(){
+  if(state.gift){
+    const off = (giftCoversDeposit() ? deposit() : 0) + giftOnDay();
+    const how = [giftCoversDeposit() ? `pays the $${deposit()} deposit` : '', giftOnDay() ? `$${giftOnDay()} off on the day` : ''].filter(Boolean).join(' · ');
+    return `<div class="bk-line gift-on"><span class="gift-tag">${GIFT_SVG}<span>Gift card <span class="gift-code">${esc(state.gift.code)}</span>${how ? `<small>${how}</small>` : ''}</span></span>
+      <span class="gift-amt"><b>−$${off}</b><button type="button" class="gift-x" onclick="removeGift()" aria-label="Remove gift card">×</button></span></div>`;
+  }
+  if(!state.giftOpen) return `<div class="bk-line gift-add-row"><button type="button" class="gift-add" onclick="openGift()">${GIFT_SVG}Add a gift card</button></div>`;
+  return `<div class="gift-entry"><label class="sr-only" for="f-gift">Gift card code</label>
+    <input id="f-gift" placeholder="DV-XXXX-XXXX" autocapitalize="characters" autocomplete="off" spellcheck="false" enterkeyhint="done" onkeydown="if(event.key==='Enter'){event.preventDefault();applyGift();}">
+    <button type="button" class="gift-apply" id="giftBtn" onclick="applyGift()">Apply</button>
+    <p id="giftErr" class="form-err" hidden></p></div>`;
+}
+function openGift(){ state.giftOpen = true; render(); const el = document.getElementById('f-gift'); if(el) el.focus(); }
 let state = freshState();
 let slotCache = null;
 let submitting = false;
@@ -1438,7 +1476,15 @@ function onAddrInput(el){
   addrQuery = stTokens(q);
   // Like any search box: wait for the start of the street name, not just the number.
   if(q.replace(/[^a-z]/gi, '').length < 2){ closeAddr(); return; }
-  const local = localStreets(num, q);
+  let local = localStreets(num, q);
+  // Typing past the comma (the town): narrow to that town; a full match is just accepted.
+  const townPart = (raw.split(',')[1] || '').trim().toLowerCase();
+  if(local && townPart){
+    local = local.filter(a=> (a.town||'').toLowerCase().startsWith(townPart));
+    const exact = local.find(a=> `${a.street}, ${a.town}`.toLowerCase() === raw.trim().toLowerCase());
+    if(exact){ addrItems = [exact]; acceptAddr(0); return; }
+    if(!local.length){ closeAddr(); return; }
+  }
   if(local && local.length){ addrItems = local; drawAddr(); return; }   // instant
   if(q.replace(/[^a-z]/gi, '').length < 3){ closeAddr(); return; }
   addrTimer = setTimeout(async ()=>{
@@ -1486,6 +1532,12 @@ function closeAddr(){
   if(ul){ ul.hidden = true; ul.innerHTML = ''; }
   if(inp){ inp.setAttribute('aria-expanded','false'); inp.removeAttribute('aria-activedescendant'); }
   addrIdx = -1;
+}
+// Take a suggestion without touching what's in the field (it already matches).
+function acceptAddr(i){
+  const a = addrItems[i]; if(!a) return;
+  state.address = a.street; state.town = a.town || 'Valley County'; state.zip = a.zip; state.addrPicked = true;
+  closeAddr();
 }
 function pickAddr(i){
   const a = addrItems[i], inp = document.getElementById('f-address'); if(!a || !inp) return;
@@ -1560,7 +1612,7 @@ function refreshMoney(){
     rt.textContent = '$'+total();
     rt.classList.remove('bump'); void rt.offsetWidth; rt.classList.add('bump');   // restart the little pop
   }
-  const as = document.getElementById('bkAside'); if(as) as.innerHTML = asideInner();
+  const as = document.getElementById('bkAfit') || document.getElementById('bkAside'); if(as){ as.innerHTML = asideInner(); fitSheet(); }
 }
 function dropUnusableAddons(){ state.addons = state.addons.filter(id=>!pkgIncludes(id) && !pkgExcludes(id)); }
 function pickPkg(id){ state.pkg=id; dropUnusableAddons(); markSel('pkg',id); enableGo(true); refreshMoney(); }
@@ -1653,7 +1705,10 @@ function asideInner(){
   h += chosenAddons().map(a=>{ const x=ADDONS.find(z=>z.id===a); return `<div class="bk-a-line"><span>${x.name}</span>${isFree(a)?`<span class="m">Free</span>`:`<b>+$${x.price}</b>`}</div>`; }).join('');
   if(state.slot) h += `<div class="bk-a-line"><span>${fmtDay(state.slot.instant)} · ${fmtTime(state.slot.instant)}</span><span class="m">${state.slot.label}</span></div>`;
   h += `<div class="bk-a-total"><span>Total</span><b>$${total()}</b></div>`;
-  if(needsDeposit()) h += `<div class="bk-a-line"><span>Deposit to hold your date</span><b>$${deposit()}</b></div>`;
+  const gOff = state.gift ? (giftCoversDeposit() ? deposit() : 0) + giftOnDay() : 0;
+  if(gOff) h += `<div class="bk-a-line gift"><span>Gift card ${esc(state.gift.code)}</span><b>−$${gOff}</b></div>`;
+  if(needsDeposit()) h += `<div class="bk-a-line"><span>${giftCoversDeposit() ? 'Deposit (gift card)' : 'Deposit today'}</span><b>${giftCoversDeposit() ? 'Paid' : '$' + deposit()}</b></div>`;
+  if(needsDeposit() || gOff) h += `<div class="bk-a-line due"><span>Due after the job</span><b>$${payLater()}</b></div>`;
   return h + asideNotes();
 }
 function asideNotes(){
@@ -1682,9 +1737,38 @@ function sheet(n, body, foot){
   inner.classList.toggle('done', !n);
   inner.innerHTML = `<div class="bk-main">`
     + (n ? topBar(n, dir==='fwd') : `<div class="bk-done-top"><button class="bk-ic" onclick="closeBooking()" aria-label="Close booking">${IC_CLOSE}</button></div>`)
-    + `<div class="bk-body slide-${dir}" id="sheetBody">${body}</div>${foot||''}</div>`
-    + (n ? `<aside class="bk-aside" id="bkAside" aria-label="Your booking">${asideInner()}</aside>` : '');
+    + `<div class="bk-body slide-${dir}" id="sheetBody"><div class="bk-fit" id="bkFit">${body}</div></div>${foot||''}</div>`
+    + (n ? `<aside class="bk-aside" id="bkAside" aria-label="Your booking"><div class="bk-fit" id="bkAfit">${asideInner()}</div></aside>` : '');
 }
+/* Steps never scroll: if a step's content is taller than the sheet (lots of
+   add-ons, a gift card, a short phone), shrink it to fit, down to 75%. Not on the
+   details step (text fields under 16px make iPhones zoom) or the payment step. */
+const FIT_MIN = 0.75;
+function fitBox(box, fit){
+  if(!box || !fit) return;
+  fit.style.zoom = '';
+  for(let i=0; i<3; i++){
+    if(box.scrollHeight - box.clientHeight <= 1) break;
+    const z = parseFloat(fit.style.zoom || '1');
+    fit.style.zoom = String(Math.max(FIT_MIN, z * (box.clientHeight / box.scrollHeight) - 0.005));
+    if(parseFloat(fit.style.zoom) <= FIT_MIN) break;
+  }
+}
+function fitSheet(){
+  fitBox(document.getElementById('bkAside'), document.getElementById('bkAfit'));   // the summary on wide screens
+  const body = document.getElementById('sheetBody'), fit = document.getElementById('bkFit');
+  if(!body || !fit) return;
+  fit.style.zoom = '';
+  if(state.step === 5 || state.step === 'pay' || state.step === 4) return;
+  for(let i=0; i<3; i++){
+    const over = body.scrollHeight - body.clientHeight;
+    if(over <= 1) break;
+    const z = parseFloat(fit.style.zoom || '1');
+    fit.style.zoom = String(Math.max(FIT_MIN, z * (body.clientHeight / body.scrollHeight) - 0.005));
+    if(parseFloat(fit.style.zoom) <= FIT_MIN) break;
+  }
+}
+window.addEventListener('resize', ()=>{ if(modal.classList.contains('open')) fitSheet(); });
 function footNext(label, enabled, action, totLabel){
   return `<div class="bk-foot"><div class="bk-tot"><span>${totLabel||'Total so far'}</span><b id="runTotal">$${total()}</b></div>`
     + `<button class="bk-go" id="bkGo" onclick="${action}" ${enabled?'':'disabled'}>${label}</button></div>`;
@@ -1717,7 +1801,8 @@ function icsHref(){
   return 'data:text/calendar;charset=utf-8,'+encodeURIComponent(ics);
 }
 
-function render(){
+function render(){ renderStep(); requestAnimationFrame(fitSheet); }
+function renderStep(){
   if(state.step===1){
     sheet(1, `
       <h2 class="bk-title">What does your car need?</h2>
@@ -1816,23 +1901,16 @@ function render(){
         ${sz ? `<div class="bk-line"><span>${sz.name}</span><b>+$${sz.price}</b></div>` : ''}
         ${extrasLines()}
       </div>
+      <div class="bk-giftrow">${giftRowHtml()}</div>
       <div class="bk-card tight"><div class="bk-who">
         <div><div class="n">${esc(state.name)} · ${esc(state.phone)}</div>
         <div class="s">${esc(addrLine())}</div>
         ${isWinterSlot(state.slot) ? `<div class="s">In a heated or attached garage</div>` : state.utilities==='yes'?'':`<div class="s warn">${state.utilities==='no'?'No water tap or power outlet on site':'Water &amp; power: not sure yet'}</div>`}</div>
         <button class="bk-change" onclick="go(5)">Change</button>
       </div></div>
-      ${needsDeposit() ? `<div class="bk-card tight bk-lock">
-        <div class="bk-line"><span><b>$${deposit()} deposit</b> holds your date at this year's price</span></div>
-        <p class="bk-lock-p">${giftCoversDeposit() ? 'Your gift card pays it, so your date is booked as soon as you confirm.' : "You'll pay it on the next step (card, Apple Pay or Google Pay); your date is booked once it's paid."} It comes off your total. Need to move? Give us 48 hours' notice and it moves with you, free. Weather reschedules are always free. A no-show or a cancel under 48 hours keeps the deposit. If we cancel, you get it back.</p>
-      </div>` : ''}
-      <div class="bk-card tight bk-gift">${state.gift
-        ? `<div class="bk-line"><span><b>Gift card</b> ${esc(state.gift.code)}</span><b>−$${(giftCoversDeposit() ? deposit() : 0) + giftOnDay()}</b></div>
-           <p class="bk-lock-p">${giftCoversDeposit() ? `Covers your $${deposit()} deposit, so there's nothing to pay now. ` : ''}${giftOnDay() ? `$${giftOnDay()} comes off on the day. ` : ''}<button type="button" class="bk-linkbtn" onclick="removeGift()">Remove</button></p>`
-        : `<details class="gift-d"><summary>Have a gift card?</summary>
-           <div class="gift-row"><label class="sr-only" for="f-gift">Gift card code</label><input id="f-gift" placeholder="DV-XXXX-XXXX" autocapitalize="characters" autocomplete="off" spellcheck="false" enterkeyhint="done" onkeydown="if(event.key==='Enter'){event.preventDefault();applyGift();}">
-           <button type="button" class="bk-change" id="giftBtn" onclick="applyGift()">Apply</button></div>
-           <p id="giftErr" class="form-err" hidden></p></details>`}</div>
+      ${needsDeposit() ? `<p class="bk-depnote">${giftCoversDeposit()
+        ? `<b>Your gift card covers the $${deposit()} deposit.</b>`
+        : `<b>$${deposit()} today</b> locks in this year's price.`} It comes off your total and moves free with 48 hours' notice. <a href="/terms#deposits" target="_blank" rel="noopener">Deposit terms</a></p>` : ''}
       <p id="confirmErr" class="form-err" hidden></p>
       <p class="bk-legal">By confirming, you agree to our <a href="/terms" target="_blank" rel="noopener">terms</a> and to get texts about this booking. Reply STOP to opt out. <a href="/privacy" target="_blank" rel="noopener">Privacy</a></p>
     `, `<div class="bk-foot keep-tot">

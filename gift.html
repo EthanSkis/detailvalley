@@ -1,0 +1,268 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Gift Cards | Detail Valley</title>
+<meta name="description" content="Give a clean car. Detail Valley gift cards for mobile detailing in McCall, Cascade and Donnelly, delivered by email.">
+<link rel="icon" href="logo.svg" type="image/svg+xml">
+<link rel="canonical" href="https://detailvalley.com/gift">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600&family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --font:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;
+    --bg:#f4f6f8; --surface:#ffffff; --text:#0b2a45; --mute:#3d566b; --rule:#dde3e9; --rule-2:#c9d2da;
+    --cop:#a4521f; --cop-hover:#8c4418; --peach:#f0c29e; --on-navy:#c3d0db; --raised:#e9edf1; --err:#b3261e;
+    --f-head:'Sora',var(--font); --f-body:'Inter',var(--font);
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--text);font-family:var(--f-body);line-height:1.5;-webkit-font-smoothing:antialiased}
+  a{color:var(--cop)}
+  .top{background:var(--surface);border-bottom:1px solid var(--rule)}
+  .top-in{max-width:1100px;margin:0 auto;padding:12px 16px;display:flex;align-items:center;justify-content:space-between;gap:12px}
+  .brand{display:flex;align-items:center;gap:10px;text-decoration:none;color:var(--text);font-family:var(--f-head);font-weight:600;font-size:1.05rem}
+  .brand img{width:36px;height:36px}
+  .top a.back{font-weight:500;text-decoration:none;color:var(--mute);min-height:44px;display:inline-flex;align-items:center}
+  main{max-width:1100px;margin:0 auto;padding:28px 16px 64px;display:grid;grid-template-columns:minmax(0,1fr);gap:28px}
+  @media(min-width:900px){ main{grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:48px;padding-top:48px} }
+  h1{font-family:var(--f-head);font-weight:600;font-size:clamp(2rem,6vw,3rem);line-height:1.05;letter-spacing:-.02em;margin:0 0 10px}
+  .lead{color:var(--mute);font-size:1.05rem;margin:0 0 22px}
+  /* the card */
+  .gc{position:relative;aspect-ratio:1.6/1;max-width:520px;border-radius:22px;background:var(--text);color:#fff;padding:24px 26px;display:flex;flex-direction:column;justify-content:space-between;box-shadow:0 24px 48px rgba(11,42,69,.22);overflow:hidden}
+  .gc::after{content:"";position:absolute;right:-60px;top:-60px;width:220px;height:220px;border-radius:50%;background:rgba(240,194,158,.12)}
+  .gc-top{display:flex;justify-content:space-between;align-items:center;position:relative;z-index:1}
+  .gc-top b{font-family:var(--f-head);font-weight:600;font-size:1.1rem}
+  .gc-top img{width:44px;height:44px;background:#fff;border-radius:50%}
+  .gc-amt{font-family:var(--f-head);font-weight:600;font-size:clamp(3rem,12vw,4.6rem);line-height:1;color:var(--peach);position:relative;z-index:1}
+  .gc-sub{font-size:.9rem;color:var(--on-navy);position:relative;z-index:1}
+  .gc-code{position:relative;z-index:1;margin-top:10px;background:#fff;color:var(--text);border-radius:10px;padding:8px 12px;font-weight:700;letter-spacing:.18em;font-size:1.15rem;text-align:center}
+  .gc-code[hidden]{display:none}
+  .points{list-style:none;margin:22px 0 0;padding:0;display:grid;gap:10px;color:var(--mute);font-size:.95rem}
+  .points li{display:flex;gap:10px}
+  .points li::before{content:"";flex:none;width:8px;height:8px;margin-top:8px;border-radius:50%;background:var(--cop)}
+  /* the form */
+  .panel{background:var(--surface);border:1px solid var(--rule);border-radius:18px;padding:22px 20px}
+  @media(min-width:600px){ .panel{padding:28px} }
+  .panel h2{font-family:var(--f-head);font-weight:600;font-size:1.3rem;margin:0 0 16px}
+  .amts{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+  .amt{min-height:52px;border:1px solid var(--rule-2);background:var(--surface);border-radius:12px;font:inherit;font-weight:700;font-size:1.05rem;color:var(--text);cursor:pointer}
+  .amt[aria-pressed="true"]{border-color:var(--text);box-shadow:0 0 0 1px var(--text);background:#f7f9fb}
+  .other{margin-top:10px;display:flex;align-items:center;gap:10px;font-size:.92rem;color:var(--mute)}
+  .other input{width:110px}
+  .bonus{margin:10px 0 0;font-size:.92rem;font-weight:600;color:#1d6b34}
+  .bonus[hidden]{display:none}
+  .field{margin-top:16px}
+  .row2{display:grid;grid-template-columns:minmax(0,1fr);gap:0 12px}
+  @media(min-width:520px){ .row2{grid-template-columns:repeat(2,minmax(0,1fr))} }
+  label{display:block;font-weight:500;font-size:.92rem;margin-bottom:6px}
+  .opt{color:var(--mute);font-weight:400}
+  input,textarea{width:100%;font:inherit;font-size:16px;color:var(--text);background:#fff;border:1px solid var(--rule-2);border-radius:10px;padding:12px 14px}
+  textarea{resize:vertical;min-height:72px}
+  input:focus,textarea:focus{outline:none;border-color:var(--text);box-shadow:0 0 0 3px rgba(11,42,69,.12)}
+  .btn{display:flex;width:100%;align-items:center;justify-content:center;margin-top:20px;min-height:52px;background:var(--cop);color:#fff;border:none;border-radius:12px;font:inherit;font-weight:700;font-size:1.05rem;cursor:pointer}
+  .btn:hover{background:var(--cop-hover)}
+  .btn:disabled{opacity:.6;cursor:default}
+  .err{margin:12px 0 0;color:var(--err);font-weight:500;font-size:.95rem}
+  .err[hidden]{display:none}
+  .fine{margin:14px 0 0;font-size:.82rem;color:var(--mute)}
+  #payMount{margin-top:18px;min-height:120px}
+  #payMount.loading{display:flex;align-items:center;justify-content:center;border:1px dashed var(--rule-2);border-radius:12px;color:var(--mute);font-size:.92rem}
+  .linkbtn{background:none;border:none;color:var(--mute);font:inherit;text-decoration:underline;cursor:pointer;min-height:44px;padding:0;margin-top:6px}
+  .done p{margin:0 0 10px}
+  .done .acts{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+  .done .acts button{flex:1 1 140px;margin-top:0}
+  .ghost{background:var(--surface);color:var(--text);border:1px solid var(--rule-2)}
+  .ghost:hover{background:var(--raised)}
+  [hidden]{display:none!important}
+  @media print{ .top,.panel,.points,.lead,h1{display:none!important} main{display:block;padding:0} .gc{box-shadow:none;-webkit-print-color-adjust:exact;print-color-adjust:exact} }
+</style>
+</head>
+<body>
+<header class="top"><div class="top-in">
+  <a class="brand" href="/"><img src="logo.svg" alt="" width="36" height="36">Detail Valley</a>
+  <a class="back" href="/">Book a detail</a>
+</div></header>
+
+<main>
+  <section>
+    <h1>Give a clean car.</h1>
+    <p class="lead">A Detail Valley gift card, delivered by email right away. Forward it, print it, or tuck the code in a card.</p>
+    <div class="gc" aria-live="polite">
+      <div class="gc-top"><b>Detail Valley</b><img src="logo.svg" alt=""></div>
+      <div>
+        <div class="gc-amt" id="gcAmt">$115</div>
+        <div class="gc-sub" id="gcSub">Gift card</div>
+        <div class="gc-code" id="gcCode" hidden></div>
+      </div>
+    </div>
+    <ul class="points">
+      <li>Works on any package: interiors all winter in a heated or attached garage, everything else from April.</li>
+      <li>Covers the $50 spring deposit when they book, and the rest comes off on the day.</li>
+      <li id="ptBonus">Holiday bonus: an extra $15 for every $100, good through June 30, 2027.</li>
+    </ul>
+  </section>
+
+  <section class="panel" id="panel">
+    <form id="gform" novalidate onsubmit="startBuy(event)">
+      <h2>Choose an amount</h2>
+      <div class="amts" role="group" aria-label="Gift card amount">
+        <button type="button" class="amt" data-v="50" aria-pressed="false" onclick="pickAmt(50)">$50</button>
+        <button type="button" class="amt" data-v="100" aria-pressed="true" onclick="pickAmt(100)">$100</button>
+        <button type="button" class="amt" data-v="200" aria-pressed="false" onclick="pickAmt(200)">$200</button>
+        <button type="button" class="amt" data-v="300" aria-pressed="false" onclick="pickAmt(300)">$300</button>
+      </div>
+      <div class="other"><label for="gOther" style="margin:0">Or another amount: $</label>
+        <input id="gOther" type="number" inputmode="numeric" min="25" max="1000" step="5" placeholder="75" oninput="otherAmt(this)"></div>
+      <p class="bonus" id="gBonus"></p>
+
+      <div class="row2">
+        <div class="field"><label for="gTo">To <span class="opt">(their name)</span></label><input id="gTo" maxlength="120" autocomplete="off" placeholder="Jordan" oninput="drawCard()"></div>
+        <div class="field"><label for="gFrom">From <span class="opt">(your name)</span></label><input id="gFrom" maxlength="120" autocomplete="name" placeholder="Sam" oninput="drawCard()"></div>
+      </div>
+      <div class="field"><label for="gEmail">Your email <span class="opt">(we send the card here)</span></label><input id="gEmail" type="email" inputmode="email" maxlength="200" autocomplete="email" placeholder="you@example.com"></div>
+      <div class="field"><label for="gMsg">Message <span class="opt">(optional)</span></label><textarea id="gMsg" maxlength="300" placeholder="Merry Christmas! Your car deserves it."></textarea></div>
+      <p class="err" id="gErr" role="alert" hidden></p>
+      <button class="btn" id="gGo">Continue to payment</button>
+      <p class="fine">The amount you pay never expires while we're open (through August 15, 2027); any unused balance after that is refunded in full. The bonus is promotional and expires on the date shown. <a href="/terms">Terms</a></p>
+    </form>
+
+    <div id="gpay" hidden>
+      <h2 id="payTitle">Pay $100</h2>
+      <div id="payMount" class="loading"><span>Loading secure payment…</span></div>
+      <p class="err" id="payErr" role="alert" hidden></p>
+      <button class="btn" id="payBtn" onclick="submitPay()" disabled>Pay</button>
+      <button class="linkbtn" onclick="backToForm()">Change details</button>
+      <p class="fine">Card details are handled securely by Stripe.</p>
+    </div>
+
+    <div id="gdone" class="done" hidden>
+      <h2>It's ready.</h2>
+      <p id="doneText"></p>
+      <div class="acts">
+        <button class="btn" onclick="copyCode()">Copy code</button>
+        <button class="btn ghost" onclick="window.print()">Print it</button>
+      </div>
+      <p class="fine">They book at detailvalley.com and enter the code on the last step.</p>
+    </div>
+  </section>
+</main>
+
+<script>
+const FN = 'https://utybbdrthxgsijplowup.supabase.co/functions/v1/gift-card';
+const STRIPE_PK = 'pk_live_51Pq7cJA8l4yd6OUzd0MBEirg9woJeAje74gFTOSMtuqBOwCITxx8856PKjQwsQz7yLZcKTPaPgSSKP6JtZ7Lif290018tEvRx1';
+// Holiday bonus (mirrors the gift-card function): +$15 per $100 bought before this date.
+const BONUS_UNTIL = '2026-12-25', BONUS_EXPIRES_TEXT = 'June 30, 2027';
+const bonusOn = () => new Date(Date.now() - 7*3600e3).toISOString().slice(0,10) < BONUS_UNTIL;
+const bonusFor = a => bonusOn() ? Math.floor(a/100)*15 : 0;
+let amount = 100, cardId = null, code = '', stripe = null, elements = null, payEl = null, ready = false, paying = false;
+const $ = id => document.getElementById(id);
+const esc = s => String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+function drawCard(){
+  const b = bonusFor(amount);
+  $('gcAmt').textContent = '$' + (amount + b);
+  const to = $('gTo').value.trim(), from = $('gFrom').value.trim();
+  $('gcSub').textContent = to ? `For ${to}${from ? ', from ' + from : ''}` : (b ? `$${amount} + $${b} holiday bonus` : 'Gift card');
+  $('gBonus').hidden = !b;
+  $('gBonus').textContent = b ? `+ $${b} bonus, so it's worth $${amount + b} (bonus good through ${BONUS_EXPIRES_TEXT})` : '';
+  $('ptBonus').hidden = !bonusOn();
+}
+function pickAmt(v){
+  amount = v; $('gOther').value = '';
+  document.querySelectorAll('.amt').forEach(b=>b.setAttribute('aria-pressed', String(+b.dataset.v === v)));
+  drawCard();
+}
+function otherAmt(el){
+  const v = Math.round(+el.value);
+  document.querySelectorAll('.amt').forEach(b=>b.setAttribute('aria-pressed', 'false'));
+  if(v >= 25 && v <= 1000){ amount = v; drawCard(); }
+}
+function err(id, msg){ $(id).textContent = msg; $(id).hidden = !msg; }
+
+async function startBuy(e){
+  e.preventDefault();
+  err('gErr', '');
+  if($('gOther').value){
+    const v = Math.round(+$('gOther').value);
+    if(!(v >= 25 && v <= 1000) || v % 5) return err('gErr', 'Pick an amount from $25 to $1,000, in $5 steps.');
+    amount = v;
+  }
+  const email = $('gEmail').value.trim();
+  if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return err('gErr', 'Enter your email so we can send you the card.');
+  const btn = $('gGo'); btn.disabled = true; btn.textContent = 'One moment…';
+  try{
+    const [s, r] = await Promise.all([ loadStripe(), fetch(FN, {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({
+      action:'buy', amount, buyer_email: email, buyer_name: $('gFrom').value, recipient_name: $('gTo').value, message: $('gMsg').value })}) ]);
+    const d = await r.json().catch(()=>({}));
+    if(!r.ok || !d.client_secret) throw new Error(d.error || 'buy');
+    cardId = d.card_id; stripe = s;
+    showPay(d.client_secret);
+  }catch(x){
+    err('gErr', x && x.message === 'bad_email' ? 'That email doesn\'t look right.' : `Couldn't start the payment. Try again, or text (208) 315-1420.`);
+  }
+  btn.disabled = false; btn.textContent = 'Continue to payment';
+}
+function loadStripe(){
+  if(window.Stripe) return Promise.resolve(window.Stripe(STRIPE_PK));
+  return new Promise((res, rej)=>{ const sc = document.createElement('script'); sc.src = 'https://js.stripe.com/v3/';
+    sc.onload = ()=> window.Stripe ? res(window.Stripe(STRIPE_PK)) : rej(new Error('stripe')); sc.onerror = ()=>rej(new Error('stripe')); document.head.appendChild(sc); });
+}
+function showPay(secret){
+  $('gform').hidden = true; $('gpay').hidden = false;
+  $('payTitle').textContent = `Pay $${amount}`;
+  $('payBtn').textContent = `Pay $${amount}`; $('payBtn').disabled = true; ready = false;
+  const area = $('payMount'); area.classList.add('loading'); area.innerHTML = '<span>Loading secure payment…</span>';
+  elements = stripe.elements({ clientSecret: secret, appearance: {
+    theme:'stripe', labels:'floating',
+    variables:{ colorPrimary:'#a4521f', colorText:'#0b2a45', colorTextSecondary:'#3d566b', colorBackground:'#ffffff', colorDanger:'#b3261e',
+      fontFamily:'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif', fontSizeBase:'16px', borderRadius:'10px', gridRowSpacing:'12px' },
+    rules:{ '.Input':{ border:'1px solid #c9d2da', boxShadow:'none' }, '.Input:focus':{ borderColor:'#0b2a45', boxShadow:'0 0 0 3px rgba(11,42,69,.12)' },
+      '.Input--invalid':{ borderColor:'#b3261e', boxShadow:'none' }, '.Error':{ fontSize:'0px', lineHeight:'0px', marginTop:'0px', color:'rgba(0,0,0,0)' },
+      '.Tab':{ border:'1px solid #c9d2da', boxShadow:'none' }, '.Tab--selected, .Tab--selected:hover, .Tab--selected:focus':{ borderColor:'#0b2a45', boxShadow:'0 0 0 1px #0b2a45' } } },
+    fonts:[{ cssSrc:'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap' }] });
+  payEl = elements.create('payment', { layout:{ type:'tabs' }, fields:{ billingDetails:{ address:{ country:'never' } } },
+    wallets:{ applePay:'auto', googlePay:'auto', link:'never' } });
+  payEl.on('ready', ()=>{ ready = true; area.classList.remove('loading'); $('payBtn').disabled = false; });
+  payEl.on('loaderror', ()=> err('payErr', 'Payment couldn\'t load. Try another browser, or text (208) 315-1420.'));
+  payEl.on('change', ()=> err('payErr', ''));
+  area.innerHTML = ''; payEl.mount(area);
+}
+function backToForm(){ if(payEl){ try{ payEl.destroy(); }catch(e){} payEl = null; } $('gpay').hidden = true; $('gform').hidden = false; }
+async function submitPay(){
+  if(!ready || paying) return;
+  paying = true; const btn = $('payBtn'); btn.disabled = true; btn.textContent = 'Processing…'; err('payErr', '');
+  try{
+    const { error, paymentIntent } = await stripe.confirmPayment({ elements, redirect:'if_required',
+      confirmParams:{ return_url: `${location.origin}/gift?paid=${cardId}`, payment_method_data:{ billing_details:{ address:{ country:'US' } } } } });
+    if(error){ err('payErr', (error.type==='card_error'||error.type==='validation_error') ? error.message : 'Something went wrong with the payment. Please try again.'); }
+    else if(paymentIntent && paymentIntent.status === 'succeeded'){ await finish(paymentIntent.id); return; }
+    else err('payErr', 'The payment didn\'t go through. Please try again.');
+  }catch(x){ err('payErr', 'Something went wrong with the payment. Please try again.'); }
+  paying = false; btn.disabled = false; btn.textContent = `Pay $${amount}`;
+}
+async function finish(pi){
+  const r = await fetch(FN, {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ action:'confirm', card_id: cardId, payment_intent: pi })});
+  const d = await r.json().catch(()=>({}));
+  if(payEl){ try{ payEl.destroy(); }catch(e){} }
+  $('gform').hidden = true; $('gpay').hidden = true; $('gdone').hidden = false;
+  if(d.code){
+    code = d.code;
+    $('gcCode').textContent = code; $('gcCode').hidden = false;
+    $('gcAmt').textContent = '$' + (d.amount + (d.bonus||0));
+    $('doneText').innerHTML = `Your $${d.amount + (d.bonus||0)} gift card is <b>${esc(code)}</b>. We emailed it to ${$('gEmail').value.trim() ? '<b>' + esc($('gEmail').value.trim()) + '</b>' : 'you'} too.`;
+  } else {
+    $('doneText').textContent = 'Payment received. Your gift card is on its way to your email. If it doesn\'t show up in a few minutes, text (208) 315-1420.';
+  }
+}
+async function copyCode(){ try{ await navigator.clipboard.writeText(code); $('doneText').insertAdjacentHTML('beforeend', ' <span style="color:#1d6b34">Copied.</span>'); }catch(e){} }
+// Back from a bank (3-D Secure) page.
+(function(){
+  const q = new URLSearchParams(location.search), id = q.get('paid'), pi = q.get('payment_intent');
+  if(id && pi && /^[0-9a-f-]{36}$/i.test(id)){ cardId = id; history.replaceState(null, '', location.pathname); finish(pi); }
+})();
+drawCard();
+</script>
+</body>
+</html>

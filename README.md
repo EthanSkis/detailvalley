@@ -59,6 +59,7 @@ command and no publish directory beyond the root are needed.
 | `quote.html` | Private **quoting tool** — pick a make &amp; model, get the same price and time on site the booking flow would charge. See [Quoting tool](#quoting-tool-quotehtml). |
 | `before-after.html` | Before &amp; after gallery — one chapter per vehicle, 10 drag-to-compare sliders each. See [Before &amp; after](#before--after-photos). |
 | `dv-pricing.js` | **The one price list**: packages, vehicle sizes and add-ons, with their prices and minutes. Read by both the booking flow and the quoting tool, so they always agree. |
+| `gift.html` | Gift card shop (`/gift`): amount, message, Stripe payment, code by email. See [Gift cards](#gift-cards). |
 | `dv-streets.js` | Valley County street list for instant address suggestions (OpenStreetMap data, ODbL). Built by `tools/streets-*.py`. |
 | `dv-compare.js` | Drag / tap / keyboard behavior for the compare sliders. Shared by the homepage and the gallery page. |
 | `gallery/<vehicle>/` | The before &amp; after photos, one folder per vehicle, two widths each (`-sm` = 560px, plain = 900px) for `srcset`. |
@@ -179,6 +180,29 @@ around here, so suggestions are street-level. Typed addresses without a pick
 are split into street + town (`splitAddress`: known towns and ZIPs), falling
 back to "Valley County". A house number is required. For house-level autofill,
 swap `ADDR_API` for Google Places or Mapbox (needs an API key).
+
+## Gift cards
+
+`gift.html` (live at `/gift`) sells gift cards: pick an amount ($25 to $1,000),
+add To / From / a message and the buyer's email, then pay in our own Stripe
+form. Through Dec 24, 2026 every $100 gets a $15 promotional bonus, good
+through June 30, 2027 (`BONUS_UNTIL` / `BONUS_EXPIRES` in
+`supabase/functions/gift-card` and `gift.html`). The buyer sees the code
+(`DV-XXXX-XXXX`) on screen and gets it by email; the owner gets an email too.
+
+- **Using one:** the booking flow's review step has "Have a gift card?". If the
+  card covers the spring deposit, the deposit is paid from the card (no step 7);
+  what's left shows as coming off on the day. The code is saved on the booking.
+- **On the day:** the job board shows the card on the booking with its balance;
+  **Use gift card** takes an amount off (`redeem_gift_card`, owner only) and
+  notes it on the booking. **Money** lists every card sold with what's left.
+- **Rules:** bonus value is spent first and expires; paid value doesn't expire
+  while operating, and any unused paid balance after Aug 15, 2027 is refunded
+  (see `terms.html`).
+- **Backend:** `gift_cards` + `gift_card_uses` tables (owner-only RLS), the
+  `gift-card` edge function (buy / confirm / check / pay_deposit), and the
+  webhook turns cards on from `payment_intent.succeeded` as a backup.
+  Migration: `supabase/migrations/20261119_gift_cards.sql`.
 
 ## Stripe deposits
 

@@ -194,6 +194,8 @@
   .addr .ico{margin-top:4px}
   .warn{background:var(--card-2);color:var(--amber);font-size:.875rem;line-height:1.4286;
     padding:8px 12px;border-radius:8px;margin-top:8px;font-weight:500}
+  .giftline{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;margin:6px 0;font-size:.86rem}
+  .giftline .act{padding:6px 12px;min-height:36px}
   .dep{display:inline-block;margin:4px 0 2px;font-size:.8rem;font-weight:700;padding:3px 10px;border-radius:999px}
   .dep-paid{background:#e3f4e8;color:#1d6b34}
   .dep-due{background:#fbf0e9;color:#8a3b12}
@@ -1015,6 +1017,7 @@ function jobCard(j){
     ${addons}
     <p class="total">${money(j.total_usd)}</p>
     ${depositHtml(j)}
+    ${giftLineHtml(j)}
     <a class="addr" href="${mapHref(j)}" target="_blank" rel="noopener"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"/><circle cx="12" cy="10" r="3"/></svg>${esc(j.address)}, ${esc(j.town)}</a>
     ${warn}
     <textarea class="notes" placeholder="Notes (gate code, dog, reminders)"
@@ -1468,6 +1471,7 @@ function drawPanel(){
       <dt class="tot">Total</dt><dd class="in-total">${money(j.total_usd)}</dd>
     </dl>
     ${depositHtml(j)}
+    ${giftLineHtml(j)}
     ${warn}
     <div><label for="dNotes">Notes</label>
       <textarea class="notes" id="dNotes" placeholder="Gate code, dog, reminders" data-id="${j.id}" onblur="saveNotes(this)">${esc(j.notes)}</textarea></div>
@@ -1678,7 +1682,15 @@ let MONEY_LOADED = false;
 const EXPENSE_CATS = ['Supplies','Equipment','Insurance','Phone & software','Marketing','Fees','Other'];
 const INCOME_CATS = ['Tips','Cash job','Kept deposit','Other'];
 
+let GIFTS = [];          // gift_cards rows (sold online), newest first
+let GIFT_ERR = null;
+async function loadGifts(){
+  const { data, error } = await sb.from('gift_cards').select('*').neq('status','pending').order('paid_at', { ascending:false });
+  GIFT_ERR = error ? error.message : null;
+  GIFTS = data || [];
+}
 async function loadMoney(){
+  loadGifts().then(()=>{ try{ redraw(); }catch(e){} });
   const [e, t] = await Promise.all([
     sb.from('money_entries').select('*').order('entry_date', { ascending:false }).order('created_at', { ascending:false }),
     sb.from('tax_settings').select('*')
@@ -1967,8 +1979,53 @@ function moneyBodyHtml(m){
   const foot = `<div class="m-foot"><button class="act act-ghost" onclick="exportMoneyCsv()">Download ${y} as CSV</button>`+
     `<p>Estimates for planning, not tax advice. Per hour is time on site, not drive time. Check the numbers with a tax pro or IRS Free File before you file.</p></div>`;
 
-  return kpis + errHtml + flagsHtml + `<div class="m-grid"><div>${chart}${logCard}${pkgCard}${townCard}</div><div>${taxCard}${payCard}</div></div>` + foot;
+  return kpis + errHtml + flagsHtml + `<div class="m-grid"><div>${chart}${logCard}${pkgCard}${townCard}</div><div>${taxCard}${payCard}${giftCardHtml()}</div></div>` + foot;
 }
+
+/* Gift cards sold on detailvalley.com/gift: who, what's left. Bonus value expires. */
+function giftLeft(g){
+  const bonusOk = !g.bonus_expires || g.bonus_expires >= todayKey() ? (+g.bonus_balance_usd || 0) : 0;
+  return (+g.balance_usd || 0) + bonusOk;
+}
+function giftCardHtml(){
+  const sold = GIFTS.reduce((n, g) => n + (+g.amount_paid_usd || 0), 0);
+  const owed = GIFTS.reduce((n, g) => n + (+g.balance_usd || 0), 0);
+  const row = g => `<tr><td><b>${esc(g.code)}</b><small>${esc(g.recipient_name || 'No name')}${g.buyer_name ? ' · from ' + esc(g.buyer_name) : ''}${g.buyer_email ? ' · ' + esc(g.buyer_email) : ''}</small></td>`+
+    `<td>${cur(giftLeft(g))}<small>of ${cur((+g.amount_paid_usd||0) + (+g.bonus_usd||0))}</small></td></tr>`;
+  return `<section class="m-card"><h2>Gift cards <em>${plural(GIFTS.length, 'card')}</em></h2>`+
+    (GIFT_ERR ? `<p class="m-note">Couldn’t load gift cards (${esc(GIFT_ERR)}).</p>`
+      : GIFTS.length ? `<p class="m-note">${cur(sold)} sold · ${cur(owed)} paid value still unused (refund any of it left after Aug 15).</p>`+
+        `<div class="m-scroll"><table class="m-tbl"><tbody>${GIFTS.map(row).join('')}</tbody></table></div>`
+      : `<p class="m-note">None sold yet. Share <b>detailvalley.com/gift</b>.</p>`)+
+    `</section>`;
+}
+/* A booking that came with a gift card: show it, and use it once the job's done. */
+function giftLineHtml(j){
+  if(!j.gift_card_code) return '';
+  const g = GIFTS.find(x => x.code === j.gift_card_code);
+  const left = g ? giftLeft(g) : null;
+  return `<div class="giftline"><span>Gift card <b>${esc(j.gift_card_code)}</b>${g ? ` · ${cur(left)} left${g.recipient_name ? ' · for ' + esc(g.recipient_name) : ''}` : ''}</span>`+
+    (left ? `<button class="act act-ghost" onclick="useGift('${j.id}')">Use gift card</button>` : '')+`</div>`;
+}
+async function useGift(id){
+  const j = JOBS.find(x => x.id === id); if(!j) return;
+  const g = GIFTS.find(x => x.code === j.gift_card_code); if(!g) return toast('Gift card not found');
+  const dep = j.deposit_paid_at ? (+j.deposit_paid_usd || 0) : 0;
+  const due = Math.max(0, (+j.total_usd || 0) - dep), left = giftLeft(g);
+  const suggest = Math.min(due, left);
+  const v = prompt(`Use how much from ${g.code}? It has ${cur(left)} left; this job has ${cur(due)} due.`, String(suggest));
+  if(v === null) return;
+  const amt = Math.round(+v);
+  if(!(amt > 0) || amt > left) return toast(`Enter an amount from $1 to ${cur(left)}`);
+  const { data, error } = await sb.rpc('redeem_gift_card', { p_code: g.code, p_amount: amt, p_booking: j.id });
+  if(error || !data) return toast('Couldn’t use the gift card' + (error ? ': ' + error.message : ''));
+  const note = `[Gift card ${g.code}: $${data} used ${new Date().toLocaleDateString('en-US')}]`;
+  await sb.from('bookings').update({ notes: ((j.notes || '') + ' ' + note).trim() }).eq('id', j.id);
+  j.notes = ((j.notes || '') + ' ' + note).trim();
+  toast(`$${data} taken off ${g.code}. Collect ${cur(Math.max(0, due - data))}.`);
+  await loadGifts(); redrawJobs();
+}
+function redrawJobs(){ try{ redraw(); }catch(e){} }
 
 /* Log it (expenses, miles, income) and the year's tax settings. Drawn once per
    year so nothing being typed is lost when the numbers refigure. */

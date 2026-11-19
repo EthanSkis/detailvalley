@@ -675,6 +675,12 @@
   .pay-fine{margin:4px 0 0;font-size:.82rem;line-height:1.45;color:var(--mute)}
   .pay-mount.loading{display:flex;align-items:center;justify-content:center;border:1px dashed var(--rule-2);border-radius:12px;color:var(--mute);font-size:.92rem}
   .pay-mount a{color:inherit}
+  .bk-gift summary{cursor:pointer;font-weight:500;padding:8px 0;min-height:40px;display:flex;align-items:center}
+  .bk-gift .gift-row{display:flex;gap:8px;align-items:center;padding-bottom:8px}
+  .bk-gift .gift-row input{flex:1;min-width:0;text-transform:uppercase;letter-spacing:.08em}
+  .bk-linkbtn{background:none;border:none;padding:0;font:inherit;color:var(--mute);text-decoration:underline;cursor:pointer}
+  .gift-cta{margin:20px 0 0;text-align:center;color:var(--mute)}
+  .gift-cta a{color:var(--cop);font-weight:600}
   .addr-field{position:relative;z-index:20}
   .addr-list{position:absolute;left:0;right:0;top:100%;z-index:5;margin:4px 0 0;padding:4px;list-style:none;background:var(--surface);border:1px solid var(--rule-2);border-radius:12px;box-shadow:0 12px 28px rgba(11,42,69,.16);max-height:240px;overflow-y:auto}
   .addr-list[hidden]{display:none}
@@ -706,6 +712,7 @@
       <a href="#how">How it works</a>
       <a href="#faq">FAQ</a>
       <a href="/service-areas">Service areas</a>
+      <a href="/gift">Gift cards</a>
     </div>
     <a class="nav-phone" href="tel:+12083151420">(208) 315-1420</a>
     <button class="btn nav-btn" onclick="openBooking()">Book a detail</button>
@@ -825,6 +832,7 @@
       <div class="pkg-price"><span data-price="interior">$185</span><span class="pkg-later" data-lockin>$205 from April 1</span></div>
       <button class="pkg-btn" onclick="openBooking('interior')">Book Interior Detail</button>
     </div>
+    <p class="gift-cta">Giving it as a gift? <a href="/gift">Get a gift card</a>, delivered by email in a minute.</p>
   </div>
 </section>
 
@@ -952,6 +960,10 @@
         <p>Only to lock in a spring date before April 1. A $50 deposit ($25 for a Maintenance Wash) holds your date at this year's price and comes off your total. You pay it by card when you book. It moves free if you reschedule with 48 hours' notice or the weather turns; you only lose it for a no-show or a cancel under 48 hours. From April 1 there's no deposit: you book, we do the work, you look the car over, and then you pay: cash, check, cards, Venmo, PayPal or Cash App.</p>
       </details>
       <details>
+        <summary>Do you sell gift cards?</summary>
+        <p>Yes, any amount from $25, delivered by email right away: <a href="/gift">get one here</a>. Through Christmas, every $100 comes with a $15 bonus. The card can cover the spring deposit when they book, and the rest comes off on the day.</p>
+      </details>
+      <details>
         <summary>Do you detail in winter?</summary>
         <p>Interiors, yes: we do Interior Details all winter on weekends, as long as the car is in a heated or attached garage (so the carpets dry). Washes and full details start back up in April. Until school's out on May 22 we work Sundays (some Saturdays open up once the track schedule is set), then every day through August 15. Spring and summer dates are open to book now.</p>
       </details>
@@ -1022,6 +1034,7 @@
     <div class="foot-col">
       <p class="foot-h">Explore</p>
       <a href="/before-after">Before &amp; after photos</a>
+      <a href="/gift">Gift cards</a>
       <a href="/service-areas">Areas we serve in Valley County</a>
       <a href="#packages">Packages &amp; pricing</a>
     </div>
@@ -1314,7 +1327,32 @@ const SIZE_ICON = {
   oversize:'<svg viewBox="0 0 56 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9.500 18H5.500a2 2 0 0 1-2-2v-5.500a1 1 0 0 1 1-1H24V5.500a2 2 0 0 1 2-2h7.800a5 5 0 0 1 3.900 1.900L41 10l8.300 1.300a4 4 0 0 1 3.200 3.900V16a2 2 0 0 1-2 2h-4M18.500 18h19M24 9.500V14M28 10h12.500"/><circle cx="14" cy="18" r="4"/><circle cx="42" cy="18" r="4"/></svg>'
 };
 
-function freshState(){ return {step:1, pkg:null, size:null, addons:[], slot:null, calDate:null, name:'', phone:'', address:'', town:'', zip:'', addrPicked:false, utilities:null, garage:null, hp:false, bookingId:null, depositPaid:false}; }
+function freshState(){ return {step:1, pkg:null, size:null, addons:[], slot:null, calDate:null, name:'', phone:'', address:'', town:'', zip:'', addrPicked:false, utilities:null, garage:null, hp:false, bookingId:null, depositPaid:false, gift:null, giftPaidDeposit:false}; }
+/* ---------- Gift cards (gift.html sells them; the gift-card function checks and spends) ---------- */
+const GIFT_FN = 'https://utybbdrthxgsijplowup.supabase.co/functions/v1/gift-card';
+const giftCoversDeposit = () => !!(state.gift && needsDeposit() && state.gift.available >= deposit());
+function giftOnDay(){
+  if(!state.gift) return 0;
+  const left = state.gift.available - (giftCoversDeposit() ? deposit() : 0);
+  return Math.max(0, Math.min(left, total() - deposit()));
+}
+const payLater = () => Math.max(0, total() - deposit() - giftOnDay());
+async function applyGift(){
+  const el = document.getElementById('f-gift'), e = document.getElementById('giftErr'), b = document.getElementById('giftBtn');
+  const code = (el && el.value || '').trim();
+  const fail = m => { if(e){ e.textContent = m; e.hidden = false; } if(b){ b.disabled = false; b.textContent = 'Apply'; } };
+  if(code.replace(/[^a-z0-9]/gi,'').length < 8) return fail('Enter the code from the gift card, like DV-7KQ4-M2XP.');
+  if(b){ b.disabled = true; b.textContent = 'Checking…'; }
+  try{
+    const r = await fetch(GIFT_FN, {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({action:'check', code})});
+    const d = await r.json();
+    if(!d.valid) return fail("That code didn't work. Check it and try again, or text " + BIZ_PHONE + '.');
+    if(!(d.available > 0)) return fail('That gift card has been used up.');
+    state.gift = { code: d.code, available: d.available };
+    render(); refreshMoney();
+  }catch(x){ fail("Couldn't check the gift card right now. Try again in a moment."); }
+}
+function removeGift(){ state.gift = null; render(); refreshMoney(); }
 let state = freshState();
 let slotCache = null;
 let submitting = false;
@@ -1593,7 +1631,7 @@ function go(step){
 }
 function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
 const STEP_LABELS = {1:'Service', 2:'Vehicle', 3:'Extras', 4:'Day & time', 5:'Your details', 6:'Review', 7:'Deposit'};
-const STEP_COUNT = () => needsDeposit() ? 7 : 6;
+const STEP_COUNT = () => (needsDeposit() && !giftCoversDeposit()) ? 7 : 6;
 const IC_BACK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>';
 const IC_CLOSE = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>';
 function topBar(n, fwd){
@@ -1786,13 +1824,20 @@ function render(){
       </div></div>
       ${needsDeposit() ? `<div class="bk-card tight bk-lock">
         <div class="bk-line"><span><b>$${deposit()} deposit</b> holds your date at this year's price</span></div>
-        <p class="bk-lock-p">You'll pay it on the next step (card, Apple Pay or Google Pay); your date is booked once it's paid. It comes off your total. Need to move? Give us 48 hours' notice and it moves with you, free. Weather reschedules are always free. A no-show or a cancel under 48 hours keeps the deposit. If we cancel, you get it back.</p>
+        <p class="bk-lock-p">${giftCoversDeposit() ? 'Your gift card pays it, so your date is booked as soon as you confirm.' : "You'll pay it on the next step (card, Apple Pay or Google Pay); your date is booked once it's paid."} It comes off your total. Need to move? Give us 48 hours' notice and it moves with you, free. Weather reschedules are always free. A no-show or a cancel under 48 hours keeps the deposit. If we cancel, you get it back.</p>
       </div>` : ''}
+      <div class="bk-card tight bk-gift">${state.gift
+        ? `<div class="bk-line"><span><b>Gift card</b> ${esc(state.gift.code)}</span><b>−$${(giftCoversDeposit() ? deposit() : 0) + giftOnDay()}</b></div>
+           <p class="bk-lock-p">${giftCoversDeposit() ? `Covers your $${deposit()} deposit, so there's nothing to pay now. ` : ''}${giftOnDay() ? `$${giftOnDay()} comes off on the day. ` : ''}<button type="button" class="bk-linkbtn" onclick="removeGift()">Remove</button></p>`
+        : `<details class="gift-d"><summary>Have a gift card?</summary>
+           <div class="gift-row"><label class="sr-only" for="f-gift">Gift card code</label><input id="f-gift" placeholder="DV-XXXX-XXXX" autocapitalize="characters" autocomplete="off" spellcheck="false" enterkeyhint="done" onkeydown="if(event.key==='Enter'){event.preventDefault();applyGift();}">
+           <button type="button" class="bk-change" id="giftBtn" onclick="applyGift()">Apply</button></div>
+           <p id="giftErr" class="form-err" hidden></p></details>`}</div>
       <p id="confirmErr" class="form-err" hidden></p>
       <p class="bk-legal">By confirming, you agree to our <a href="/terms" target="_blank" rel="noopener">terms</a> and to get texts about this booking. Reply STOP to opt out. <a href="/privacy" target="_blank" rel="noopener">Privacy</a></p>
     `, `<div class="bk-foot keep-tot">
-      <div class="bk-tot"><span>${needsDeposit() ? `$${deposit()} now · rest after` : 'Pay after the job'}</span><b>$${total()}</b></div>
-      <button class="bk-go" id="confirmBtn" onclick="submitBooking()">${needsDeposit() ? 'Continue to deposit' : 'Confirm booking'}</button>
+      <div class="bk-tot"><span>${needsDeposit() && !giftCoversDeposit() ? `$${deposit()} now · $${payLater()} after` : `Pay after the job`}</span><b>$${(needsDeposit() && !giftCoversDeposit() ? deposit() : 0) + payLater()}</b></div>
+      <button class="bk-go" id="confirmBtn" onclick="submitBooking()">${confirmLabel()}</button>
     </div>`);
   }
   else if(state.step==='pay'){
@@ -1821,9 +1866,10 @@ function render(){
         <div class="bk-line"><span class="k">Where</span><span class="v">${esc(addrLine())}</span></div>
         <div class="bk-line"><span class="k">Service</span><span class="v">${svc}</span></div>
         ${needsDeposit()
-          ? `<div class="bk-line"><span class="k">Deposit</span><span class="v">$${deposit()}${state.depositPaid ? ' paid' : ', link by text'}</span></div>
-        <div class="bk-line"><span class="k">Due after the job</span><span class="v">$${total()-deposit()}</span></div>`
-          : `<div class="bk-line"><span class="k">Total due after</span><span class="v">$${total()}</span></div>`}
+          ? `<div class="bk-line"><span class="k">Deposit</span><span class="v">$${deposit()}${state.giftPaidDeposit ? ' paid by gift card' : state.depositPaid ? ' paid' : ', link by text'}</span></div>
+        <div class="bk-line"><span class="k">Due after the job</span><span class="v">$${payLater()}</span></div>`
+          : `<div class="bk-line"><span class="k">Total due after</span><span class="v">$${payLater()}</span></div>`}
+        ${giftOnDay() ? `<div class="bk-line"><span class="k">Gift card</span><span class="v">$${giftOnDay()} off on the day</span></div>` : ''}
       </div>
       <p class="bk-tip"><b>Before we arrive:</b> ${isWinterSlot(state.slot)
         ? "have the car in the garage near an outlet; we'll fill water jugs at a sink. Clear out anything you want kept."
@@ -2001,6 +2047,7 @@ function saveDetails(){
   go(6);
 }
 
+function confirmLabel(){ return needsDeposit() && !giftCoversDeposit() ? 'Continue to deposit' : 'Confirm booking'; }
 async function submitBooking(){
   if(submitting) return;
   const btn = document.getElementById('confirmBtn');
@@ -2025,8 +2072,9 @@ async function submitBooking(){
     status: 'pending'
   };
   if(bookingId) row.id = bookingId;   // so the deposit checkout can find this booking
+  if(state.gift) row.gift_card_code = state.gift.code;
   const { error } = await sb.from('bookings').insert(row);
-  submitting = false; if(btn){ btn.disabled=false; btn.textContent = needsDeposit() ? 'Continue to deposit' : 'Confirm booking'; }
+  submitting = false; if(btn){ btn.disabled=false; btn.textContent = confirmLabel(); }
   if(error){
     if(error.code==='23505' || error.code==='23P01'){
       takenCache = null;   // our cached availability was out of date
@@ -2040,6 +2088,15 @@ async function submitBooking(){
   takenCache = null;
   if(needsDeposit() && bookingId){
     state.bookingId = bookingId;
+    if(giftCoversDeposit()){        // deposit straight from the gift card, no card payment
+      if(btn){ btn.disabled = true; btn.textContent = 'Applying gift card…'; }
+      try{
+        const r = await fetch(GIFT_FN, {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({action:'pay_deposit', code: state.gift.code, booking_id: bookingId})});
+        const d = await r.json();
+        if(d.paid){ state.depositPaid = true; state.giftPaidDeposit = true; go(7); return; }
+      }catch(x){}
+      state.gift = null;            // card couldn't cover it after all: pay the deposit by card instead
+    }
     go('pay');                     // pay the deposit right inside the booking sheet
     return;
   }

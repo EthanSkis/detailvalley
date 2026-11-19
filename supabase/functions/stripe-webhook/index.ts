@@ -51,6 +51,12 @@ Deno.serve(async (req) => {
     bookingId = s.metadata?.booking_id || s.client_reference_id;
     paidUsd = Math.round((s.amount_total || 0) / 100);
     ref = s.id;
+  } else if (event.type === "payment_intent.succeeded" && s.metadata?.gift_card_id) {
+    // A gift card purchase (gift.html): turn the card on (no-op if the page already did).
+    const sbg = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
+    const { error } = await sbg.rpc("activate_gift_card", { p_card: s.metadata.gift_card_id, p_pi: s.id });
+    if (error) { console.error("gift card activate failed", error.message); return new Response("db error", { status: 500 }); }
+    return new Response("ok", { status: 200 });
   } else if (event.type === "payment_intent.succeeded") {
     // Our own payment form (Payment Element). Checkout's intents carry the same
     // metadata; the update below only ever applies once per booking.

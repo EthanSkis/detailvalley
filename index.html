@@ -702,8 +702,12 @@
   .bk-a-line.gift b{color:var(--peach)}
   .bk-a-line.due b{font-weight:700}
   .bk-linkbtn{background:none;border:none;padding:0;font:inherit;color:var(--mute);text-decoration:underline;cursor:pointer}
-  .gift-cta{margin:20px 0 0;text-align:center;color:var(--mute)}
-  .gift-cta a{color:var(--cop);font-weight:600}
+  .pkg-gift{margin-top:14px;background:var(--text);border-color:var(--text);color:#fff}
+  .pkg-gift .pkg-name span,.pkg-gift .inside-sub{color:var(--on-navy)}
+  .pkg-gift .pkg-price{color:var(--peach)}
+  .pkg-gift .pkg-btn{background:var(--peach);border-color:var(--peach);color:var(--text);text-align:center;text-decoration:none}
+  .pkg-gift .pkg-btn:hover{background:#fff;border-color:#fff}
+  .pkg-gift .pkg-name .pkg-bonus{background:rgba(240,194,158,.18);color:var(--peach)}
   .addr-field{position:relative;z-index:20}
   .addr-list{position:absolute;left:0;right:0;top:100%;z-index:5;margin:4px 0 0;padding:4px;list-style:none;background:var(--surface);border:1px solid var(--rule-2);border-radius:12px;box-shadow:0 12px 28px rgba(11,42,69,.16);max-height:240px;overflow-y:auto}
   .addr-list[hidden]{display:none}
@@ -855,7 +859,14 @@
       <div class="pkg-price"><span data-price="interior">$185</span><span class="pkg-later" data-lockin>$205 from April 1</span></div>
       <button class="pkg-btn" onclick="openBooking('interior')">Book Interior Detail</button>
     </div>
-    <p class="gift-cta">Giving it as a gift? <a href="/gift">Get a gift card</a>, delivered by email in a minute.</p>
+    <div class="pkg pkg-inside pkg-gift">
+      <div>
+        <h3 class="pkg-name">Gift card <span>· any amount · emailed in a minute</span> <span class="pkg-winter pkg-bonus" data-giftbonus>+$15 per $100 through Dec 24</span></h3>
+        <p class="inside-sub">Give a spotless car. Works on any package, covers the spring deposit, and prints as a gift certificate.</p>
+      </div>
+      <div class="pkg-price">From $25</div>
+      <a class="pkg-btn" href="/gift">Buy a gift card</a>
+    </div>
   </div>
 </section>
 
@@ -1146,7 +1157,9 @@ const HOURS = {
 // A day listed here is closed no matter what HOURS says. Past dates are harmless
 // (they fall outside the booking window), but tidy them up when you think of it.
 const BLOCKED_DAYS = [
-  '2026-11-28',   // Sat — day off
+  // Rest of November 2026: unavailable
+  '2026-11-20','2026-11-21','2026-11-22','2026-11-23','2026-11-24','2026-11-25',
+  '2026-11-26','2026-11-27','2026-11-28','2026-11-29','2026-11-30',
   '2026-08-14',   // Fri — booked
   '2026-08-15',   // Sat — booked
 
@@ -1390,7 +1403,7 @@ function giftRowHtml(){
     <button type="button" class="gift-apply" id="giftBtn" onclick="applyGift()">Apply</button>
     <p id="giftErr" class="form-err" hidden></p></div>`;
 }
-function openGift(){ state.giftOpen = true; render(); const el = document.getElementById('f-gift'); if(el) el.focus(); }
+function openGift(){ state.giftOpen = true; renderStep(); fitSheet(); const el = document.getElementById('f-gift'); if(el) el.focus({preventScroll:true}); }
 let state = freshState();
 let slotCache = null;
 let submitting = false;
@@ -1481,7 +1494,9 @@ function onAddrInput(el){
   const townPart = (raw.split(',')[1] || '').trim().toLowerCase();
   if(local && townPart){
     local = local.filter(a=> (a.town||'').toLowerCase().startsWith(townPart));
-    const exact = local.find(a=> `${a.street}, ${a.town}`.toLowerCase() === raw.trim().toLowerCase());
+    const normA = t => stTokens(t).map(w=> ST_ALIAS[w] || w).join(' ');   // "Deer Forest Dr" == "Deer Forest Drive"
+    const typed = normA(raw);
+    const exact = local.find(a=> normA(`${a.street} ${a.town}`) === typed);
     if(exact){ addrItems = [exact]; acceptAddr(0); return; }
     if(!local.length){ closeAddr(); return; }
   }
@@ -1536,7 +1551,9 @@ function closeAddr(){
 // Take a suggestion without touching what's in the field (it already matches).
 function acceptAddr(i){
   const a = addrItems[i]; if(!a) return;
-  state.address = a.street; state.town = a.town || 'Valley County'; state.zip = a.zip; state.addrPicked = true;
+  const el = document.getElementById('f-address');
+  const typedStreet = el ? el.value.split(',')[0].trim() : '';
+  state.address = typedStreet || a.street; state.town = a.town || 'Valley County'; state.zip = a.zip; state.addrPicked = true;
   closeAddr();
 }
 function pickAddr(i){
@@ -1560,7 +1577,7 @@ function onAddrKey(e){
 function readAddress(){
   const el = document.getElementById('f-address'); if(!el) return;
   const typed = el.value.trim();
-  if(state.addrPicked && typed === addrLine()) return;   // picked from the list, untouched
+  if(state.addrPicked && (typed === addrLine() || typed.split(',')[0].trim() === state.address)) return;   // picked or matched, untouched
   const sp = splitAddress(typed);
   state.address = sp.street; state.zip = sp.zip;
   state.town = sp.town || 'Valley County';
@@ -1754,7 +1771,23 @@ function fitBox(box, fit){
     if(parseFloat(fit.style.zoom) <= FIT_MIN) break;
   }
 }
+// Someone is typing in the sheet (the gift card code): the phone keyboard is up
+// and has squeezed the window, so leave the layout exactly as it is.
+const typingInSheet = () => { const a = document.activeElement; return !!(a && /^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName) && inner.contains(a)); };
+// On phones, the window is squeezed while the keyboard is up (or still closing):
+// don't refit until it's back to (near) full height; the resize when it closes refits.
+let fitMaxH = window.innerHeight;   // full height, before any keyboard
+const COARSE = window.matchMedia ? window.matchMedia('(pointer:coarse)') : { matches:false };
+// Rotating the phone changes the width (the keyboard never does): start over then.
+let fitW = window.innerWidth;
+window.addEventListener('resize', ()=>{ if(window.innerWidth !== fitW){ fitW = window.innerWidth; fitMaxH = window.innerHeight; } });
+function keyboardSqueezed(){
+  const h = window.innerHeight;
+  fitMaxH = Math.max(fitMaxH, h);
+  return COARSE.matches && h < fitMaxH * 0.8;
+}
 function fitSheet(){
+  if(typingInSheet() || keyboardSqueezed()) return;
   fitBox(document.getElementById('bkAside'), document.getElementById('bkAfit'));   // the summary on wide screens
   const body = document.getElementById('sheetBody'), fit = document.getElementById('bkFit');
   if(!body || !fit) return;
@@ -1767,6 +1800,9 @@ function fitSheet(){
     fit.style.zoom = String(Math.max(FIT_MIN, z * (body.clientHeight / body.scrollHeight) - 0.005));
     if(parseFloat(fit.style.zoom) <= FIT_MIN) break;
   }
+  // Text fields keep a real 16px even when the step is shrunk, or iPhones zoom in on tap.
+  const z = parseFloat(fit.style.zoom || '1');
+  fit.querySelectorAll('input,textarea').forEach(el=>{ el.style.fontSize = z < 1 ? (16 / z).toFixed(2) + 'px' : ''; });
 }
 window.addEventListener('resize', ()=>{ if(modal.classList.contains('open')) fitSheet(); });
 function footNext(label, enabled, action, totLabel){
@@ -2380,6 +2416,7 @@ const LOCKIN_SHOW_FROM = 3;  // hide the progress bar until this many spring job
     const p = PACKAGES.find(x=>x.id===el.dataset.price); if(p) el.textContent = '$'+p.price;
   });
   if(!winterOn()) document.querySelectorAll('[data-winter]').forEach(el=>el.hidden=true);
+  if(new Date(Date.now() - 7*3600e3).toISOString().slice(0,10) >= '2026-12-25') document.querySelectorAll('[data-giftbonus]').forEach(el=>el.hidden=true);
   if(!LOCK_IN){
     document.querySelectorAll('[data-lockin]').forEach(el=>el.hidden=true);
     document.querySelectorAll('[data-after]').forEach(el=>el.hidden=false);

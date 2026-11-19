@@ -1979,7 +1979,7 @@ function moneyBodyHtml(m){
   const foot = `<div class="m-foot"><button class="act act-ghost" onclick="exportMoneyCsv()">Download ${y} as CSV</button>`+
     `<p>Estimates for planning, not tax advice. Per hour is time on site, not drive time. Check the numbers with a tax pro or IRS Free File before you file.</p></div>`;
 
-  return kpis + errHtml + flagsHtml + `<div class="m-grid"><div>${chart}${logCard}${pkgCard}${townCard}</div><div>${taxCard}${payCard}${giftCardHtml()}</div></div>` + foot;
+  return kpis + errHtml + flagsHtml + `<div class="m-grid"><div>${chart}${logCard}${pkgCard}${townCard}</div><div>${taxCard}${payCard}${heardCardHtml(y)}${giftCardHtml()}</div></div>` + foot;
 }
 
 /* Gift cards sold on detailvalley.com/gift: who, what's left. Bonus value expires. */
@@ -1998,6 +1998,22 @@ function giftCardHtml(){
         `<div class="m-scroll"><table class="m-tbl"><tbody>${GIFTS.map(row).join('')}</tbody></table></div>`
       : `<p class="m-note">None sold yet. Share <b>detailvalley.com/gift</b>.</p>`)+
     `</section>`;
+}
+/* "How'd you hear about us?" answers (saved in booking notes), for the year shown. */
+function heardCardHtml(y){
+  const counts = {}, refs = [];
+  for(const j of JOBS){
+    if(j.status === 'cancelled' || yearKey(dayKey(j.slot_start)) !== String(y)) continue;
+    const m = String(j.notes || '').match(/Heard via: ([^\]·]+?)\s*(?:·\s*Referred by: ([^\]]+))?\]/);
+    if(!m) continue;
+    const k = m[1].trim(); counts[k] = (counts[k] || 0) + 1;
+    if(m[2]) refs.push(`${esc(m[2].trim())} → ${esc(j.customer_name)}`);
+  }
+  const rows = Object.entries(counts).sort((a,b)=>b[1]-a[1]);
+  if(!rows.length) return `<section class="m-card"><h2>How customers found you</h2><p class="m-note">No answers yet. New bookings ask “How’d you hear about us?” on the last step.</p></section>`;
+  return `<section class="m-card"><h2>How customers found you <em>${plural(rows.reduce((n,r)=>n+r[1],0), 'answer')}</em></h2>`+
+    `<div class="m-scroll"><table class="m-tbl"><tbody>${rows.map(([k,n])=>`<tr><td>${esc(k)}</td><td>${n}</td></tr>`).join('')}</tbody></table></div>`+
+    (refs.length ? `<p class="m-note"><b>Referrals (both get $20 off):</b> ${refs.join(' · ')}</p>` : '')+`</section>`;
 }
 /* A booking that came with a gift card: show it, and use it once the job's done. */
 function giftLineHtml(j){

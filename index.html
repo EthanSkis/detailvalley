@@ -676,6 +676,10 @@
   .pay-fine{margin:4px 0 0;font-size:.82rem;line-height:1.45;color:var(--mute)}
   .pay-mount.loading{display:flex;align-items:center;justify-content:center;border:1px dashed var(--rule-2);border-radius:12px;color:var(--mute);font-size:.92rem}
   .pay-mount a{color:inherit}
+  .bk-heard{margin:0 2px 12px;display:grid;gap:6px}
+  .bk-heard label{font-size:.88rem;font-weight:500;color:var(--text)}
+  .bk-heard select,.bk-heard input{width:100%;font:inherit;font-size:16px;color:var(--text);background:var(--surface);border:1px solid var(--rule-2);border-radius:10px;padding:10px 12px;min-height:44px}
+  .bk-heard select:focus,.bk-heard input:focus{outline:none;border-color:var(--text)}
   .bk-depnote{margin:2px 2px 12px;font-size:.86rem;line-height:1.45;color:var(--mute)}
   .bk-depnote b{color:var(--text);font-weight:600}
   .bk-depnote a{color:var(--mute)}
@@ -1364,7 +1368,19 @@ const SIZE_ICON = {
   oversize:'<svg viewBox="0 0 56 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9.500 18H5.500a2 2 0 0 1-2-2v-5.500a1 1 0 0 1 1-1H24V5.500a2 2 0 0 1 2-2h7.800a5 5 0 0 1 3.900 1.900L41 10l8.300 1.300a4 4 0 0 1 3.200 3.900V16a2 2 0 0 1-2 2h-4M18.500 18h19M24 9.500V14M28 10h12.500"/><circle cx="14" cy="18" r="4"/><circle cx="42" cy="18" r="4"/></svg>'
 };
 
-function freshState(){ return {step:1, pkg:null, size:null, addons:[], slot:null, calDate:null, name:'', phone:'', address:'', town:'', zip:'', addrPicked:false, utilities:null, garage:null, hp:false, bookingId:null, depositPaid:false, gift:null, giftPaidDeposit:false}; }
+function freshState(){ return {step:1, pkg:null, size:null, addons:[], slot:null, calDate:null, name:'', phone:'', address:'', town:'', zip:'', addrPicked:false, utilities:null, garage:null, hp:false, bookingId:null, depositPaid:false, gift:null, giftPaidDeposit:false, heard:'', referrer:''}; }
+/* "How'd you hear about us?" (optional, review step). Saved in the booking's notes
+   as "Heard via: …" so the job board can tally it. */
+const HEARD = [
+  ['group', 'A Facebook group'], ['page', 'Our Facebook or Instagram'], ['friend', 'A friend or family member'],
+  ['past', "I've booked before"], ['saw', 'Saw a car you did'], ['google', 'Google'], ['flyer', 'A flyer or sign'], ['other', 'Something else']
+];
+function pickHeard(v){ state.heard = v; renderStep(); fitSheet(); }
+function heardNote(){
+  const h = HEARD.find(x=>x[0]===state.heard); if(!h) return '';
+  const ref = state.heard==='friend' && state.referrer.trim() ? ` · Referred by: ${state.referrer.trim().slice(0,80)}` : '';
+  return `[Heard via: ${h[1]}${ref}]`;
+}
 /* ---------- Gift cards (gift.html sells them; the gift-card function checks and spends) ---------- */
 const GIFT_FN = 'https://utybbdrthxgsijplowup.supabase.co/functions/v1/gift-card';
 const giftCoversDeposit = () => !!(state.gift && needsDeposit() && state.gift.available >= deposit());
@@ -1759,9 +1775,9 @@ function sheet(n, body, foot){
     + (n ? `<aside class="bk-aside" id="bkAside" aria-label="Your booking"><div class="bk-fit" id="bkAfit">${asideInner()}</div></aside>` : '');
 }
 /* Steps never scroll: if a step's content is taller than the sheet (lots of
-   add-ons, a gift card, a short phone), shrink it to fit, down to 75%. Not on the
+   add-ons, a gift card, a short phone), shrink it to fit, down to 70%. Not on the
    details step (text fields under 16px make iPhones zoom) or the payment step. */
-const FIT_MIN = 0.75;
+const FIT_MIN = 0.7;
 function fitBox(box, fit){
   if(!box || !fit) return;
   fit.style.zoom = '';
@@ -1803,7 +1819,7 @@ function fitSheet(){
   }
   // Text fields keep a real 16px even when the step is shrunk, or iPhones zoom in on tap.
   const z = parseFloat(fit.style.zoom || '1');
-  fit.querySelectorAll('input,textarea').forEach(el=>{ el.style.fontSize = z < 1 ? (16 / z).toFixed(2) + 'px' : ''; });
+  fit.querySelectorAll('input,textarea,select').forEach(el=>{ el.style.fontSize = z < 1 ? (16 / z).toFixed(2) + 'px' : ''; });
 }
 window.addEventListener('resize', ()=>{ if(modal.classList.contains('open')) fitSheet(); });
 function footNext(label, enabled, action, totLabel){
@@ -1945,6 +1961,14 @@ function renderStep(){
         ${isWinterSlot(state.slot) ? `<div class="s">In a heated or attached garage</div>` : state.utilities==='yes'?'':`<div class="s warn">${state.utilities==='no'?'No water tap or power outlet on site':'Water &amp; power: not sure yet'}</div>`}</div>
         <button class="bk-change" onclick="go(5)">Change</button>
       </div></div>
+      <div class="bk-heard">
+        <label for="f-heard">How'd you hear about us? <span class="opt-note">(optional)</span></label>
+        <select id="f-heard" onchange="pickHeard(this.value)">
+          <option value="" ${state.heard?'':'selected'}>Choose one</option>
+          ${HEARD.map(([v,t])=>`<option value="${v}" ${state.heard===v?'selected':''}>${t}</option>`).join('')}
+        </select>
+        ${state.heard==='friend' ? `<input id="f-ref" value="${esc(state.referrer)}" placeholder="Who sent you? They get $20 off too" autocomplete="off" autocapitalize="words" oninput="state.referrer=this.value">` : ''}
+      </div>
       ${needsDeposit() ? `<p class="bk-depnote">${giftCoversDeposit()
         ? `<b>Your gift card covers the $${deposit()} deposit.</b>`
         : `<b>$${deposit()} today</b> locks in this year's price.`} It comes off your total and moves free with 48 hours' notice. <a href="/terms#deposits" target="_blank" rel="noopener">Deposit terms</a></p>` : ''}
@@ -2188,6 +2212,7 @@ async function submitBooking(){
   };
   if(bookingId) row.id = bookingId;   // so the deposit checkout can find this booking
   if(state.gift) row.gift_card_code = state.gift.code;
+  if(heardNote()) row.notes = heardNote();
   const { error } = await sb.from('bookings').insert(row);
   submitting = false; if(btn){ btn.disabled=false; btn.textContent = confirmLabel(); }
   if(error){

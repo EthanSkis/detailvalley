@@ -9,74 +9,161 @@
 <link rel="canonical" href="https://detailvalley.com/gift">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600&family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
   :root{
     --font:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;
-    --bg:#f4f6f8; --surface:#ffffff; --text:#0b2a45; --mute:#3d566b; --rule:#dde3e9; --rule-2:#c9d2da;
-    --cop:#a4521f; --cop-hover:#8c4418; --peach:#f0c29e; --on-navy:#c3d0db; --raised:#e9edf1; --err:#b3261e;
+    --bg:#f4f6f8; --surface:#ffffff; --text:#0b2a45; --mute:#3d566b; --faint:#6b7f91; --rule:#dde3e9; --rule-2:#c9d2da;
+    --cop:#a4521f; --cop-hover:#8c4418; --peach:#f0c29e; --on-navy:#c3d0db; --raised:#e9edf1; --err:#b3261e; --ok:#1d6b34; --ok-bg:#e6f3ea;
     --f-head:'Sora',var(--font); --f-body:'Inter',var(--font);
   }
   *{box-sizing:border-box}
+  html{-webkit-text-size-adjust:100%}
   body{margin:0;background:var(--bg);color:var(--text);font-family:var(--f-body);line-height:1.5;-webkit-font-smoothing:antialiased}
   a{color:var(--cop)}
-  .top{background:var(--surface);border-bottom:1px solid var(--rule)}
-  .top-in{max-width:1100px;margin:0 auto;padding:12px 16px;display:flex;align-items:center;justify-content:space-between;gap:12px}
+  .sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+
+  /* top bar */
+  .top{background:var(--surface);border-bottom:1px solid var(--rule);position:sticky;top:0;z-index:5}
+  .top-in{max-width:1120px;margin:0 auto;padding:10px 16px;display:flex;align-items:center;justify-content:space-between;gap:12px}
   .brand{display:flex;align-items:center;gap:10px;text-decoration:none;color:var(--text);font-family:var(--f-head);font-weight:600;font-size:1.05rem}
   .brand img{width:36px;height:36px}
-  .top a.back{font-weight:500;text-decoration:none;color:var(--mute);min-height:44px;display:inline-flex;align-items:center}
-  main{max-width:1100px;margin:0 auto;padding:28px 16px 64px;display:grid;grid-template-columns:minmax(0,1fr);gap:28px}
-  @media(min-width:900px){ main{grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:48px;padding-top:48px} }
-  h1{font-family:var(--f-head);font-weight:600;font-size:clamp(2rem,6vw,3rem);line-height:1.05;letter-spacing:-.02em;margin:0 0 10px}
-  .lead{color:var(--mute);font-size:1.05rem;margin:0 0 22px}
+  .top a.back{display:inline-flex;align-items:center;min-height:44px;padding:0 16px;border:1px solid var(--rule-2);border-radius:999px;font-weight:600;font-size:.92rem;text-decoration:none;color:var(--text)}
+  .top a.back:hover{background:var(--raised)}
+
+  /* layout */
+  main{max-width:1120px;margin:0 auto;padding:24px 16px 48px;display:grid;grid-template-columns:minmax(0,1fr);gap:24px}
+  @media(min-width:920px){
+    main{grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);gap:56px;padding-top:48px;align-items:start}
+    .show{position:sticky;top:96px}
+  }
+  .kicker{margin:0 0 8px;font-size:.78rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--cop)}
+  h1{font-family:var(--f-head);font-weight:600;font-size:clamp(2.1rem,6.5vw,3.4rem);line-height:1.02;letter-spacing:-.025em;margin:0 0 12px}
+  .lead{color:var(--mute);font-size:1.05rem;margin:0 0 24px;max-width:30em}
+
   /* the card */
-  .gc{position:relative;aspect-ratio:1.6/1;max-width:520px;border-radius:22px;background:var(--text);color:#fff;padding:24px 26px;display:flex;flex-direction:column;justify-content:space-between;box-shadow:0 24px 48px rgba(11,42,69,.22);overflow:hidden}
-  .gc::after{content:"";position:absolute;right:-60px;top:-60px;width:220px;height:220px;border-radius:50%;background:rgba(240,194,158,.12)}
-  .gc-top{display:flex;justify-content:space-between;align-items:center;position:relative;z-index:1}
-  .gc-top b{font-family:var(--f-head);font-weight:600;font-size:1.1rem}
-  .gc-top img{width:44px;height:44px;background:#fff;border-radius:50%}
-  .gc-amt{font-family:var(--f-head);font-weight:600;font-size:clamp(3rem,12vw,4.6rem);line-height:1;color:var(--peach);position:relative;z-index:1}
-  .gc-sub{font-size:.9rem;color:var(--on-navy);position:relative;z-index:1}
-  .gc-code{position:relative;z-index:1;margin-top:10px;background:#fff;color:var(--text);border-radius:10px;padding:8px 12px;font-weight:700;letter-spacing:.18em;font-size:1.15rem;text-align:center}
-  .gc-code[hidden]{display:none}
-  .points{list-style:none;margin:22px 0 0;padding:0;display:grid;gap:10px;color:var(--mute);font-size:.95rem}
-  .points li{display:flex;gap:10px}
-  .points li::before{content:"";flex:none;width:8px;height:8px;margin-top:8px;border-radius:50%;background:var(--cop)}
+  .gc{position:relative;aspect-ratio:1.586/1;width:100%;max-width:540px;border-radius:24px;color:#fff;overflow:hidden;
+      background:radial-gradient(120% 90% at 100% 0%, #1e4467 0%, #0b2a45 55%, #082035 100%);
+      box-shadow:0 30px 60px -20px rgba(11,42,69,.45),0 10px 24px -12px rgba(11,42,69,.35);
+      padding:clamp(18px,4.5vw,28px);display:flex;flex-direction:column;justify-content:space-between;
+      transform:rotate(-1.5deg);transition:transform .4s cubic-bezier(.22,1,.36,1)}
+  .gc:hover{transform:rotate(0)}
+  .gc::before{content:"";position:absolute;inset:0;background:url(logo.svg) no-repeat right -12% bottom -40%/62%;opacity:.06;pointer-events:none}
+  .gc::after{content:"";position:absolute;left:0;right:0;top:0;height:6px;background:var(--cop)}
+  .gc>*{position:relative}
+  .gc-top{display:flex;justify-content:space-between;align-items:center}
+  .gc-brand{display:flex;align-items:center;gap:10px;font-family:var(--f-head);font-weight:600;font-size:clamp(.95rem,2.6vw,1.1rem)}
+  .gc-brand img{width:34px;height:34px;background:#fff;border-radius:50%}
+  .gc-label{font-size:.7rem;font-weight:700;letter-spacing:.2em;color:var(--peach)}
+  .gc-amt{font-family:var(--f-head);font-weight:600;font-size:clamp(3.2rem,14vw,5.2rem);line-height:.95;letter-spacing:-.03em;color:var(--peach)}
+  .gc-sub{font-size:clamp(.8rem,2.4vw,.92rem);color:var(--on-navy);margin-top:4px}
+  .gc-bot{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;font-size:clamp(.78rem,2.4vw,.9rem)}
+  .gc-who{color:#fff;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .gc-who span{color:var(--on-navy)}
+  .gc-code{flex:none;font-weight:700;letter-spacing:.16em;padding:6px 10px;border-radius:8px;border:1px dashed rgba(255,255,255,.35);color:var(--on-navy)}
+  .gc-code.real{background:#fff;color:var(--text);border-style:solid;border-color:#fff}
+
+  /* features */
+  .feats{list-style:none;margin:28px 0 0;padding:0;display:grid;grid-template-columns:minmax(0,1fr);gap:14px}
+  @media(min-width:560px){ .feats{grid-template-columns:repeat(3,minmax(0,1fr))} }
+  .feats li{display:flex;gap:12px;align-items:flex-start}
+  @media(min-width:560px){ .feats li{flex-direction:column;gap:8px} }
+  .feats svg{flex:none;width:36px;height:36px;padding:8px;border-radius:10px;background:var(--surface);border:1px solid var(--rule);color:var(--cop)}
+  .feats b{display:block;font-size:.95rem}
+  .feats span{font-size:.86rem;color:var(--mute)}
+  .feats li[hidden]{display:none}
+
   /* the form */
-  .panel{background:var(--surface);border:1px solid var(--rule);border-radius:18px;padding:22px 20px}
-  @media(min-width:600px){ .panel{padding:28px} }
-  .panel h2{font-family:var(--f-head);font-weight:600;font-size:1.3rem;margin:0 0 16px}
-  .amts{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
-  .amt{min-height:52px;border:1px solid var(--rule-2);background:var(--surface);border-radius:12px;font:inherit;font-weight:700;font-size:1.05rem;color:var(--text);cursor:pointer}
-  .amt[aria-pressed="true"]{border-color:var(--text);box-shadow:0 0 0 1px var(--text);background:#f7f9fb}
-  .other{margin-top:10px;display:flex;align-items:center;gap:10px;font-size:.92rem;color:var(--mute)}
-  .other input{width:110px}
-  .bonus{margin:10px 0 0;font-size:.92rem;font-weight:600;color:#1d6b34}
-  .bonus[hidden]{display:none}
-  .field{margin-top:16px}
-  .row2{display:grid;grid-template-columns:minmax(0,1fr);gap:0 12px}
-  @media(min-width:520px){ .row2{grid-template-columns:repeat(2,minmax(0,1fr))} }
-  label{display:block;font-weight:500;font-size:.92rem;margin-bottom:6px}
-  .opt{color:var(--mute);font-weight:400}
-  input,textarea{width:100%;font:inherit;font-size:16px;color:var(--text);background:#fff;border:1px solid var(--rule-2);border-radius:10px;padding:12px 14px}
-  textarea{resize:vertical;min-height:72px}
+  .panel{background:var(--surface);border:1px solid var(--rule);border-radius:20px;padding:22px 18px;box-shadow:0 1px 2px rgba(11,42,69,.04)}
+  @media(min-width:600px){ .panel{padding:30px} }
+  .sec + .sec{margin-top:26px;padding-top:24px;border-top:1px solid var(--rule)}
+  .sec h2{display:flex;align-items:center;gap:10px;font-family:var(--f-head);font-weight:600;font-size:1.12rem;margin:0 0 14px}
+  .sec h2 i{font-style:normal;display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:50%;background:var(--text);color:#fff;font-family:var(--f-body);font-size:.8rem;font-weight:700}
+  .promo{display:flex;align-items:center;gap:8px;margin:-4px 0 14px;padding:8px 12px;border-radius:10px;background:var(--ok-bg);color:var(--ok);font-size:.88rem;font-weight:600}
+  .promo svg{flex:none;width:18px;height:18px}
+  .promo[hidden]{display:none}
+  .amts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+  @media(min-width:520px){ .amts{grid-template-columns:repeat(5,minmax(0,1fr))} }
+  .amt{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;min-height:64px;border:1px solid var(--rule-2);background:var(--surface);border-radius:14px;font:inherit;color:var(--text);cursor:pointer;transition:border-color .15s,box-shadow .15s,background .15s}
+  .amt:hover{border-color:var(--text)}
+  .amt b{font-size:1.12rem;font-weight:700}
+  .amt small{font-size:.74rem;font-weight:600;color:var(--ok)}
+  .amt small:empty{display:none}
+  .amt[aria-pressed="true"]{border-color:var(--text);box-shadow:0 0 0 1px var(--text);background:#f6f9fc}
+  .other{display:flex;align-items:center;gap:10px;margin-top:10px}
+  .other[hidden]{display:none}
+  .money{position:relative;flex:0 1 160px}
+  .money span{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--mute);font-weight:600}
+  .money input{padding-left:28px}
+  .other p{margin:0;font-size:.84rem;color:var(--mute)}
+  .row2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+  .field + .field,.row2 + .field{margin-top:14px}
+  .row2 .field + .field{margin-top:0}
+  label{display:block;font-weight:500;font-size:.9rem;margin-bottom:6px}
+  .opt{color:var(--faint);font-weight:400}
+  input,textarea{width:100%;font:inherit;font-size:16px;color:var(--text);background:#fff;border:1px solid var(--rule-2);border-radius:12px;padding:12px 14px;transition:border-color .15s,box-shadow .15s}
+  input::placeholder,textarea::placeholder{color:#8a9aa8}
+  textarea{resize:vertical;min-height:76px}
   input:focus,textarea:focus{outline:none;border-color:var(--text);box-shadow:0 0 0 3px rgba(11,42,69,.12)}
-  .btn{display:flex;width:100%;align-items:center;justify-content:center;margin-top:20px;min-height:52px;background:var(--cop);color:#fff;border:none;border-radius:12px;font:inherit;font-weight:700;font-size:1.05rem;cursor:pointer}
+  .count{display:block;text-align:right;font-size:.75rem;color:var(--faint);margin-top:4px}
+  .sum{margin:24px 0 0;padding:14px 16px;border-radius:14px;background:var(--bg);display:flex;justify-content:space-between;align-items:center;gap:12px}
+  .sum span{font-size:.92rem;color:var(--mute)}
+  .sum b{font-family:var(--f-head);font-size:1.35rem}
+  .btn{display:flex;width:100%;align-items:center;justify-content:center;gap:8px;margin-top:12px;min-height:54px;background:var(--cop);color:#fff;border:none;border-radius:14px;font:inherit;font-weight:700;font-size:1.05rem;cursor:pointer;transition:background .15s}
   .btn:hover{background:var(--cop-hover)}
   .btn:disabled{opacity:.6;cursor:default}
-  .err{margin:12px 0 0;color:var(--err);font-weight:500;font-size:.95rem}
+  .err{margin:12px 0 0;color:var(--err);font-weight:500;font-size:.92rem}
   .err[hidden]{display:none}
-  .fine{margin:14px 0 0;font-size:.82rem;color:var(--mute)}
-  #payMount{margin-top:18px;min-height:120px}
+  .fine{margin:14px 0 0;font-size:.78rem;line-height:1.5;color:var(--faint)}
+  .fine a{color:var(--faint)}
+  #payMount{margin-top:6px;min-height:120px}
   #payMount.loading{display:flex;align-items:center;justify-content:center;border:1px dashed var(--rule-2);border-radius:12px;color:var(--mute);font-size:.92rem}
-  .linkbtn{background:none;border:none;color:var(--mute);font:inherit;text-decoration:underline;cursor:pointer;min-height:44px;padding:0;margin-top:6px}
-  .done p{margin:0 0 10px}
-  .done .acts{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+  .linkbtn{background:none;border:none;color:var(--mute);font:inherit;font-size:.92rem;text-decoration:underline;cursor:pointer;min-height:44px;padding:0;margin-top:4px}
+  .paid-tick{width:52px;height:52px;border-radius:50%;background:var(--ok-bg);color:var(--ok);display:flex;align-items:center;justify-content:center;margin-bottom:14px}
+  .paid-tick svg{width:26px;height:26px}
+  .done h2{font-family:var(--f-head);font-weight:600;font-size:1.5rem;margin:0 0 8px}
+  .done p{margin:0 0 10px;color:var(--mute)}
+  .done .acts{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
   .done .acts button{flex:1 1 140px;margin-top:0}
   .ghost{background:var(--surface);color:var(--text);border:1px solid var(--rule-2)}
   .ghost:hover{background:var(--raised)}
+  .foot{max-width:1120px;margin:0 auto;padding:8px 16px 40px;color:var(--faint);font-size:.86rem;display:flex;flex-wrap:wrap;gap:6px 18px}
+  .foot a{color:var(--mute)}
   [hidden]{display:none!important}
-  @media print{ .top,.panel,.points,.lead,h1{display:none!important} main{display:block;padding:0} .gc{box-shadow:none;-webkit-print-color-adjust:exact;print-color-adjust:exact} }
+  @media(prefers-reduced-motion:reduce){ .gc{transform:none;transition:none} }
+
+  /* printable certificate (only when printing / saving as PDF) */
+  .cert{display:none}
+  @page{size:letter;margin:0.45in}
+  @media print{
+    body{background:#fff}
+    body>*:not(.cert){display:none!important}
+    .cert{display:block;-webkit-print-color-adjust:exact;print-color-adjust:exact;color:var(--text);font-family:var(--f-body)}
+    .cert-frame{position:relative;border:2px solid var(--text);border-radius:18px;padding:0.36in 0.5in 0.3in;text-align:center;height:9.95in;overflow:hidden;break-inside:avoid;display:flex;flex-direction:column}
+    .cert-frame::before{content:"";position:absolute;inset:8px;border:1px solid var(--cop);border-radius:12px;pointer-events:none}
+    .cert-brand{display:inline-flex;align-items:center;justify-content:center;gap:10px;font-family:var(--f-head);font-weight:600;font-size:12pt;letter-spacing:.24em}
+    .cert-brand img{width:38px;height:38px}
+    .cert-kicker{margin:6px 0 0;font-size:8.5pt;letter-spacing:.06em;color:var(--mute)}
+    .cert-h{font-family:var(--f-head);font-weight:600;font-size:30pt;letter-spacing:-.02em;line-height:1.05;margin:0.22in 0 6px}
+    .cert-sub{margin:0 auto;max-width:5.2in;font-size:11.5pt;color:var(--mute)}
+    .cert-msg{margin:0.14in auto 0;max-width:5in;font-size:12.5pt;font-style:italic;color:var(--text);line-height:1.45}
+    .cert-msg cite{display:block;margin-top:6px;font-style:normal;font-size:10pt;color:var(--mute)}
+    .cert-card{margin:0.22in auto 0;width:4.2in}
+    .gc.gc-print{transform:none;box-shadow:none;max-width:none;border-radius:18px;padding:20px 22px}
+    .gc-print .gc-amt{font-size:42pt}
+    .gc-print .gc-sub,.gc-print .gc-bot{font-size:9.5pt}
+    .gc-print .gc-brand{font-size:11pt}
+    .cert-code{margin:0.2in auto 0;display:inline-flex;flex-direction:column;align-items:center;gap:2px;padding:10px 26px;border:1.5px dashed var(--text);border-radius:12px}
+    .cert-code span{font-size:8pt;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--mute)}
+    .cert-code b{font-size:20pt;letter-spacing:.18em}
+    .cert-steps{list-style:none;counter-reset:s;margin:0.22in 0 0;padding:0;display:grid;grid-template-columns:repeat(3,1fr);gap:16px;text-align:left}
+    .cert-steps li{counter-increment:s;padding:12px 12px 12px 14px;border-radius:12px;background:var(--bg)}
+    .cert-steps li::before{content:counter(s);display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;background:var(--cop);color:#fff;font-size:8.5pt;font-weight:700;margin-bottom:6px}
+    .cert-steps b{display:block;font-size:10.5pt}
+    .cert-steps span{display:block;font-size:9pt;color:var(--mute);line-height:1.4}
+    .cert-foot{margin-top:auto;padding-top:0.16in;font-size:10pt}
+    .cert-foot p{margin:6px auto 0;max-width:6in;font-size:7.5pt;color:var(--faint)}
+  }
 </style>
 </head>
 <body>
@@ -86,58 +173,85 @@
 </div></header>
 
 <main>
-  <section>
+  <section class="show">
+    <p class="kicker">Gift cards</p>
     <h1>Give a clean car.</h1>
-    <p class="lead">A Detail Valley gift card, delivered by email right away. Forward it, print it, or tuck the code in a card.</p>
-    <div class="gc" aria-live="polite">
-      <div class="gc-top"><b>Detail Valley</b><img src="logo.svg" alt=""></div>
+    <p class="lead">A Detail Valley gift card, emailed to you in a minute. Forward it, print it, or write the code in a card.</p>
+    <div class="gc" aria-live="polite" aria-label="Gift card preview">
+      <div class="gc-top">
+        <div class="gc-brand"><img src="logo.svg" alt="">Detail Valley</div>
+        <div class="gc-label">GIFT CARD</div>
+      </div>
       <div>
         <div class="gc-amt" id="gcAmt">$115</div>
-        <div class="gc-sub" id="gcSub">Gift card</div>
-        <div class="gc-code" id="gcCode" hidden></div>
+        <div class="gc-sub" id="gcSub">$100 + $15 holiday bonus</div>
+      </div>
+      <div class="gc-bot">
+        <div class="gc-who" id="gcWho"><span>For</span> someone lucky</div>
+        <div class="gc-code" id="gcCode">DV-••••-••••</div>
       </div>
     </div>
-    <ul class="points">
-      <li>Works on any package: interiors all winter in a heated or attached garage, everything else from April.</li>
-      <li>Covers the $50 spring deposit when they book, and the rest comes off on the day.</li>
-      <li id="ptBonus">Holiday bonus: an extra $15 for every $100, good through June 30, 2027.</li>
+    <ul class="feats">
+      <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg>
+        <div><b>Emailed in a minute</b><span>Print it or forward it. No shipping.</span></div></li>
+      <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10h18M7 3v4M17 3v4"/><rect x="3" y="5" width="18" height="16" rx="2"/></svg>
+        <div><b>Any package</b><span>Garage interiors all winter, everything else from April.</span></div></li>
+      <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>
+        <div><b>Covers the deposit</b><span>Nothing to pay up front; the rest comes off on the day.</span></div></li>
     </ul>
   </section>
 
   <section class="panel" id="panel">
     <form id="gform" novalidate onsubmit="startBuy(event)">
-      <h2>Choose an amount</h2>
-      <div class="amts" role="group" aria-label="Gift card amount">
-        <button type="button" class="amt" data-v="50" aria-pressed="false" onclick="pickAmt(50)">$50</button>
-        <button type="button" class="amt" data-v="100" aria-pressed="true" onclick="pickAmt(100)">$100</button>
-        <button type="button" class="amt" data-v="200" aria-pressed="false" onclick="pickAmt(200)">$200</button>
-        <button type="button" class="amt" data-v="300" aria-pressed="false" onclick="pickAmt(300)">$300</button>
+      <div class="sec">
+        <h2><i>1</i>Choose an amount</h2>
+        <p class="promo" id="ptBonus"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="8" width="18" height="4" rx="1"/><path d="M12 8v13M19 12v7a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-7M7.5 8a2.5 2.5 0 0 1 0-5C10 3 12 8 12 8s2-5 4.5-5a2.5 2.5 0 0 1 0 5"/></svg>Holiday bonus: +$15 for every $100, through Dec 24</p>
+        <div class="amts" role="group" aria-label="Gift card amount">
+          <button type="button" class="amt" data-v="50" aria-pressed="false" onclick="pickAmt(50)"><b>$50</b><small></small></button>
+          <button type="button" class="amt" data-v="100" aria-pressed="true" onclick="pickAmt(100)"><b>$100</b><small></small></button>
+          <button type="button" class="amt" data-v="200" aria-pressed="false" onclick="pickAmt(200)"><b>$200</b><small></small></button>
+          <button type="button" class="amt" data-v="300" aria-pressed="false" onclick="pickAmt(300)"><b>$300</b><small></small></button>
+          <button type="button" class="amt" data-v="other" aria-pressed="false" onclick="pickOther()"><b>Other</b><small></small></button>
+        </div>
+        <div class="other" id="otherRow" hidden>
+          <div class="money"><span>$</span><label class="sr-only" for="gOther">Amount</label><input id="gOther" type="number" inputmode="numeric" min="25" max="1000" step="5" placeholder="75" oninput="otherAmt(this)"></div>
+          <p>$25 to $1,000</p>
+        </div>
+        <p class="sr-only" id="gBonus"></p>
       </div>
-      <div class="other"><label for="gOther" style="margin:0">Or another amount: $</label>
-        <input id="gOther" type="number" inputmode="numeric" min="25" max="1000" step="5" placeholder="75" oninput="otherAmt(this)"></div>
-      <p class="bonus" id="gBonus"></p>
 
-      <div class="row2">
-        <div class="field"><label for="gTo">To <span class="opt">(their name)</span></label><input id="gTo" maxlength="120" autocomplete="off" placeholder="Jordan" oninput="drawCard()"></div>
-        <div class="field"><label for="gFrom">From <span class="opt">(your name)</span></label><input id="gFrom" maxlength="120" autocomplete="name" placeholder="Sam" oninput="drawCard()"></div>
+      <div class="sec">
+        <h2><i>2</i>Who's it for?</h2>
+        <div class="row2">
+          <div class="field"><label for="gTo">To <span class="opt">(their name)</span></label><input id="gTo" maxlength="120" autocomplete="off" placeholder="Jordan" oninput="drawCard()"></div>
+          <div class="field"><label for="gFrom">From <span class="opt">(you)</span></label><input id="gFrom" maxlength="120" autocomplete="name" placeholder="Sam" oninput="drawCard()"></div>
+        </div>
+        <div class="field"><label for="gMsg">Message <span class="opt">(optional)</span></label><textarea id="gMsg" maxlength="300" placeholder="Merry Christmas! Your car deserves it." oninput="msgCount()"></textarea><span class="count" id="msgCount">0 / 300</span></div>
       </div>
-      <div class="field"><label for="gEmail">Your email <span class="opt">(we send the card here)</span></label><input id="gEmail" type="email" inputmode="email" maxlength="200" autocomplete="email" placeholder="you@example.com"></div>
-      <div class="field"><label for="gMsg">Message <span class="opt">(optional)</span></label><textarea id="gMsg" maxlength="300" placeholder="Merry Christmas! Your car deserves it."></textarea></div>
-      <p class="err" id="gErr" role="alert" hidden></p>
-      <button class="btn" id="gGo">Continue to payment</button>
-      <p class="fine">The amount you pay never expires while we're open (through August 15, 2027); any unused balance after that is refunded in full. The bonus is promotional and expires on the date shown. <a href="/terms">Terms</a></p>
+
+      <div class="sec">
+        <h2><i>3</i>Where should we send it?</h2>
+        <div class="field"><label for="gEmail">Your email <span class="opt">(we email you the card)</span></label><input id="gEmail" type="email" inputmode="email" maxlength="200" autocomplete="email" placeholder="you@example.com"></div>
+        <div class="sum"><span id="sumLabel">They get to spend</span><b id="sumVal">$115</b></div>
+        <p class="err" id="gErr" role="alert" hidden></p>
+        <button class="btn" id="gGo">Continue to payment</button>
+        <p class="fine">The amount you pay never expires while we're open (through August 15, 2027), and any unused balance after that is refunded in full. Bonus value is promotional and expires June 30, 2027. <a href="/terms">Terms</a></p>
+      </div>
     </form>
 
     <div id="gpay" hidden>
-      <h2 id="payTitle">Pay $100</h2>
-      <div id="payMount" class="loading"><span>Loading secure payment…</span></div>
-      <p class="err" id="payErr" role="alert" hidden></p>
-      <button class="btn" id="payBtn" onclick="submitPay()" disabled>Pay</button>
-      <button class="linkbtn" onclick="backToForm()">Change details</button>
-      <p class="fine">Card details are handled securely by Stripe.</p>
+      <div class="sec">
+        <h2 id="payTitle">Pay $100</h2>
+        <div id="payMount" class="loading"><span>Loading secure payment…</span></div>
+        <p class="err" id="payErr" role="alert" hidden></p>
+        <button class="btn" id="payBtn" onclick="submitPay()" disabled>Pay</button>
+        <button class="linkbtn" onclick="backToForm()">Back to details</button>
+        <p class="fine">Card details are handled securely by Stripe.</p>
+      </div>
     </div>
 
     <div id="gdone" class="done" hidden>
+      <div class="paid-tick" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></div>
       <h2>It's ready.</h2>
       <p id="doneText"></p>
       <div class="acts">
@@ -148,6 +262,42 @@
     </div>
   </section>
 </main>
+<footer class="foot"><span>Questions? Text <a href="sms:+12083151420">(208) 315-1420</a></span><a href="/">detailvalley.com</a><a href="/terms">Terms</a><a href="/privacy">Privacy</a></footer>
+
+<!-- Printed / saved as PDF: a gift certificate instead of the web page. -->
+<section class="cert" id="cert" aria-hidden="true">
+  <div class="cert-frame">
+    <div class="cert-brand"><img src="logo.svg" alt="">DETAIL VALLEY</div>
+    <p class="cert-kicker">Mobile car detailing · McCall · Cascade · Donnelly</p>
+    <h1 class="cert-h" id="certTitle">A gift for you</h1>
+    <p class="cert-sub">Congratulations, a spotless car is on its way. Someone thinks yours deserves it.</p>
+    <blockquote class="cert-msg" id="certMsg" hidden></blockquote>
+
+    <div class="cert-card">
+      <div class="gc gc-print">
+        <div class="gc-top"><div class="gc-brand"><img src="logo.svg" alt="">Detail Valley</div><div class="gc-label">GIFT CARD</div></div>
+        <div><div class="gc-amt" id="certAmt">$115</div><div class="gc-sub" id="certSub"></div></div>
+        <div class="gc-bot"><div class="gc-who" id="certWho"></div><div class="gc-code real" id="certCode">DV-••••-••••</div></div>
+      </div>
+    </div>
+
+    <div class="cert-code">
+      <span>Your code</span>
+      <b id="certCode2">DV-••••-••••</b>
+    </div>
+
+    <ol class="cert-steps">
+      <li><b>Pick a package</b><span>Go to detailvalley.com and tap Book a detail.</span></li>
+      <li><b>Enter your code</b><span>On the last step, tap Add a gift card. It can cover the spring deposit too.</span></li>
+      <li><b>We come to you</b><span>Interior details all winter in a heated or attached garage; everything else from April.</span></li>
+    </ol>
+
+    <div class="cert-foot">
+      <div><b>detailvalley.com</b> · Call or text (208) 315-1420</div>
+      <p id="certFine">Paid value good through August 15, 2027; any unused paid balance after that is refunded to the buyer. Keep this code private: anyone with it can use the balance.</p>
+    </div>
+  </div>
+</section>
 
 <script>
 const FN = 'https://utybbdrthxgsijplowup.supabase.co/functions/v1/gift-card';
@@ -160,24 +310,50 @@ let amount = 100, cardId = null, code = '', stripe = null, elements = null, payE
 const $ = id => document.getElementById(id);
 const esc = s => String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 
-function drawCard(){
-  const b = bonusFor(amount);
-  $('gcAmt').textContent = '$' + (amount + b);
+function whoText(){
   const to = $('gTo').value.trim(), from = $('gFrom').value.trim();
-  $('gcSub').textContent = to ? `For ${to}${from ? ', from ' + from : ''}` : (b ? `$${amount} + $${b} holiday bonus` : 'Gift card');
-  $('gBonus').hidden = !b;
-  $('gBonus').textContent = b ? `+ $${b} bonus, so it's worth $${amount + b} (bonus good through ${BONUS_EXPIRES_TEXT})` : '';
+  return { to, from, html: (to ? `<span>For</span> ${esc(to)}` : '<span>For</span> someone lucky') + (from ? ` <span>· from</span> ${esc(from)}` : '') };
+}
+function drawCard(){
+  const b = bonusFor(amount), w = whoText();
+  $('gcAmt').textContent = '$' + (amount + b);
+  $('gcSub').textContent = b ? `$${amount} + $${b} holiday bonus` : 'Detail Valley gift card';
+  $('gcWho').innerHTML = w.html;
+  $('gBonus').textContent = b ? `Plus a $${b} bonus, so it's worth $${amount + b}` : '';
   $('ptBonus').hidden = !bonusOn();
+  $('sumLabel').textContent = w.to ? `${w.to} gets to spend` : 'They get to spend';
+  $('sumVal').textContent = '$' + (amount + b);
+  $('gGo').textContent = `Continue to payment · $${amount}`;
+  // the bonus on each amount button
+  document.querySelectorAll('.amt').forEach(btn=>{
+    const v = +btn.dataset.v, s = btn.querySelector('small');
+    if(s) s.textContent = v && bonusFor(v) ? `+$${bonusFor(v)} bonus` : '';
+  });
 }
 function pickAmt(v){
-  amount = v; $('gOther').value = '';
-  document.querySelectorAll('.amt').forEach(b=>b.setAttribute('aria-pressed', String(+b.dataset.v === v)));
+  amount = v; $('gOther').value = ''; $('otherRow').hidden = true;
+  document.querySelectorAll('.amt').forEach(b=>b.setAttribute('aria-pressed', String(b.dataset.v === String(v))));
   drawCard();
+}
+function pickOther(){
+  document.querySelectorAll('.amt').forEach(b=>b.setAttribute('aria-pressed', String(b.dataset.v === 'other')));
+  $('otherRow').hidden = false; $('gOther').focus();
 }
 function otherAmt(el){
   const v = Math.round(+el.value);
-  document.querySelectorAll('.amt').forEach(b=>b.setAttribute('aria-pressed', 'false'));
   if(v >= 25 && v <= 1000){ amount = v; drawCard(); }
+}
+function msgCount(){ $('msgCount').textContent = `${$('gMsg').value.length} / 300`; }
+// The printable certificate, filled from the finished card.
+function fillCert(d){
+  const w = whoText(), msg = $('gMsg').value.trim(), total = (d.amount || amount) + (d.bonus || 0);
+  $('certTitle').textContent = w.to ? `A gift for you, ${w.to}` : 'A gift for you';
+  if(msg){ $('certMsg').innerHTML = `“${esc(msg)}”` + (w.from ? `<cite>From ${esc(w.from)}</cite>` : ''); $('certMsg').hidden = false; }
+  else if(w.from){ $('certMsg').innerHTML = `<cite>From ${esc(w.from)}</cite>`; $('certMsg').hidden = false; }
+  $('certAmt').textContent = '$' + total;
+  $('certSub').textContent = d.bonus ? `$${d.amount} + $${d.bonus} holiday bonus (bonus good through ${BONUS_EXPIRES_TEXT})` : 'Detail Valley gift card';
+  $('certWho').innerHTML = w.html;
+  $('certCode').textContent = d.code; $('certCode2').textContent = d.code;
 }
 function err(id, msg){ $(id).textContent = msg; $(id).hidden = !msg; }
 
@@ -202,7 +378,7 @@ async function startBuy(e){
   }catch(x){
     err('gErr', x && x.message === 'bad_email' ? 'That email doesn\'t look right.' : `Couldn't start the payment. Try again, or text (208) 315-1420.`);
   }
-  btn.disabled = false; btn.textContent = 'Continue to payment';
+  btn.disabled = false; drawCard();
 }
 function loadStripe(){
   if(window.Stripe) return Promise.resolve(window.Stripe(STRIPE_PK));
@@ -249,9 +425,10 @@ async function finish(pi){
   $('gform').hidden = true; $('gpay').hidden = true; $('gdone').hidden = false;
   if(d.code){
     code = d.code;
-    $('gcCode').textContent = code; $('gcCode').hidden = false;
+    $('gcCode').textContent = code; $('gcCode').classList.add('real');
+    fillCert(d);
     $('gcAmt').textContent = '$' + (d.amount + (d.bonus||0));
-    $('doneText').innerHTML = `Your $${d.amount + (d.bonus||0)} gift card is <b>${esc(code)}</b>. We emailed it to ${$('gEmail').value.trim() ? '<b>' + esc($('gEmail').value.trim()) + '</b>' : 'you'} too.`;
+    $('doneText').innerHTML = `Your $${d.amount + (d.bonus||0)} gift card is <b>${esc(code)}</b>. <b>Print it</b> for a gift certificate you can hand over or save as a PDF. We emailed it to ${$('gEmail').value.trim() ? '<b>' + esc($('gEmail').value.trim()) + '</b>' : 'you'} too.`;
   } else {
     $('doneText').textContent = 'Payment received. Your gift card is on its way to your email. If it doesn\'t show up in a few minutes, text (208) 315-1420.';
   }
@@ -262,7 +439,7 @@ async function copyCode(){ try{ await navigator.clipboard.writeText(code); $('do
   const q = new URLSearchParams(location.search), id = q.get('paid'), pi = q.get('payment_intent');
   if(id && pi && /^[0-9a-f-]{36}$/i.test(id)){ cardId = id; history.replaceState(null, '', location.pathname); finish(pi); }
 })();
-drawCard();
+drawCard(); msgCount();
 </script>
 </body>
 </html>

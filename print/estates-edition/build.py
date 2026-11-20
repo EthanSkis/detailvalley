@@ -58,7 +58,7 @@ PHONE = 'Call or text (208) 315-1420'
 # ?src=ee lets the booking flow pre-pick "Estates Edition magazine" under
 # "How'd you hear about us?", so the job board can count what this ad brings in.
 QR_URL = 'https://detailvalley.com/?src=ee'
-PHOTO = ROOT / 'gallery/land-cruiser/land-cruiser-after.jpg'
+PHOTO = HERE / 'range-rover.jpg'       # licence plate already blurred
 
 # ---- Brand colours as CMYK ink (0..1) ------------------------------------
 NAVY = (1.00, 0.78, 0.40, 0.55)      # #0b2a45
@@ -283,7 +283,7 @@ def build():
 
     # --- Photo, upper right ------------------------------------------------
     pw = W - SPLIT
-    im = photo_cmyk(PHOTO, pw / top_h, anchor_y=0.35)
+    im = photo_cmyk(PHOTO, pw / top_h, anchor_y=0.5)
     c.drawImage(ImageReader(im), SPLIT, BAND, pw, top_h)
     dpi = im.size[0] / (pw / IN)
 
@@ -329,9 +329,9 @@ def build():
     text(c, int7, OWNER_NAME, 5.2, ox, oy, PEACH, track=0.6)
     text(c, int4, OWNER_NOTE, 6.3, ox, oy - 8.6, MIST)
 
-    # --- Review chip over the foot of the photo ---------------------------
+    # --- Review chip over the trees at the head of the photo ---------------
     ch, cm = 40.0, 7.0
-    cx0, cy0, cw = SPLIT + cm, BAND + cm, pw - 2 * cm
+    cx0, cy0, cw = SPLIT + cm, H - cm - ch, pw - 2 * cm
     c.setFillColorCMYK(*WHITE)
     c.roundRect(cx0, cy0, cw, ch, 3, stroke=0, fill=1)
     for i in range(5):

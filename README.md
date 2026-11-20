@@ -66,6 +66,7 @@ command and no publish directory beyond the root are needed.
 | `CNAME` | Custom domain for GitHub Pages (`detailvalley.com`). |
 | `logo.svg` | The logo, as vector — used on the site (hero, footer, favicon). Scales crisply at any size. |
 | `logo.png` | Raster version of the logo — social profile picture / raster fallback. |
+| `print/estates-edition/` | The half-page print ad for Estates Edition magazine: the print-ready PDF, a preview PNG, and the script that builds them. See [Print ad](#print-ad-estates-edition). |
 | `alternate-designs/ridgeline-mountain.html` | Earlier "alpine garage" concept (rugged, mountain-themed, under the working name *Ridgeline Detail*). Kept for reference; not used live. |
 
 ## Before &amp; after photos
@@ -100,6 +101,25 @@ The slider markup is plain HTML — both photos are real `<img>` tags, so they
 still show up for search engines and for anyone with JavaScript off (they just
 render as a fixed 50/50 split). `dv-compare.js` only adds the dragging,
 the arrow-key control and the one-time nudge when a slider scrolls into view.
+
+## Print ad (Estates Edition)
+
+`print/estates-edition/detail-valley-half-page.pdf` is the half-page ad for
+Estates Edition (C2 Media Group), the magazine mailed to Tamarack Resort,
+Whitetail Club, Jug Mountain Ranch, McCall Golf Club and Meadow Creek. It's
+built to their spec: 4.75" x 3.7", no bleed, CMYK, text outlined, no crop marks.
+The `.png` beside it is a screen preview only; send the PDF.
+
+To change the ad, edit the copy at the top of `print/estates-edition/build.py`
+and run it (the file's header lists what it needs installed). It redraws the PDF
+and the preview. The fonts in `fonts/` are Sora and Inter (SIL Open Font
+License), there so the script can turn the text into outlines.
+
+**Tracking.** The ad's QR code opens `detailvalley.com/?src=ee`. Arriving that
+way pre-picks "Estates Edition magazine" under "How'd you hear about us?" in the
+booking flow, so the job board's tally counts bookings from the ad. People who
+type the address or call won't be counted unless they pick it themselves, so ask
+on the phone.
 
 ## Before going fully live
 

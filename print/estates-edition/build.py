@@ -58,7 +58,7 @@ PHONE = 'Call or text (208) 315-1420'
 # ?src=ee lets the booking flow pre-pick "Estates Edition magazine" under
 # "How'd you hear about us?", so the job board can count what this ad brings in.
 QR_URL = 'https://detailvalley.com/?src=ee'
-PHOTO = HERE / 'range-rover.jpg'       # licence plate already blurred
+PHOTO = HERE / 'range-rover.jpg'       # AI-retouched light and colour; plate blanked
 
 # ---- Brand colours as CMYK ink (0..1) ------------------------------------
 NAVY = (1.00, 0.78, 0.40, 0.55)      # #0b2a45

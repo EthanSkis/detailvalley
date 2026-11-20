@@ -42,14 +42,17 @@ W, H = 4.75 * IN, 3.7 * IN          # 342 x 266.4 pt, the half-page trim
 # ---- Copy. Edit here, re-run, done. --------------------------------------
 EYEBROW = 'MOBILE DETAILING · WE COME TO YOU'
 HEADLINE = ['A spotless car,', 'without leaving', 'your driveway.']
-BODY = ('Professional hand detailing at your home or cabin, anywhere in '
-        'McCall, Donnelly and Cascade. Hand us the keys, get back a car '
-        'that looks new.')
-BULLETS = ['We bring all our own gear',
-           'One vehicle a day, done by hand',
-           'Not happy? We fix it']
+# Broken by hand so no community's name is split across two lines.
+BODY = ['Hand detailing at your home in Tamarack,',
+        'Whitetail Club, Jug Mountain Ranch,',
+        'McCall Golf Club and Meadow Creek.']
+# The owner's own words, beside his photo.
+OWNER_SAYS = '“One vehicle a day, done by hand. Not happy? I fix it.”'
+OWNER_NAME = 'ETHAN GARDNER, OWNER'
+OWNER_NOTE = 'Local student, saving for college'
+OWNER_PHOTO = HERE / 'ethan.jpg'
 QUOTE = ['“The ease of scheduling and immaculate', 'work are second to none!”']
-QUOTE_BY = 'Brittany K. · Google review'
+QUOTE_BY = 'Google review'
 SITE = 'detailvalley.com'
 PHONE = 'Call or text (208) 315-1420'
 # ?src=ee lets the booking flow pre-pick "Estates Edition magazine" under
@@ -61,6 +64,7 @@ PHOTO = ROOT / 'gallery/land-cruiser/land-cruiser-after.jpg'
 NAVY = (1.00, 0.78, 0.40, 0.55)      # #0b2a45
 COPPER = (0.18, 0.76, 1.00, 0.08)    # #bc5823, the logo's copper
 PEACH = (0.03, 0.42, 0.62, 0.00)     # copper, lightened to read on navy
+NAVY_LINE = (0.82, 0.58, 0.30, 0.28) # a hairline that shows on navy
 MIST = (0.05, 0.02, 0.01, 0.00)      # #f0f3f6
 WHITE = (0, 0, 0, 0)
 INK = (0, 0, 0, 1)                   # QR only: one ink keeps small modules crisp
@@ -197,19 +201,26 @@ def star(c, cx, cy, r, color):
     c.drawPath(p, stroke=0, fill=1)
 
 
-def check(c, x, y, s, color):
-    """A small tick with round ends."""
+def to_cmyk(im):
+    return ImageCms.profileToProfile(
+        im.convert('RGB'), ImageCms.createProfile('sRGB'), ImageCms.getOpenProfile(CMYK_ICC),
+        renderingIntent=ImageCms.Intent.RELATIVE_COLORIMETRIC, outputMode='CMYK',
+        flags=ImageCms.Flags.BLACKPOINTCOMPENSATION)
+
+
+def portrait(c, path, x, y, d, ring):
+    """A round photo, d across, lower-left at x, y, with a thin ring."""
+    im = Image.open(path)
+    im = im.resize((360, 360), Image.LANCZOS)          # 600+ dpi at this size
     c.saveState()
-    c.setStrokeColorCMYK(*color)
-    c.setLineWidth(s * 0.2)
-    c.setLineCap(1)
-    c.setLineJoin(1)
     p = c.beginPath()
-    p.moveTo(x, y + s * 0.42)
-    p.lineTo(x + s * 0.36, y + s * 0.08)
-    p.lineTo(x + s, y + s * 0.82)
-    c.drawPath(p, stroke=1, fill=0)
+    p.circle(x + d / 2, y + d / 2, d / 2)
+    c.clipPath(p, stroke=0, fill=0)
+    c.drawImage(ImageReader(to_cmyk(im)), x, y, d, d)
     c.restoreState()
+    c.setStrokeColorCMYK(*ring)
+    c.setLineWidth(0.9)
+    c.circle(x + d / 2, y + d / 2, d / 2, stroke=1, fill=0)
 
 
 def photo_cmyk(path, aspect, anchor_y=0.5):
@@ -224,11 +235,7 @@ def photo_cmyk(path, aspect, anchor_y=0.5):
         nh = round(w / aspect)
         top = round((h - nh) * anchor_y)
         im = im.crop((0, top, w, top + nh))
-    im = im.filter(ImageFilter.UnsharpMask(radius=1.2, percent=60, threshold=2))
-    return ImageCms.profileToProfile(
-        im, ImageCms.createProfile('sRGB'), ImageCms.getOpenProfile(CMYK_ICC),
-        renderingIntent=ImageCms.Intent.RELATIVE_COLORIMETRIC, outputMode='CMYK',
-        flags=ImageCms.Flags.BLACKPOINTCOMPENSATION)
+    return to_cmyk(im.filter(ImageFilter.UnsharpMask(radius=1.2, percent=60, threshold=2)))
 
 
 def qr(c, x, y, size, data):
@@ -297,18 +304,30 @@ def build():
         y -= lead
     y += lead
 
-    rect(c, mx, y - 12.5, 22, 1.6, COPPER)
-    y -= 26.5
-    for line in wrap(int4, BODY, 7.6, tw):
+    rect(c, mx, y - 11.5, 22, 1.6, COPPER)
+    y -= 24.5
+    assert max(int4.width(l, 7.6) for l in BODY) <= tw, 'body line too wide'
+    for line in BODY:
         text(c, int4, line, 7.6, mx, y, MIST)
         y -= 10.9
+    body_foot = y + 10.9 - 2.2             # bottom of the last line of body copy
 
-    y -= 5.0
-    for b in BULLETS:
-        check(c, mx + 0.6, y - 0.3, 6.2, PEACH)
-        text(c, int6, b, 7.6, mx + 11.8, y, WHITE)
-        y -= 12.6
-    assert y + 12.6 - BAND > 11, 'copy panel overflows'
+    # The owner, in his own words, sitting on the foot of the panel.
+    pd = 40.0
+    py = BAND + 12.5
+    rule_y = py + pd + 8.0
+    assert body_foot - rule_y > 6, 'copy panel overflows'
+    rect(c, mx, rule_y, tw, 0.5, NAVY_LINE)
+    portrait(c, OWNER_PHOTO, mx, py, pd, PEACH)
+    ox = mx + pd + 9.5
+    says = wrap(int5, OWNER_SAYS, 7.4, SPLIT - 14.0 - ox)
+    oy = py + pd - 6.6 if len(says) > 1 else py + pd - 11.5
+    for line in says:
+        text(c, int5, line, 7.4, ox, oy, WHITE)
+        oy -= 10.0
+    oy -= 1.2
+    text(c, int7, OWNER_NAME, 5.2, ox, oy, PEACH, track=0.6)
+    text(c, int4, OWNER_NOTE, 6.3, ox, oy - 8.6, MIST)
 
     # --- Review chip over the foot of the photo ---------------------------
     ch, cm = 40.0, 7.0
